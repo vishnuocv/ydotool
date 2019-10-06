@@ -1,19 +1,14 @@
 # ydotool
 Generic Linux command-line automation tool (no X!)
 
-[![pipeline status](https://gitlab.com/ReimuNotMoe/ydotool/badges/master/pipeline.svg)](https://gitlab.com/ReimuNotMoe/ydotool/pipelines)
+Forked to try to clean up the code and use a single GNU Makefile instead of CMake
+Might convert to C code to avoid need for extra C++ libraries ([libevdevPlus] and [uInputPlus])
 
 #### Contents
 - [Usage](#usage)
 - [Examples](#examples)
 - [Notes](#notes)
-- [Packages](#packages)
 - [Build](#build)
-
-## Releases
-- [Ubuntu 18.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:18.04)
-- [Ubuntu 19.04](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:ubuntu:19.04)
-- [Debian 9](https://gitlab.com/ReimuNotMoe/ydotool/-/jobs/artifacts/master/browse/build?job=package:debian:9)
 
 ## Usage
 In most times, replace `x` with `y`. :P
@@ -49,16 +44,9 @@ Relatively move mouse pointer to -100,100:
 Mouse right click:
 
     ydotool click 2
-    
+
 
 ## Notes
-#### About the project
-As of May, 2019, searching `wayland xdotool replacement` online won't get much useful results.
-
-If you find this project useful, please consider to spread it.
-
-I have little time to maintain this project because I'm striving to start an undertaking (instead of working [996](https://en.wikipedia.org/wiki/996_working_hour_system)). You could donate to help this project.
-
 #### Runtime
 This program requires access to `/dev/uinput`. This usually requires root permissions.
 
@@ -73,27 +61,18 @@ So, if the delay was too short, the virtual input device may not got recognized 
 
 In order to solve this problem, I made a persistent background service, ydotoold, to hold a persistent virtual device, and accept input from ydotool. When ydotoold is unavailable, ydotool will work without it.
 
-#### New modular design
-Now everyone can write their own tool to use with ydotool. Have a look at the `Tool` folder.
-
-I will write some documents for this when I have time.
-
-## Packages
-Arch Linux: [AUR](https://aur.archlinux.org/packages/ydotool-git/) (Thanks @[Depau](https://github.com/Depau))
-
-(Currently I don't have time to make a PPA for Debian-like distros, if anyone wants to help, feel free to contact me.)
-
 ## Build
 ### Dependencies
-- [uInputPlus](https://github.com/YukiWorkshop/libuInputPlus)
-- [libevdevPlus](https://github.com/YukiWorkshop/libevdevPlus)
-- boost::program_options
+- [uInputPlus]
+- [libevdevPlus]
+- boost::program\_options
 
 ### Compile
-Nearly all my projects use CMake. It's very simple:
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j `nproc`
+```bash
+make -j $(nproc)
+```
 
+<!-- Links -->
+[uinputplus]: https://github.com/YukiWorkshop/libuInputPlus
+[libevdevplus]: https://github.com/YukiWorkshop/libevdevPlus
