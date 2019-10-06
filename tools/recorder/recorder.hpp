@@ -5,8 +5,8 @@
 #ifndef YDOTOOL_TOOL_RECORD_HPP
 #define YDOTOOL_TOOL_RECORD_HPP
 
-#include "../../Library/Tool.hpp"
-#include "../../Library/Utils.hpp"
+#include "tool.hpp"
+#include "utils.hpp"
 
 
 namespace po = boost::program_options;

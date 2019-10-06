@@ -13,7 +13,7 @@
 #ifndef YDOTOOL_TOOL_MOUSEMOVE_HPP
 #define YDOTOOL_TOOL_MOUSEMOVE_HPP
 
-#include "../../Library/Tool.hpp"
+#include "tool.hpp"
 
 
 namespace po = boost::program_options;

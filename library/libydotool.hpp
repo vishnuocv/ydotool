@@ -13,9 +13,9 @@
 #ifndef YDOTOOL_LIBYDOTOOL_HPP
 #define YDOTOOL_LIBYDOTOOL_HPP
 
-#include "../CommonIncludes.hpp"
-#include "Instance.hpp"
-#include "Tool.hpp"
+#include "CommonIncludes.hpp"
+#include "instance.hpp"
+#include "tool.hpp"
 
 namespace ydotool {
 

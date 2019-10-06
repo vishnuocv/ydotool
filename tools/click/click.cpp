@@ -10,7 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "Click.hpp"
+#include "click.hpp"
 
 
 static const char ydotool_tool_name[] = "click";

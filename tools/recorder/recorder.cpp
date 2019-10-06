@@ -2,7 +2,7 @@
 // Created by root on 9/2/19.
 //
 
-#include "Recorder.hpp"
+#include "recorder.hpp"
 
 using namespace ydotool;
 using namespace Tools;

@@ -10,7 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "MouseMove.hpp"
+#include "mouse.hpp"
 
 using namespace ydotool::Tools;
 

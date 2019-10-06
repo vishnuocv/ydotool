@@ -2,7 +2,7 @@
 // Created by root on 9/2/19.
 //
 
-#include "Utils.hpp"
+#include "utils.hpp"
 
 using namespace ydotool;
 

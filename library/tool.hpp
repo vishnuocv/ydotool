@@ -13,8 +13,8 @@
 #ifndef YDOTOOL_LIB_COMMANDS_HPP
 #define YDOTOOL_LIB_COMMANDS_HPP
 
-#include "../CommonIncludes.hpp"
-#include "Instance.hpp"
+#include "CommonIncludes.hpp"
+#include "instance.hpp"
 
 namespace ydotool {
 	namespace Tool {

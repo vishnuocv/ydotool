@@ -10,7 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "Type.hpp"
+#include "type.hpp"
 
 using namespace evdevPlus;
 

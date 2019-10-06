@@ -10,10 +10,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "Tool.hpp"
-#include "Utils.hpp"
-
-#include "../Tools/Tools.hpp"
+#include "tool.hpp"
+#include "tools.hpp"
+#include "utils.hpp"
 
 using namespace ydotool::Tool;
 

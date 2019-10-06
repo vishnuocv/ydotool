@@ -10,7 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "Instance.hpp"
+#include "instance.hpp"
 
 using namespace ydotool;
 

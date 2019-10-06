@@ -5,12 +5,12 @@
 #ifndef YDOTOOL_TOOLS_HPP
 #define YDOTOOL_TOOLS_HPP
 
-#include "../CommonIncludes.hpp"
+#include "CommonIncludes.hpp"
 
-#include "Click/Click.hpp"
-#include "Key/Key.hpp"
-#include "MouseMove/MouseMove.hpp"
-#include "Recorder/Recorder.hpp"
-#include "Type/Type.hpp"
+#include "click/click.hpp"
+#include "key/key.hpp"
+#include "mouse/mouse.hpp"
+#include "recorder/recorder.hpp"
+#include "type/type.hpp"
 
 #endif //YDOTOOL_TOOLS_HPP

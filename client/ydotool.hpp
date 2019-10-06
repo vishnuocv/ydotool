@@ -14,7 +14,7 @@
 #ifndef YDOTOOL_YDOTOOL_HPP
 #define YDOTOOL_YDOTOOL_HPP
 
-#include "../CommonIncludes.hpp"
-#include "../Library/libydotool.hpp"
+#include "CommonIncludes.hpp"
+#include "libydotool.hpp"
 
 #endif //YDOTOOL_YDOTOOL_HPP

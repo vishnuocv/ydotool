@@ -10,7 +10,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "Key.hpp"
+#include "key.hpp"
 
 using namespace evdevPlus;
 using namespace ydotool::Tools;

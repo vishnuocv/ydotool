@@ -13,7 +13,7 @@
 #ifndef YDOTOOL_TOOL_TYPE_HPP
 #define YDOTOOL_TOOL_TYPE_HPP
 
-#include "../../Library/Tool.hpp"
+#include "tool.hpp"
 
 using namespace ydotool;
 using namespace uInputPlus;
