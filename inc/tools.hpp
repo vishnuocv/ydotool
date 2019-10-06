@@ -7,10 +7,10 @@
 
 #include "CommonIncludes.hpp"
 
-#include "click/click.hpp"
-#include "key/key.hpp"
-#include "mouse/mouse.hpp"
-#include "recorder/recorder.hpp"
-#include "type/type.hpp"
+#include "click.hpp"
+#include "key.hpp"
+#include "mouse.hpp"
+#include "recorder.hpp"
+#include "type.hpp"
 
 #endif //YDOTOOL_TOOLS_HPP

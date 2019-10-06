@@ -5,7 +5,7 @@
 #ifndef YDOTOOL_LIB_UTILS_HPP
 #define YDOTOOL_LIB_UTILS_HPP
 
-#include "../CommonIncludes.hpp"
+#include "CommonIncludes.hpp"
 
 namespace ydotool {
 	class Utils {

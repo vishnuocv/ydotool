@@ -1,9 +1,13 @@
+SRC_DIR := src
+INC_DIR := inc
+OBJ_DIR := obj
+BIN_DIR := bin
+
+RM := rm -rf
+
 WARN := -Wall -Wextra -Wpedantic -Weffc++
 
-INC += -Iclient
-INC += -Ilibrary
-INC += -Itools
-INC += -I.
+INC += -Iinc
 
 OPT += -pthread
 
@@ -14,6 +18,33 @@ LIB += -ldl
 
 CXXFLAGS := $(WARN) $(INC) $(OPT)
 
-ydotool: client/ydotool.cpp library/instance.cpp library/tool.cpp library/utils.cpp tools/click/click.cpp tools/key/key.cpp tools/mouse/mouse.cpp tools/recorder/recorder.cpp tools/type/type.cpp
+ydotool_DEPS := $(patsubst %,$(OBJ_DIR)/%.o, \
+	ydotool \
+	instance \
+	tool \
+	utils \
+	click \
+	key \
+	mouse \
+	recorder \
+	type \
+	)
+
+.PHONY: default
+default: $(OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/ydotool
+
+$(OBJ_DIR):
+	@mkdir $(OBJ_DIR)
+
+$(BIN_DIR):
+	@mkdir $(BIN_DIR)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BIN_DIR)/ydotool: $(ydotool_DEPS)
 	$(CXX) $(CXXFLAGS) $^ $(LIB) -o $@
 
+.PHONY: clean
+clean:
+	$(RM) $(OBJ_DIR) $(BIN_DIR)

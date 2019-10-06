@@ -13,7 +13,7 @@
 #ifndef YDOTOOL_LIB_INSTANCE_HPP
 #define YDOTOOL_LIB_INSTANCE_HPP
 
-#include "../CommonIncludes.hpp"
+#include "CommonIncludes.hpp"
 
 using namespace uInputPlus;
 
