@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+    Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -13,17 +14,18 @@
 #ifndef YDOTOOL_LIB_INSTANCE_HPP
 #define YDOTOOL_LIB_INSTANCE_HPP
 
-#include "CommonIncludes.hpp"
+// C++ system includes
+#include <memory>
+// External libs
+#include <uInputPlus/uInput.hpp>
 
 namespace ydotool {
 	class Instance {
 	public:
-		std::unique_ptr<uInputPlus::uInput> uInputContext;
-
+		std::unique_ptr<uInputPlus::uInput> uInputContext {};
 		Instance() = default;
-
 		void Init();
-		void Init(const std::string& device_name);
+		void Init(const std::string & device_name);
 	};
 }
 #endif //YDOTOOL_LIB_INSTANCE_HPP

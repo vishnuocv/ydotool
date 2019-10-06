@@ -1,16 +1,37 @@
-//
-// Created by root on 9/2/19.
-//
+/*
+    This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
+    Copyright (C) 2018-2019 ReimuNotMoe
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the MIT License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+// Local includes
 #include "recorder.hpp"
-
-using namespace ydotool;
-using namespace Tools;
+// C system includes
+#include <signal.h>
+#include <dirent.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/epoll.h>
+// C++ system includes
+#include <thread>
+// External libs
+#include <evdevPlus/evdevPlus.hpp>
+#include <boost/program_options.hpp>
 
 const char ydotool_tool_name[] = "recorder";
 
+void * ydotool::Tools::Recorder::construct() {
+	return (void *)(new Recorder());
+}
 
-static void ShowHelp(const char *argv_0){
+static void ShowHelp(const char * argv_0){
 	std::cerr << "Usage: " << argv_0 << " [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
 		  << "  --help                Show this help.\n"
 		  << "  --record                \n"
@@ -23,17 +44,17 @@ static void ShowHelp(const char *argv_0){
 		     "The record file can't be replayed on an architecture with different endianness." << std::endl;
 }
 
-const char *Recorder::Name() {
+const char * ydotool::Tools::Recorder::Name() {
 	return ydotool_tool_name;
 }
 
 static int fd_file = -1;
 
 static std::vector<uint8_t> record_buffer;
-static Recorder::file_header header;
+static ydotool::Tools::Recorder::file_header header;
 
 static void generate_header() {
-	auto &m = header.magic;
+	auto & m = header.magic;
 	m[0] = 'Y';
 	m[1] = 'D';
 	m[2] = 'T';
@@ -41,10 +62,10 @@ static void generate_header() {
 
 	header.feature_mask = 0;
 	header.size = record_buffer.size();
-	header.crc32 = Utils::crc32(record_buffer.data(), record_buffer.size());
+	header.crc32 = ydotool::Utils::crc32(record_buffer.data(), record_buffer.size());
 }
 
-static void stop_handler(int whatever) {
+static void stop_handler(__attribute__((unused)) int whatever) {
 	std::cout << "Saving file...\n";
 	generate_header();
 
@@ -59,7 +80,7 @@ static void stop_handler(int whatever) {
 }
 
 
-int Recorder::Exec(int argc, const char **argv) {
+int ydotool::Tools::Recorder::Exec(int argc, const char **argv) {
 	std::vector<std::string> extra_args;
 
 	int delay = 5000;
@@ -67,28 +88,25 @@ int Recorder::Exec(int argc, const char **argv) {
 	int mode = 0;
 
 	try {
-
-		po::options_description desc("");
+		boost::program_options::options_description desc("");
 		desc.add_options()
 			("help", "Show this help")
 			("record", "")
 			("replay", "")
 			("display", "")
-			("delay", po::value<int>())
-			("duration", po::value<int>())
-			("extra-args", po::value(&extra_args));
+			("delay", boost::program_options::value<int>())
+			("duration", boost::program_options::value<int>())
+			("extra-args", boost::program_options::value(&extra_args));
 
-
-		po::positional_options_description p;
+		boost::program_options::positional_options_description p;
 		p.add("extra-args", -1);
 
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
+		boost::program_options::variables_map vm;
+		boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
 			options(desc).
 			positional(p).
 			run(), vm);
-		po::notify(vm);
+		boost::program_options::notify(vm);
 
 		if (vm.count("delay")) {
 			delay = vm["delay"].as<int>();
@@ -120,16 +138,14 @@ int Recorder::Exec(int argc, const char **argv) {
 
 		if (extra_args.empty())
 			throw std::invalid_argument("file not specified");
-
-
-	} catch (std::exception &e) {
+	} catch (std::exception & e) {
 		std::cerr <<  "ydotool: " << argv[0] << ": error: " << e.what() << std::endl;
 		std::cerr << "Use --help for help.\n";
 
 		return 2;
 	}
 
-	auto& filepath = extra_args.front();
+	auto & filepath = extra_args.front();
 
 	if (mode == 1)
 		fd_file = open(filepath.c_str(), O_WRONLY|O_CREAT, 0644);
@@ -144,8 +160,6 @@ int Recorder::Exec(int argc, const char **argv) {
 
 	std::cerr << "Delay was set to "
 		  << delay << " milliseconds.\n";
-
-
 
 	if (mode == 1) {
 		extra_args.erase(extra_args.begin());
@@ -184,30 +198,31 @@ int Recorder::Exec(int argc, const char **argv) {
 	} else if (mode == 3) {
 		do_display();
 	}
+
+	return 0;
 }
 
-
-void Recorder::do_replay() {
+void ydotool::Tools::Recorder::do_replay() {
 	struct stat statat;
 
 	fstat(fd_file, &statat);
 
-	if (statat.st_size < sizeof(file_header)+sizeof(data_chunk)) {
+	if ((size_t)statat.st_size < sizeof(file_header)+sizeof(data_chunk)) {
 		fprintf(stderr, "File too small\n");
 		abort();
 	}
 
-	auto filedata = (uint8_t *)mmap(nullptr, statat.st_size, PROT_READ, MAP_SHARED, fd_file, 0);
+	uint8_t * filedata = (uint8_t *)mmap(nullptr, statat.st_size, PROT_READ, MAP_SHARED, fd_file, 0);
 
 	assert(filedata);
 
-	auto file_hdr = (file_header *)filedata;
+	file_header * file_hdr = (file_header *)filedata;
 	auto file_end = filedata + statat.st_size;
 	auto data_start = (filedata + sizeof(file_header));
 
 	auto cur_pos = data_start;
 
-	auto size_cur = file_end - data_start;
+	size_t size_cur = file_end - data_start;
 
 	if (size_cur == file_hdr->size) {
 		fprintf(stderr, "Size match\n");
@@ -237,12 +252,12 @@ void Recorder::do_replay() {
 	}
 }
 
-void Recorder::do_display() {
+void ydotool::Tools::Recorder::do_display() {
 	struct stat statat;
 
 	fstat(fd_file, &statat);
 
-	if (statat.st_size < sizeof(file_header)+sizeof(data_chunk)) {
+	if ((size_t)statat.st_size < sizeof(file_header)+sizeof(data_chunk)) {
 		fprintf(stderr, "File too small\n");
 		abort();
 	}
@@ -276,18 +291,17 @@ void Recorder::do_display() {
 	}
 }
 
-void Recorder::do_record(const std::vector<std::string> &__devices) {
+void ydotool::Tools::Recorder::do_record(const std::vector<std::string> &__devices) {
 
 	fd_epoll = epoll_create(42);
 	assert(fd_epoll > 0);
-
 
 	for (auto &it : __devices) {
 		std::cerr << "Using device: " << it << "\n";
 
 		auto evDev = new evdevPlus::EventDevice(it);
 
-		epoll_event eev{0};
+		epoll_event eev {};
 		eev.data.ptr = evDev;
 		eev.events = EPOLLIN;
 
@@ -319,23 +333,18 @@ void Recorder::do_record(const std::vector<std::string> &__devices) {
 
 			tm_now = tm_now2;
 
-			uint64_t time_hdr[2];
 			dat.delay[0] = tm_diff.tv_sec;
 			dat.delay[1] = tm_diff.tv_nsec;
-
 			dat.ev_type = buf.Type;
 			dat.ev_code = buf.Code;
 			dat.ev_value = buf.Value;
 
 			record_buffer.insert(record_buffer.end(), (uint8_t *)&dat, (uint8_t *)&dat+sizeof(data_chunk));
-
-//			write(STDERR_FILENO, ".", 1);
 		}
 	}
-
 }
 
-std::vector<std::string> Recorder::find_all_devices() {
+std::vector<std::string> ydotool::Tools::Recorder::find_all_devices() {
 	std::vector<std::string> ret;
 
 	try {

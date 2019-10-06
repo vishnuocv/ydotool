@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -10,17 +11,15 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+// Local Includes
 #include "key.hpp"
-
-using namespace evdevPlus;
-using namespace ydotool::Tools;
-
+// C++ system Includes
+#include <sstream>
+// External libs
+#include <evdevPlus/evdevPlus.hpp>
+#include <boost/program_options.hpp>
 
 const char ydotool_tool_name[] = "key";
-
-
-
-static int time_keydelay = 12;
 
 static void ShowHelp(){
 	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
@@ -66,19 +65,19 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 				itc = toupper(itc);
 		}
 
-		auto t_kms = Table_ModifierKeys.find(it);
-		if (t_kms != Table_ModifierKeys.end()) {
+		auto t_kms = evdevPlus::Table_ModifierKeys.find(it);
+		if (t_kms != evdevPlus::Table_ModifierKeys.end()) {
 			list_keycodes.push_back(t_kms->second);
 			continue;
 		}
 
-		auto t_ks = Table_FunctionKeys.find(it);
-		if (t_ks != Table_FunctionKeys.end()) {
+		auto t_ks = evdevPlus::Table_FunctionKeys.find(it);
+		if (t_ks != evdevPlus::Table_FunctionKeys.end()) {
 			list_keycodes.push_back(t_ks->second);
 		} else {
-			auto t_kts = Table_LowerKeys.find(tolower(it[0]));
+			auto t_kts = evdevPlus::Table_LowerKeys.find(tolower(it[0]));
 
-			if (t_kts != Table_LowerKeys.end()) {
+			if (t_kts != evdevPlus::Table_LowerKeys.end()) {
 				list_keycodes.push_back(t_kts->second);
 			} else {
 				throw std::invalid_argument("no matching keycode");
@@ -89,11 +88,11 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 	return list_keycodes;
 }
 
-const char *Key::Name() {
+const char * ydotool::Tools::Key::Name() {
 	return ydotool_tool_name;
 }
 
-int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
+int ydotool::Tools::Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
 	for (auto &it : list_keycodes) {
@@ -111,8 +110,11 @@ int Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_
 	return 0;
 }
 
+void * ydotool::Tools::Key::construct() {
+	return (void *)(new Key());
+}
 
-int Key::Exec(int argc, const char **argv) {
+int ydotool::Tools::Key::Exec(int argc, const char **argv) {
 	int time_delay = 100;
 	int time_keydelay = 12;
 	int time_repdelay = 0;

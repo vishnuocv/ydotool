@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -10,12 +11,19 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+// Local includes
 #include "click.hpp"
+// External libs
+#include <boost/program_options.hpp>
 
 static const char ydotool_tool_name[] = "click";
 
 const char * ydotool::Tools::Click::Name() {
 	return ydotool_tool_name;
+}
+
+void * ydotool::Tools::Click::construct() {
+	return (void *)(new Click());
 }
 
 static void ShowHelp(){
@@ -26,7 +34,6 @@ static void ShowHelp(){
 }
 
 int ydotool::Tools::Click::Exec(int argc, const char **argv) {
-
 	int time_delay = 100;
 	std::vector<std::string> extra_args;
 

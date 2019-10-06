@@ -18,7 +18,7 @@ LIB += -ldl
 
 CXXFLAGS := $(WARN) $(INC) $(OPT)
 
-ydotool_DEPS := $(patsubst %,$(OBJ_DIR)/%.o, \
+ydotool_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
 	ydotool \
 	instance \
 	tool \
@@ -30,21 +30,27 @@ ydotool_DEPS := $(patsubst %,$(OBJ_DIR)/%.o, \
 	type \
 	)
 
+ydotoold_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
+	ydotoold \
+	instance \
+	)
+
 .PHONY: default
-default: $(OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/ydotool
+default: create_dirs $(BIN_DIR)/ydotool $(BIN_DIR)/ydotoold
 
-$(OBJ_DIR):
-	@mkdir $(OBJ_DIR)
-
-$(BIN_DIR):
-	@mkdir $(BIN_DIR)
+.PHONY: create_dirs
+create_dirs:
+	@mkdir -p $(OBJ_DIR) $(BIN_DIR)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(BIN_DIR)/ydotool: $(ydotool_DEPS)
+$(BIN_DIR)/ydotool: $(ydotool_DEP)
+	$(CXX) $(CXXFLAGS) $^ $(LIB) -o $@
+
+$(BIN_DIR)/ydotoold: $(ydotoold_DEP)
 	$(CXX) $(CXXFLAGS) $^ $(LIB) -o $@
 
 .PHONY: clean
 clean:
-	$(RM) $(OBJ_DIR) $(BIN_DIR)
+	$(RM) $(OBJ_DIR)/* $(BIN_DIR)/*

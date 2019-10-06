@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -10,38 +11,37 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "CommonIncludes.hpp"
-#include "instance.hpp"
+// Local includes
 #include "tool.hpp"
+// C++ system includes
+#include <sstream>
+// C system includes
+#include <sys/socket.h>
+#include <sys/un.h>
 
-using namespace ydotool;
-using namespace uInputPlus;
+uInputPlus::uInput * myuInput = nullptr;
 
-uInput *myuInput = nullptr;
-
-Tool::ToolManager tool_mgr;
+ydotool::Tool::ToolManager tool_mgr;
 
 static void ShowHelp() {
 	std::cerr << "Usage: ydotool <cmd> <args>\n"
 		"Available commands:\n";
 
-	for (auto &it : tool_mgr.init_funcs) {
+	for (auto & it : tool_mgr.init_funcs) {
 		std::cerr << "  " << it.first << std::endl;
 	}
-
 }
 
 int InituInput() {
 	if (!myuInput) {
-		uInputSetup us({"ydotool virtual device"});
-
-		myuInput = new uInput({us});
+		uInputPlus::uInputSetup us({"ydotool virtual device"});
+		myuInput = new uInputPlus::uInput({us});
 	}
 
 	return 0;
 }
 
-std::vector<std::string> explode(const std::string& str, char delim) {
+std::vector<std::string> explode(const std::string & str, char delim) {
 	std::vector<std::string> result;
 	std::istringstream iss(str);
 
@@ -53,7 +53,7 @@ std::vector<std::string> explode(const std::string& str, char delim) {
 }
 
 
-int connect_socket(const char *path_socket) {
+int connect_socket(const char * path_socket) {
 	int fd_client = socket(AF_UNIX, SOCK_STREAM, 0);
 
 	if (fd_client == -1) {
@@ -61,7 +61,7 @@ int connect_socket(const char *path_socket) {
 		return -2;
 	}
 
-	sockaddr_un addr{0};
+	sockaddr_un addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, path_socket, sizeof(addr.sun_path)-1);
@@ -72,30 +72,15 @@ int connect_socket(const char *path_socket) {
 	return fd_client;
 }
 
-int socket_callback(uint16_t type, uint16_t code, int32_t val, void *userp) {
-	uInputRawData buf{0};
-	buf.type = type;
-	buf.code = code;
-	buf.value = val;
-
+int socket_callback(uint16_t type, uint16_t code, int32_t val, void * userp) {
+	uInputPlus::uInputRawData buf {type, code, val};
 	int fd = (intptr_t)userp;
-
 	send(fd, &buf, sizeof(buf), 0);
 
 	return 0;
 }
 
-const char default_library_path[] = "/usr/local/lib/ydotool:/usr/lib/ydotool:/usr/lib/x86_64-linux-gnu/ydotool:/usr/lib/i386-linux-gnu/ydotool";
-
-int main(int argc, const char **argv) {
-	const char *library_path = default_library_path;
-
-//	std::cerr << "ydotool: library search path: " << library_path << "\n";
-
-//	for (auto &it : explode(library_path, ':')) {
-//		tool_mgr.ScanPath(it);
-//	}
-
+int main(int argc, const char ** argv) {
 	if (argc < 2) {
 		ShowHelp();
 		exit(1);
@@ -114,14 +99,14 @@ int main(int argc, const char **argv) {
 		exit(1);
 	}
 
-	auto instance = std::make_shared<Instance>();
+	auto instance = std::make_shared<ydotool::Instance>();
 
 	const char path_socket[] = "/tmp/.ydotool_socket";
 	int fd_client = connect_socket(path_socket);
 
 	if (fd_client > 0) {
 		std::cerr << "ydotool: notice: Using ydotoold backend\n";
-		instance->uInputContext = std::make_unique<uInput>();
+		instance->uInputContext = std::make_unique<uInputPlus::uInput>();
 		instance->uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
 	} else {
 		std::cerr << "ydotool: notice: ydotoold backend unavailable (may have latency+delay issues)\n";
@@ -129,12 +114,9 @@ int main(int argc, const char **argv) {
 	}
 
 	auto tool_constructor = (void *(*)())it_cmd->second;
-	auto *this_tool = static_cast<Tool::ToolTemplate *>(tool_constructor());
-
-//	std::cerr <<  "ydotool: debug: tool `" << this_tool->Name() << "' constructed at " << std::hex << this_tool << std::dec << std::endl;
+	auto * this_tool = static_cast<ydotool::Tool::ToolTemplate *>(tool_constructor());
 
 	this_tool->Init(instance);
 
-	int rc = this_tool->Exec(argc-1, &argv[1]);
-
+	return this_tool->Exec(argc-1, &argv[1]);
 }

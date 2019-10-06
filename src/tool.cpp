@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -10,40 +11,25 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+// Local includes
 #include "tool.hpp"
-#include "CommonIncludes.hpp"
-
 #include "click.hpp"
 #include "key.hpp"
 #include "mouse.hpp"
 #include "recorder.hpp"
 #include "type.hpp"
 #include "utils.hpp"
+// C system includes
+#include <dirent.h>
+#include <dlfcn.h>
 
-using namespace ydotool::Tool;
-
-void ToolTemplate::Init(std::shared_ptr<ydotool::Instance> &__ydotool_instance) {
+void ydotool::Tool::ToolTemplate::Init(std::shared_ptr<ydotool::Instance> & __ydotool_instance) {
 	ydotool_instance = __ydotool_instance;
 	uInputContext = ydotool_instance->uInputContext.get();
 }
 
-void ToolManager::ScanPath(const std::string &__path) {
-	try {
-		Utils::dir_foreach(__path, [this](const std::string &path_base, struct dirent *ent) {
-			if (ent->d_type != DT_REG && ent->d_type != DT_LNK)
-				return 1;
-
-			std::string fullpath = path_base + "/" + std::string(ent->d_name);
-			TryDlOpen(fullpath);
-			return 0;
-		});
-	} catch (...) {
-
-	}
-}
-
-void ToolManager::TryDlOpen(const std::string &__path) {
-	void *handle = dlopen(__path.c_str(), RTLD_LAZY);
+void ydotool::Tool::ToolManager::TryDlOpen(const std::string & __path) {
+	void * handle = dlopen(__path.c_str(), RTLD_LAZY);
 
 	if (!handle) {
 		std::cerr <<  "ydotool: dlopen failed: " << dlerror() << "\n";
@@ -58,15 +44,12 @@ void ToolManager::TryDlOpen(const std::string &__path) {
 		return;
 	}
 
-//	std::cerr << "ToolManager: debug: tool found: " << tool_name << " at " << __path << "\n";
-
 	dl_handles[tool_name] = handle;
 	init_funcs[tool_name] = tool_fptr;
 }
 
-ToolManager::ToolManager() {
-	auto &i = init_funcs;
-
+ydotool::Tool::ToolManager::ToolManager() {
+	auto & i = init_funcs;
 
 	i["click"] = (void *)&Tools::Click::construct;
 	i["key"] = (void *)&Tools::Key::construct;

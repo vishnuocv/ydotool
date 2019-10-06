@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+    Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -10,15 +11,14 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+// Local includes
 #include "instance.hpp"
 
-using namespace ydotool;
-
-void Instance::Init() {
+void ydotool::Instance::Init() {
 	Init("ydotool virtual device");
 }
 
-void Instance::Init(const std::string &device_name) {
+void ydotool::Instance::Init(const std::string &device_name) {
     uInputPlus::uInputSetup us(device_name);
 	uInputContext = std::make_unique<uInputPlus::uInput>();
 	uInputContext->Init({us});

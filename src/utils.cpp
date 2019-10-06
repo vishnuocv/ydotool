@@ -1,12 +1,27 @@
-//
-// Created by root on 9/2/19.
-//
+/*
+    This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
+    Copyright (C) 2018-2019 ReimuNotMoe
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the MIT License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+// Local includes
 #include "utils.hpp"
+// C++ system includes
+#include <cstring>
+#include <system_error>
+// C system includes
+#include <dirent.h>
+// External libs
+#include <boost/crc.hpp>
 
-using namespace ydotool;
-
-void Utils::timespec_diff(struct timespec *start, struct timespec *stop, struct timespec *result) {
+void ydotool::Utils::timespec_diff(struct timespec * start, struct timespec * stop, struct timespec * result) {
 	if ((stop->tv_nsec - start->tv_nsec) < 0) {
 		result->tv_sec = stop->tv_sec - start->tv_sec - 1;
 		result->tv_nsec = stop->tv_nsec - start->tv_nsec + 1000000000;
@@ -16,9 +31,9 @@ void Utils::timespec_diff(struct timespec *start, struct timespec *stop, struct 
 	}
 }
 
-void Utils::dir_foreach(const std::string &path, const std::function<int(const std::string &, struct dirent *)>& callback, bool recursive) {
-	DIR *dir;
-	struct dirent *ent;
+void ydotool::Utils::dir_foreach(const std::string & path, const std::function<int(const std::string &, struct dirent *)> & callback, bool recursive) {
+	DIR * dir;
+	struct dirent * ent;
 
 	if ((dir = opendir(path.c_str()))) {
 		int dotdot_flag = 0;
@@ -56,7 +71,7 @@ void Utils::dir_foreach(const std::string &path, const std::function<int(const s
 	}
 }
 
-uint32_t Utils::crc32(const void *buf, size_t len) {
+uint32_t ydotool::Utils::crc32(const void *buf, size_t len) {
 	boost::crc_32_type result;
 	result.process_bytes(buf, len);
 	return result.checksum();

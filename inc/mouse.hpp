@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -13,24 +14,18 @@
 #ifndef YDOTOOL_TOOL_MOUSEMOVE_HPP
 #define YDOTOOL_TOOL_MOUSEMOVE_HPP
 
+// Local includes
 #include "tool.hpp"
 
 namespace ydotool {
 	namespace Tools {
 		class MouseMove : public Tool::ToolTemplate {
-		private:
-
 		public:
-			const char *Name() override;
-
-			int Exec(int argc, const char **argv) override;
-
-			static void *construct() {
-				return (void *)(new MouseMove());
-			}
+			const char * Name() override;
+			int Exec(int argc, const char ** argv) override;
+			static void * construct();
 		};
 	}
 }
-
 
 #endif //YDOTOOL_TOOL_MOUSEMOVE_HPP

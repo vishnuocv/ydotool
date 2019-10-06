@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -10,17 +11,18 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+// Local includes
 #include "type.hpp"
-
-using namespace evdevPlus;
-
-using namespace ydotool::Tools;
+// External libs
+#include <boost/program_options.hpp>
+#include <evdevPlus/evdevPlus.hpp>
 
 const char ydotool_tool_name[] = "type";
-
-
-
 static int time_keydelay = 12;
+
+void * ydotool::Tools::Type::construct() {
+	return (void *)(new Type());
+}
 
 static void ShowHelp(){
 	std::cerr <<  "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N]"
@@ -30,10 +32,9 @@ static void ShowHelp(){
 		<< "  --key-delay milliseconds  Delay time between keystrokes. Default 12ms.\n"
 		<< "  --file filepath           Specify a file, the contents of which will be be typed as if passed as"
 				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
-
 }
 
-int Type::TypeText(const std::string &text) {
+int ydotool::Tools::Type::TypeText(const std::string &text) {
 	int pos = 0;
 
 	for (auto &c : text) {
@@ -42,13 +43,13 @@ int Type::TypeText(const std::string &text) {
 
 		int key_code;
 
-		auto itk = Table_LowerKeys.find(c);
+		auto itk = evdevPlus::Table_LowerKeys.find(c);
 
-		if (itk != Table_LowerKeys.end()) {
+		if (itk != evdevPlus::Table_LowerKeys.end()) {
 			key_code = itk->second;
 		} else {
-			auto itku = Table_UpperKeys.find(c);
-			if (itku != Table_UpperKeys.end()) {
+			auto itku = evdevPlus::Table_UpperKeys.find(c);
+			if (itku != evdevPlus::Table_UpperKeys.end()) {
 				isUpper = 1;
 				key_code = itku->second;
 			} else {
@@ -71,50 +72,44 @@ int Type::TypeText(const std::string &text) {
 		uInputContext->SendKey(key_code, 0);
 		usleep(sleep_time);
 
-
 		if (isUpper) {
 			uInputContext->SendKey(KEY_LEFTSHIFT, 0);
 			usleep(sleep_time);
 		}
-
 	}
 
 	return pos;
 }
 
-const char *Type::Name() {
+const char * ydotool::Tools::Type::Name() {
 	return ydotool_tool_name;
 }
 
-int Type::Exec(int argc, const char **argv) {
+int ydotool::Tools::Type::Exec(int argc, const char **argv) {
 	int time_delay = 100;
-	int text_start = -1;
 
 	std::string file_path;
 	std::vector<std::string> extra_args;
 
 	try {
-
-		po::options_description desc("");
+		boost::program_options::options_description desc("");
 		desc.add_options()
 			("help", "Show this help")
-			("delay", po::value<int>())
-			("key-delay", po::value<int>())
-			("file", po::value<std::string>())
-			("extra-args", po::value(&extra_args));
+			("delay", boost::program_options::value<int>())
+			("key-delay", boost::program_options::value<int>())
+			("file", boost::program_options::value<std::string>())
+			("extra-args", boost::program_options::value(&extra_args));
 
 
-		po::positional_options_description p;
+		boost::program_options::positional_options_description p;
 		p.add("extra-args", -1);
 
-
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
+		boost::program_options::variables_map vm;
+		boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
 			options(desc).
 			positional(p).
 			run(), vm);
-		po::notify(vm);
-
+		boost::program_options::notify(vm);
 
 		if (vm.count("help")) {
 			ShowHelp();
@@ -145,8 +140,6 @@ int Type::Exec(int argc, const char **argv) {
 				return 1;
 			}
 		}
-
-
 	} catch (std::exception &e) {
 		fprintf(stderr, "ydotool: type: error: %s\n", e.what());
 		return 2;

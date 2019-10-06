@@ -1,16 +1,22 @@
-//
-// Created by root on 9/2/19.
-//
+/*
+    This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
+    Copyright (C) 2018-2019 ReimuNotMoe
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the MIT License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
 
 #ifndef YDOTOOL_TOOL_RECORD_HPP
 #define YDOTOOL_TOOL_RECORD_HPP
 
+// Local includes
 #include "tool.hpp"
 #include "utils.hpp"
-
-
-namespace po = boost::program_options;
-
 
 namespace ydotool {
 	namespace Tools {
@@ -30,26 +36,15 @@ namespace ydotool {
 				int32_t ev_value;
 			} __attribute__((__packed__));
 
+			const char * Name() override;
+			void do_record(const std::vector<std::string> & __devices);
+			void do_replay();
+			void do_display();
+			std::vector<std::string> find_all_devices();
+			int Exec(int argc, const char ** argv) override;
+			static void * construct();
 		private:
 			int fd_epoll = -1;
-//			int fd_file = -1;
-
-		public:
-			const char *Name() override;
-
-			void do_record(const std::vector<std::string> &__devices);
-
-			void do_replay();
-
-			void do_display();
-
-			std::vector<std::string> find_all_devices();
-
-			int Exec(int argc, const char **argv) override;
-
-			static void *construct() {
-				return (void *)(new Recorder());
-			}
 		};
 	}
 }

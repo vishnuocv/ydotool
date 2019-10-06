@@ -1,5 +1,6 @@
 /*
     This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
     Copyright (C) 2018-2019 ReimuNotMoe
 
     This program is free software: you can redistribute it and/or modify
@@ -10,15 +11,19 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "CommonIncludes.hpp"
+// Local includes
 #include "tool.hpp"
+// C++ system includes
+#include <thread>
+// C system includes
+#include <sys/un.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
 
-using namespace ydotool;
-
-Instance instance;
+ydotool::Instance instance;
 
 static int client_handler(int fd) {
-	uInputPlus::uInputRawData buf{0};
+	uInputPlus::uInputRawData buf;
 
 	while (true) {
 		int rc = recv(fd, &buf, sizeof(buf), MSG_WAITALL);
@@ -31,7 +36,7 @@ static int client_handler(int fd) {
 	}
 }
 
-int main(int argc, char **argv) {
+int main() {
 	const char path_socket[] = "/tmp/.ydotool_socket";
 	unlink(path_socket);
 	int fd_listener = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -41,7 +46,7 @@ int main(int argc, char **argv) {
 		abort();
 	}
 
-	sockaddr_un addr{0};
+	sockaddr_un addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, path_socket, sizeof(addr.sun_path)-1);
