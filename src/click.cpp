@@ -12,13 +12,11 @@
 
 #include "click.hpp"
 
-
 static const char ydotool_tool_name[] = "click";
 
 const char * ydotool::Tools::Click::Name() {
 	return ydotool_tool_name;
 }
-
 
 static void ShowHelp(){
 	std::cerr << "Usage: click [--delay <ms>] <button>\n"
@@ -28,28 +26,19 @@ static void ShowHelp(){
 }
 
 int ydotool::Tools::Click::Exec(int argc, const char **argv) {
-//	std::cout << "argc = " << argc << "\n";
-//
-//	for (int i=1; i<argc; i++) {
-//		std::cout << "argv[" << i << "] = " << argv[i] << "\n";
-//	}
 
 	int time_delay = 100;
-
 	std::vector<std::string> extra_args;
 
 	try {
-
         boost::program_options::options_description desc("");
 		desc.add_options()
 			("help", "Show this help")
 			("delay", boost::program_options::value<int>())
 			("extra-args", boost::program_options::value(&extra_args));
 
-
         boost::program_options::positional_options_description p;
 		p.add("extra-args", -1);
-
 
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
@@ -57,7 +46,6 @@ int ydotool::Tools::Click::Exec(int argc, const char **argv) {
 			positional(p).
 			run(), vm);
         boost::program_options::notify(vm);
-
 
 		if (vm.count("help")) {
 			ShowHelp();
@@ -76,7 +64,6 @@ int ydotool::Tools::Click::Exec(int argc, const char **argv) {
 
 			return 1;
 		}
-
 	} catch (std::exception &e) {
 		std::cerr << "ydotool: click: error: " << e.what() << std::endl;
 		return 2;
@@ -98,8 +85,8 @@ int ydotool::Tools::Click::Exec(int argc, const char **argv) {
 			break;
 	}
 
-	uInputContext->SendKey(keycode, 1);
-	uInputContext->SendKey(keycode, 0);
+    uInputContext->SendKey(keycode, 1);
+    uInputContext->SendKey(keycode, 0);
 
 	return argc;
 }

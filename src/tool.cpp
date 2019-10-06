@@ -11,7 +11,13 @@
 */
 
 #include "tool.hpp"
-#include "tools.hpp"
+#include "CommonIncludes.hpp"
+
+#include "click.hpp"
+#include "key.hpp"
+#include "mouse.hpp"
+#include "recorder.hpp"
+#include "type.hpp"
 #include "utils.hpp"
 
 using namespace ydotool::Tool;

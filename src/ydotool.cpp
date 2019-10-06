@@ -10,7 +10,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "ydotool.hpp"
+#include "CommonIncludes.hpp"
+#include "instance.hpp"
+#include "tool.hpp"
 
 using namespace ydotool;
 using namespace uInputPlus;

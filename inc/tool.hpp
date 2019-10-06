@@ -22,7 +22,7 @@ namespace ydotool {
 		class ToolTemplate {
 		public:
 			std::shared_ptr<ydotool::Instance> ydotool_instance;
-			uInput* uInputContext = nullptr;
+            uInputPlus::uInput * uInputContext = nullptr;
 
 			ToolTemplate() = default;
 			~ToolTemplate() = default;

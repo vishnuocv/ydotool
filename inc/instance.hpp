@@ -15,12 +15,10 @@
 
 #include "CommonIncludes.hpp"
 
-using namespace uInputPlus;
-
 namespace ydotool {
 	class Instance {
 	public:
-		std::unique_ptr<uInput> uInputContext;
+		std::unique_ptr<uInputPlus::uInput> uInputContext;
 
 		Instance() = default;
 

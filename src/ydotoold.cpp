@@ -10,25 +10,15 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#include "ydotoold.hpp"
+#include "CommonIncludes.hpp"
+#include "tool.hpp"
 
 using namespace ydotool;
-
-
-//struct ep_ctx {
-//	size_t bufpos_read = 0;
-//	uint8_t buf_read[8];
-//};
-//
-//void fd_set_nonblocking(int fd) {
-//	int flag = fcntl(fd, F_GETFL) | O_NONBLOCK;
-//	fcntl(fd, F_SETFL, flag);
-//}
 
 Instance instance;
 
 static int client_handler(int fd) {
-	uInputRawData buf{0};
+	uInputPlus::uInputRawData buf{0};
 
 	while (true) {
 		int rc = recv(fd, &buf, sizeof(buf), MSG_WAITALL);
@@ -39,16 +29,13 @@ static int client_handler(int fd) {
 			return 0;
 		}
 	}
-
 }
 
 int main(int argc, char **argv) {
-
 	const char path_socket[] = "/tmp/.ydotool_socket";
-
 	unlink(path_socket);
-
 	int fd_listener = socket(AF_UNIX, SOCK_STREAM, 0);
+
 	if (fd_listener == -1) {
 		std::cerr << "ydotoold: " << "failed to create socket: " << strerror(errno) << "\n";
 		abort();
@@ -70,9 +57,7 @@ int main(int argc, char **argv) {
 	}
 
 	chmod(path_socket, 0600);
-
 	std::cerr << "ydotoold: " << "listening on socket " << path_socket << "\n";
-
 	instance.Init("ydotoold virtual device");
 
 	while (int fd_client = accept(fd_listener, nullptr, nullptr)) {
@@ -80,7 +65,5 @@ int main(int argc, char **argv) {
 
 		std::thread thd(client_handler, fd_client);
 		thd.detach();
-
 	}
-
 }

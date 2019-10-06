@@ -15,10 +15,6 @@
 
 #include "tool.hpp"
 
-
-namespace po = boost::program_options;
-
-
 namespace ydotool {
 	namespace Tools {
 		class MouseMove : public Tool::ToolTemplate {

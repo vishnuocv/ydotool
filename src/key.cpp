@@ -125,26 +125,26 @@ int Key::Exec(int argc, const char **argv) {
 
 	try {
 
-		po::options_description desc("");
+        boost::program_options::options_description desc("");
 		desc.add_options()
 			("help", "Show this help")
-			("delay", po::value<int>())
-			("key-delay", po::value<int>())
-			("repeat", po::value<int>())
-			("repeat-delay", po::value<int>())
-			("extra-args", po::value(&extra_args));
+			("delay", boost::program_options::value<int>())
+			("key-delay", boost::program_options::value<int>())
+			("repeat", boost::program_options::value<int>())
+			("repeat-delay", boost::program_options::value<int>())
+			("extra-args", boost::program_options::value(&extra_args));
 
 
-		po::positional_options_description p;
+        boost::program_options::positional_options_description p;
 		p.add("extra-args", -1);
 
 
-		po::variables_map vm;
-		po::store(po::command_line_parser(argc, argv).
+        boost::program_options::variables_map vm;
+        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
 			options(desc).
 			positional(p).
 			run(), vm);
-		po::notify(vm);
+        boost::program_options::notify(vm);
 
 
 		if (vm.count("help")) {

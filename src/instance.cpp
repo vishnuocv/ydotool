@@ -19,8 +19,7 @@ void Instance::Init() {
 }
 
 void Instance::Init(const std::string &device_name) {
-//	uInputDeviceInfo ud(device_name);
-	uInputSetup us(device_name);
-	uInputContext = std::make_unique<uInput>();
+    uInputPlus::uInputSetup us(device_name);
+	uInputContext = std::make_unique<uInputPlus::uInput>();
 	uInputContext->Init({us});
 }
