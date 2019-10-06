@@ -1,8 +1,10 @@
 # ydotool
 Generic Linux command-line automation tool (no X!)
 
-Forked to try to clean up the code and use a single GNU Makefile instead of CMake
-Might convert to C code to avoid need for extra C++ libraries ([libevdevPlus] and [uInputPlus])
+Forked to try to clean up the code and use a single GNU Makefile instead of CMake.
+
+Might convert to C code to avoid need for extra C++ libraries ([libevdevPlus] and [uInputPlus]).
+Then I could use `uinput` directly from the linux kernel.
 
 #### Contents
 - [Usage](#usage)
