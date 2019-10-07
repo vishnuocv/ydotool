@@ -12,34 +12,18 @@
 */
 
 // Local includes
-#include "tool.hpp"
+#include "click.hpp"
+#include "key.hpp"
+#include "mouse.hpp"
+#include "recorder.hpp"
+#include "type.hpp"
 // C++ system includes
 #include <sstream>
+#include <iostream>
+#include <vector>
 // C system includes
 #include <sys/socket.h>
 #include <sys/un.h>
-
-uInputPlus::uInput * myuInput = nullptr;
-
-ydotool::Tool::ToolManager tool_mgr;
-
-static void ShowHelp() {
-	std::cerr << "Usage: ydotool <cmd> <args>\n"
-		"Available commands:\n";
-
-	for (auto & it : tool_mgr.init_funcs) {
-		std::cerr << "  " << it.first << std::endl;
-	}
-}
-
-int InituInput() {
-	if (!myuInput) {
-		uInputPlus::uInputSetup us({"ydotool virtual device"});
-		myuInput = new uInputPlus::uInput({us});
-	}
-
-	return 0;
-}
 
 std::vector<std::string> explode(const std::string & str, char delim) {
 	std::vector<std::string> result;
@@ -51,7 +35,6 @@ std::vector<std::string> explode(const std::string & str, char delim) {
 
 	return result;
 }
-
 
 int connect_socket(const char * path_socket) {
 	int fd_client = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -81,42 +64,46 @@ int socket_callback(uint16_t type, uint16_t code, int32_t val, void * userp) {
 }
 
 int main(int argc, const char ** argv) {
-	if (argc < 2) {
-		ShowHelp();
+	if (argc < 2 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--h", 3) == 0 || strcmp(argv[1], "help") == 0) {
+		std::cerr << "Usage: " << argv[0] << " <cmd> <args>\n"
+			<< "Available commands:\n"
+			<< "	click\n"
+			<< "	key\n"
+			<< "	mouse\n"
+			<< "	recorder\n"
+			<< "	type\n";
 		exit(1);
 	}
 
-	if (strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--h", 3) == 0 || strcmp(argv[1], "help") == 0) {
-		ShowHelp();
-		exit(1);
-	}
-
-	auto it_cmd = tool_mgr.init_funcs.find(argv[1]);
-
-	if (it_cmd == tool_mgr.init_funcs.end()) {
-		std::cerr <<  "ydotool: Unknown tool: " << argv[1] << "\n"
-			<< "Run 'ydotool help' if you want a tools list" << std::endl;
-		exit(1);
-	}
-
-	auto instance = std::make_shared<ydotool::Instance>();
+	uInputPlus::uInput * uInputContext = new uInputPlus::uInput();
 
 	const char path_socket[] = "/tmp/.ydotool_socket";
 	int fd_client = connect_socket(path_socket);
 
 	if (fd_client > 0) {
 		std::cerr << "ydotool: notice: Using ydotoold backend\n";
-		instance->uInputContext = std::make_unique<uInputPlus::uInput>();
-		instance->uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
+		uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
 	} else {
 		std::cerr << "ydotool: notice: ydotoold backend unavailable (may have latency+delay issues)\n";
-		instance->Init();
+		uInputContext->Init({{"ydotool virtual device"}});
 	}
 
-	auto tool_constructor = (void *(*)())it_cmd->second;
-	auto * this_tool = static_cast<ydotool::Tool::ToolTemplate *>(tool_constructor());
+	int ret = 0;
+	if ( !strcmp(argv[1], "click") ) {
+		ret = ydotool::click_run(argc-1, &argv[1], uInputContext);
+	} else if ( !strcmp(argv[1], "key") ) {
+		ret = ydotool::key_run(argc-1, &argv[1], uInputContext);
+	} else if ( !strcmp(argv[1], "mouse") ) {
+		ret = ydotool::mouse_run(argc-1, &argv[1], uInputContext);
+	} else if ( !strcmp(argv[1], "recorder") ) {
+		ret = ydotool::recorder_run(argc-1, &argv[1], uInputContext);
+	} else if ( !strcmp(argv[1], "type") ) {
+		ret = ydotool::type_run(argc-1, &argv[1], uInputContext);
+	} else {
+		std::cerr <<  "ydotool: Unknown option: " << argv[1] << "\n"
+			<< "Run 'ydotool help' for a list of arguments" << std::endl;
+		ret = 1;
+	}
 
-	this_tool->Init(instance);
-
-	return this_tool->Exec(argc-1, &argv[1]);
+	return ret;
 }

@@ -14,19 +14,13 @@
 #ifndef YDOTOOL_TOOL_TYPE_HPP
 #define YDOTOOL_TOOL_TYPE_HPP
 
-// Local includes
-#include "tool.hpp"
+// External libs
+#include <uInputPlus/uInput.hpp>
 
 namespace ydotool {
-	namespace Tools {
-		class Type : public Tool::ToolTemplate {
-		public:
-			const char * Name() override;
-			int Exec(int argc, const char ** argv) override;
-			int TypeText(const std::string & text);
-			static void * construct();
-		};
-	}
+	void type_help();
+	int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+	int type_text(const std::string & text, const uInputPlus::uInput * uInputContext);
 }
 
 #endif //YDOTOOL_TOOL_TYPE_HPP

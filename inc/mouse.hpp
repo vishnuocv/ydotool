@@ -14,18 +14,12 @@
 #ifndef YDOTOOL_TOOL_MOUSEMOVE_HPP
 #define YDOTOOL_TOOL_MOUSEMOVE_HPP
 
-// Local includes
-#include "tool.hpp"
+// External libs
+#include <uInputPlus/uInput.hpp>
 
 namespace ydotool {
-	namespace Tools {
-		class MouseMove : public Tool::ToolTemplate {
-		public:
-			const char * Name() override;
-			int Exec(int argc, const char ** argv) override;
-			static void * construct();
-		};
-	}
+    void mouse_help(const char * argv_0);
+	int mouse_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
 }
 
 #endif //YDOTOOL_TOOL_MOUSEMOVE_HPP

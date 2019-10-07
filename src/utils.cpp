@@ -16,8 +16,6 @@
 // C++ system includes
 #include <cstring>
 #include <system_error>
-// C system includes
-#include <dirent.h>
 // External libs
 #include <boost/crc.hpp>
 

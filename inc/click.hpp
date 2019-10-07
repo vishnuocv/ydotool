@@ -14,18 +14,12 @@
 #ifndef YDOTOOL_TOOL_CLICK_HPP
 #define YDOTOOL_TOOL_CLICK_HPP
 
-// Local includes
-#include "tool.hpp"
+// External libs
+#include <uInputPlus/uInput.hpp>
 
 namespace ydotool {
-	namespace Tools {
-		class Click : public Tool::ToolTemplate {
-		public:
-			const char * Name() override;
-			int Exec(int argc, const char ** argv) override;
-			static void * construct();
-		};
-	}
+	void click_help();
+	int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
 }
 
 #endif //YDOTOOL_TOOL_CLICK_HPP

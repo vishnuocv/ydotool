@@ -20,8 +20,6 @@ CXXFLAGS := $(WARN) $(INC) $(OPT)
 
 ydotool_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
 	ydotool \
-	instance \
-	tool \
 	utils \
 	click \
 	key \
@@ -32,7 +30,6 @@ ydotool_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
 
 ydotoold_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
 	ydotoold \
-	instance \
 	)
 
 .PHONY: default

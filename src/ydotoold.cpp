@@ -11,25 +11,24 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-// Local includes
-#include "tool.hpp"
 // C++ system includes
 #include <thread>
+#include <iostream>
 // C system includes
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+// External libs
+#include <uInputPlus/uInput.hpp>
 
-ydotool::Instance instance;
-
-static int client_handler(int fd) {
+static int client_handler(int fd, const uInputPlus::uInput * uInputContext) {
 	uInputPlus::uInputRawData buf;
 
 	while (true) {
 		int rc = recv(fd, &buf, sizeof(buf), MSG_WAITALL);
 
 		if (rc == sizeof(buf)) {
-			instance.uInputContext->Emit(buf.type, buf.code, buf.value);
+			uInputContext->Emit(buf.type, buf.code, buf.value);
 		} else {
 			return 0;
 		}
@@ -63,12 +62,14 @@ int main() {
 
 	chmod(path_socket, 0600);
 	std::cerr << "ydotoold: " << "listening on socket " << path_socket << "\n";
-	instance.Init("ydotoold virtual device");
+
+	uInputPlus::uInput * uInputContext = new uInputPlus::uInput();
+	uInputContext->Init({{"ydotoold virtual device"}});
 
 	while (int fd_client = accept(fd_listener, nullptr, nullptr)) {
 		std::cerr << "ydotoold: accepted client\n";
 
-		std::thread thd(client_handler, fd_client);
+		std::thread thd(client_handler, fd_client, uInputContext);
 		thd.detach();
 	}
 }

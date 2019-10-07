@@ -14,19 +14,13 @@
 #ifndef YDOTOOL_TOOL_KEY_HPP
 #define YDOTOOL_TOOL_KEY_HPP
 
-// Local includes
-#include "tool.hpp"
+// External libs
+#include <uInputPlus/uInput.hpp>
 
 namespace ydotool {
-	namespace Tools {
-		class Key : public Tool::ToolTemplate {
-		public:
-			const char * Name() override;
-			int Exec(int argc, const char ** argv) override;
-			int EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> & list_keycodes);
-			static void * construct();
-		};
-	}
+    void key_help();
+    int key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+    int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes, const uInputPlus::uInput * uInputContext);
 }
 
 #endif //YDOTOOL_TOOL_KEY_HPP

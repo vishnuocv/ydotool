@@ -13,26 +13,18 @@
 
 // Local includes
 #include "mouse.hpp"
+// C++ system includes
+#include <iostream>
 // External libs
 #include <boost/program_options.hpp>
 
-const char ydotool_tool_name[] = "mousemove";
-
-void * ydotool::Tools::MouseMove::construct() {
-	return (void *)(new MouseMove());
-}
-
-static void ShowHelp(const char *argv_0){
+void ydotool::mouse_help(const char * argv_0){
 	std::cerr << "Usage: " << argv_0 << " [--delay <ms>] <x> <y>\n"
 			<< "  --help                Show this help.\n"
 			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
 }
 
-const char * ydotool::Tools::MouseMove::Name() {
-	return ydotool_tool_name;
-}
-
-int ydotool::Tools::MouseMove::Exec(int argc, const char **argv) {
+int ydotool::mouse_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	int time_delay = 100;
 
 	std::vector<std::string> extra_args;
@@ -56,7 +48,7 @@ int ydotool::Tools::MouseMove::Exec(int argc, const char **argv) {
 		boost::program_options::notify(vm);
 
 		if (vm.count("help")) {
-			ShowHelp(argv[0]);
+			mouse_help(argv[0]);
 			return -1;
 		}
 
@@ -91,4 +83,3 @@ int ydotool::Tools::MouseMove::Exec(int argc, const char **argv) {
 
 	return argc;
 }
-

@@ -19,9 +19,7 @@
 #include <evdevPlus/evdevPlus.hpp>
 #include <boost/program_options.hpp>
 
-const char ydotool_tool_name[] = "key";
-
-static void ShowHelp(){
+void ydotool::key_help() {
 	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
 		<< "  --help                Show this help.\n"
 		<< "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
@@ -36,7 +34,7 @@ static void ShowHelp(){
 		<< "Because typing a `#' involves pressing Shift and 3." << std::endl;
 }
 
-std::vector<std::string> ExplodeString(const std::string &str, char delim) {
+std::vector<std::string> ExplodeString(const std::string & str, char delim) {
 	std::vector<std::string> result;
 	std::istringstream iss(str);
 
@@ -46,7 +44,7 @@ std::vector<std::string> ExplodeString(const std::string &str, char delim) {
 	return result;
 }
 
-static std::vector<std::string> SplitKeys(const std::string &keys) {
+static std::vector<std::string> SplitKeys(const std::string & keys) {
 	if (!strchr(keys.c_str(), '+')) {
 		return {keys};
 	}
@@ -59,8 +57,8 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 
 	std::vector<int> list_keycodes;
 
-	for (auto &it : list_keystrokes) {
-		for (auto &itc : it) {
+	for (auto & it : list_keystrokes) {
+		for (auto & itc : it) {
 			if (islower(itc))
 				itc = toupper(itc);
 		}
@@ -88,15 +86,11 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 	return list_keycodes;
 }
 
-const char * ydotool::Tools::Key::Name() {
-	return ydotool_tool_name;
-}
-
-int ydotool::Tools::Key::EmitKeyCodes(long key_delay, const std::vector<std::vector<int>> &list_keycodes) {
+int ydotool::key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes, const uInputPlus::uInput * uInputContext) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
-	for (auto &it : list_keycodes) {
-		for (auto &it_m : it) {
+	for (auto & it : list_keycodes) {
+		for (auto & it_m : it) {
 			uInputContext->SendKey(it_m, 1);
 			usleep(sleep_time);
 		}
@@ -110,11 +104,7 @@ int ydotool::Tools::Key::EmitKeyCodes(long key_delay, const std::vector<std::vec
 	return 0;
 }
 
-void * ydotool::Tools::Key::construct() {
-	return (void *)(new Key());
-}
-
-int ydotool::Tools::Key::Exec(int argc, const char **argv) {
+int ydotool::key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	int time_delay = 100;
 	int time_keydelay = 12;
 	int time_repdelay = 0;
@@ -150,7 +140,7 @@ int ydotool::Tools::Key::Exec(int argc, const char **argv) {
 
 
 		if (vm.count("help")) {
-			ShowHelp();
+			key_help();
 			return -1;
 		}
 
@@ -186,7 +176,7 @@ int ydotool::Tools::Key::Exec(int argc, const char **argv) {
 			return 1;
 		}
 
-	} catch (std::exception &e) {
+	} catch (std::exception & e) {
 		std::cerr << "ydotool: key: error: " << e.what() << std::endl;;
 		return 2;
 	}
@@ -203,10 +193,8 @@ int ydotool::Tools::Key::Exec(int argc, const char **argv) {
 	}
 
 	while (repeats--) {
-		EmitKeyCodes(time_delay, keycodes);
+		key_emit_codes(time_delay, keycodes, uInputContext);
 	}
-
+	
 	return argc;
 }
-
-

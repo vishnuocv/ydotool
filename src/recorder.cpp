@@ -25,13 +25,7 @@
 #include <evdevPlus/evdevPlus.hpp>
 #include <boost/program_options.hpp>
 
-const char ydotool_tool_name[] = "recorder";
-
-void * ydotool::Tools::Recorder::construct() {
-	return (void *)(new Recorder());
-}
-
-static void ShowHelp(const char * argv_0){
+void ydotool::recorder_help(const char * argv_0){
 	std::cerr << "Usage: " << argv_0 << " [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
 		  << "  --help                Show this help.\n"
 		  << "  --record                \n"
@@ -44,16 +38,12 @@ static void ShowHelp(const char * argv_0){
 		     "The record file can't be replayed on an architecture with different endianness." << std::endl;
 }
 
-const char * ydotool::Tools::Recorder::Name() {
-	return ydotool_tool_name;
-}
+int fd_file = -1;
 
-static int fd_file = -1;
+std::vector<uint8_t> record_buffer;
+ydotool::file_header header;
 
-static std::vector<uint8_t> record_buffer;
-static ydotool::Tools::Recorder::file_header header;
-
-static void generate_header() {
+void generate_header() {
 	auto & m = header.magic;
 	m[0] = 'Y';
 	m[1] = 'D';
@@ -65,7 +55,7 @@ static void generate_header() {
 	header.crc32 = ydotool::Utils::crc32(record_buffer.data(), record_buffer.size());
 }
 
-static void stop_handler(__attribute__((unused)) int whatever) {
+void stop_handler(__attribute__((unused)) int whatever) {
 	std::cout << "Saving file...\n";
 	generate_header();
 
@@ -80,7 +70,7 @@ static void stop_handler(__attribute__((unused)) int whatever) {
 }
 
 
-int ydotool::Tools::Recorder::Exec(int argc, const char **argv) {
+int ydotool::recorder_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	std::vector<std::string> extra_args;
 
 	int delay = 5000;
@@ -117,7 +107,7 @@ int ydotool::Tools::Recorder::Exec(int argc, const char **argv) {
 		}
 
 		if (vm.count("help")) {
-			ShowHelp(argv[0]);
+			recorder_help(argv[0]);
 			return -1;
 		}
 
@@ -194,7 +184,7 @@ int ydotool::Tools::Recorder::Exec(int argc, const char **argv) {
 		if (delay)
 			usleep(delay * 1000);
 
-		do_replay();
+		do_replay(uInputContext);
 	} else if (mode == 3) {
 		do_display();
 	}
@@ -202,7 +192,7 @@ int ydotool::Tools::Recorder::Exec(int argc, const char **argv) {
 	return 0;
 }
 
-void ydotool::Tools::Recorder::do_replay() {
+void ydotool::do_replay(const uInputPlus::uInput * uInputContext) {
 	struct stat statat;
 
 	fstat(fd_file, &statat);
@@ -252,7 +242,7 @@ void ydotool::Tools::Recorder::do_replay() {
 	}
 }
 
-void ydotool::Tools::Recorder::do_display() {
+void ydotool::do_display() {
 	struct stat statat;
 
 	fstat(fd_file, &statat);
@@ -291,9 +281,9 @@ void ydotool::Tools::Recorder::do_display() {
 	}
 }
 
-void ydotool::Tools::Recorder::do_record(const std::vector<std::string> &__devices) {
+void ydotool::do_record(const std::vector<std::string> &__devices) {
 
-	fd_epoll = epoll_create(42);
+	int fd_epoll = epoll_create(42);
 	assert(fd_epoll > 0);
 
 	for (auto &it : __devices) {
@@ -321,7 +311,7 @@ void ydotool::Tools::Recorder::do_record(const std::vector<std::string> &__devic
 		assert(rc > 0);
 
 		for (int i=0; i<rc; i++) {
-			auto &it = events[i];
+			auto & it = events[i];
 			auto eev = (evdevPlus::EventDevice *)it.data.ptr;
 			auto buf = eev->Read();
 
@@ -344,7 +334,7 @@ void ydotool::Tools::Recorder::do_record(const std::vector<std::string> &__devic
 	}
 }
 
-std::vector<std::string> ydotool::Tools::Recorder::find_all_devices() {
+std::vector<std::string> ydotool::find_all_devices() {
 	std::vector<std::string> ret;
 
 	try {
@@ -363,8 +353,3 @@ std::vector<std::string> ydotool::Tools::Recorder::find_all_devices() {
 
 	return ret;
 }
-
-
-
-
-

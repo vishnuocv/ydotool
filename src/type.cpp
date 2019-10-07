@@ -17,14 +17,9 @@
 #include <boost/program_options.hpp>
 #include <evdevPlus/evdevPlus.hpp>
 
-const char ydotool_tool_name[] = "type";
-static int time_keydelay = 12;
+int time_keydelay = 12;
 
-void * ydotool::Tools::Type::construct() {
-	return (void *)(new Type());
-}
-
-static void ShowHelp(){
+void ydotool::type_help(){
 	std::cerr <<  "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N]"
 		"[--file <filepath>] <things to type>\n"
 		<< "  --help                    Show this help.\n"
@@ -34,10 +29,10 @@ static void ShowHelp(){
 				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
 }
 
-int ydotool::Tools::Type::TypeText(const std::string &text) {
+int ydotool::type_text(const std::string & text, const uInputPlus::uInput * uInputContext) {
 	int pos = 0;
 
-	for (auto &c : text) {
+	for (auto & c : text) {
 
 		int isUpper = 0;
 
@@ -81,11 +76,7 @@ int ydotool::Tools::Type::TypeText(const std::string &text) {
 	return pos;
 }
 
-const char * ydotool::Tools::Type::Name() {
-	return ydotool_tool_name;
-}
-
-int ydotool::Tools::Type::Exec(int argc, const char **argv) {
+int ydotool::type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	int time_delay = 100;
 
 	std::string file_path;
@@ -112,7 +103,7 @@ int ydotool::Tools::Type::Exec(int argc, const char **argv) {
 		boost::program_options::notify(vm);
 
 		if (vm.count("help")) {
-			ShowHelp();
+			type_help();
 			return -1;
 		}
 
@@ -140,7 +131,7 @@ int ydotool::Tools::Type::Exec(int argc, const char **argv) {
 				return 1;
 			}
 		}
-	} catch (std::exception &e) {
+	} catch (std::exception & e) {
 		fprintf(stderr, "ydotool: type: error: %s\n", e.what());
 		return 2;
 	}
@@ -173,7 +164,7 @@ int ydotool::Tools::Type::Exec(int argc, const char **argv) {
 		while ((rc = read(fd, &buf[0], 128))) {
 			if (rc > 0) {
 				buf.resize(rc);
-				TypeText(buf);
+				type_text(buf, uInputContext);
 				buf.resize(128);
 			} else if (rc < 0) {
 				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path.c_str(), strerror(errno));
@@ -184,11 +175,9 @@ int ydotool::Tools::Type::Exec(int argc, const char **argv) {
 		close(fd);
 	} else {
 		for (auto &txt : extra_args) {
-			TypeText(txt);
+			type_text(txt, uInputContext);
 		}
 	}
 
 	return argc;
 }
-
-
