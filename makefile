@@ -20,7 +20,6 @@ CXXFLAGS := $(WARN) $(INC) $(OPT)
 
 ydotool_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
 	ydotool \
-	utils \
 	click \
 	key \
 	mouse \
