@@ -1,10 +1,3 @@
-SRC_DIR := src
-INC_DIR := inc
-OBJ_DIR := obj
-BIN_DIR := bin
-
-RM := rm -rf
-
 WARN := -Wall -Wextra -Wpedantic -Weffc++
 
 INC += -Iinc
@@ -17,6 +10,8 @@ LIB += -lboost_program_options
 LIB += -ldl
 
 CXXFLAGS := $(WARN) $(INC) $(OPT)
+
+EXE := ydotool ydotoold
 
 ydotool_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
 	ydotool \
@@ -32,21 +27,17 @@ ydotoold_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
 	)
 
 .PHONY: default
-default: create_dirs $(BIN_DIR)/ydotool $(BIN_DIR)/ydotoold
+default: $(EXE)
 
-.PHONY: create_dirs
-create_dirs:
-	@mkdir -p $(OBJ_DIR) $(BIN_DIR)
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+%.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(BIN_DIR)/ydotool: $(ydotool_DEP)
+ydotool: $(ydotool_DEP)
 	$(CXX) $(CXXFLAGS) $^ $(LIB) -o $@
 
-$(BIN_DIR)/ydotoold: $(ydotoold_DEP)
+ydotoold: $(ydotoold_DEP)
 	$(CXX) $(CXXFLAGS) $^ $(LIB) -o $@
 
 .PHONY: clean
 clean:
-	$(RM) $(OBJ_DIR)/* $(BIN_DIR)/*
+	$(RM) $(EXE) *.o
