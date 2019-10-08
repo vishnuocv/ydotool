@@ -29,6 +29,7 @@ int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputCon
 	int time_delay = 100;
 	std::vector<std::string> extra_args;
 
+    // TODO: Convert to use getopt (see: man 3 getopt) instead of boost
 	try {
         boost::program_options::options_description desc("");
 		desc.add_options()
