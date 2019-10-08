@@ -13,18 +13,8 @@ CXXFLAGS := $(WARN) $(INC) $(OPT)
 
 EXE := ydotool ydotoold
 
-ydotool_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
-	ydotool \
-	click \
-	key \
-	mouse \
-	recorder \
-	type \
-	)
-
-ydotoold_DEP := $(patsubst %,$(OBJ_DIR)/%.o, \
-	ydotoold \
-	)
+ydotool_DEP := ydotool.o click.o key.o mouse.o recorder.o type.o
+ydotoold_DEP := ydotoold.o
 
 .PHONY: default
 default: $(EXE)
