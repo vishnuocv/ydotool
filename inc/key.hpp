@@ -17,10 +17,8 @@
 // External libs
 #include <uInputPlus/uInput.hpp>
 
-namespace ydotool {
-    void key_help();
-    int key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
-    int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes, const uInputPlus::uInput * uInputContext);
-}
+void key_help();
+int key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes, const uInputPlus::uInput * uInputContext);
 
 #endif //YDOTOOL_TOOL_KEY_HPP

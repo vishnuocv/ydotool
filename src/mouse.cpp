@@ -18,13 +18,13 @@
 // External libs
 #include <boost/program_options.hpp>
 
-void ydotool::mouse_help(const char * argv_0){
+void mouse_help(const char * argv_0){
 	std::cerr << "Usage: " << argv_0 << " [--delay <ms>] <x> <y>\n"
 			<< "  --help                Show this help.\n"
 			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
 }
 
-int ydotool::mouse_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int mouse_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	int time_delay = 100;
 
 	std::vector<std::string> extra_args;

@@ -19,7 +19,7 @@
 // External libs
 #include <boost/crc.hpp>
 
-void ydotool::Utils::timespec_diff(struct timespec * start, struct timespec * stop, struct timespec * result) {
+void timespec_diff(struct timespec * start, struct timespec * stop, struct timespec * result) {
 	if ((stop->tv_nsec - start->tv_nsec) < 0) {
 		result->tv_sec = stop->tv_sec - start->tv_sec - 1;
 		result->tv_nsec = stop->tv_nsec - start->tv_nsec + 1000000000;
@@ -29,7 +29,7 @@ void ydotool::Utils::timespec_diff(struct timespec * start, struct timespec * st
 	}
 }
 
-void ydotool::Utils::dir_foreach(const std::string & path, const std::function<int(const std::string &, struct dirent *)> & callback, bool recursive) {
+void dir_foreach(const std::string & path, const std::function<int(const std::string &, struct dirent *)> & callback, bool recursive) {
 	DIR * dir;
 	struct dirent * ent;
 
@@ -69,7 +69,7 @@ void ydotool::Utils::dir_foreach(const std::string & path, const std::function<i
 	}
 }
 
-uint32_t ydotool::Utils::crc32(const void *buf, size_t len) {
+uint32_t crc32(const void *buf, size_t len) {
 	boost::crc_32_type result;
 	result.process_bytes(buf, len);
 	return result.checksum();

@@ -18,14 +18,14 @@
 // External libs
 #include <boost/program_options.hpp>
 
-void ydotool::click_help(){
+void click_help(){
 	std::cerr << "Usage: click [--delay <ms>] <button>\n"
 		<< "  --help                Show this help.\n"
 		<< "  --delay ms            Delay time before start clicking. Default 100ms.\n"
 		<< "  button                1: left 2: right 3: middle" << std::endl;
 }
 
-int ydotool::click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	int time_delay = 100;
 	std::vector<std::string> extra_args;
 

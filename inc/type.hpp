@@ -17,10 +17,8 @@
 // External libs
 #include <uInputPlus/uInput.hpp>
 
-namespace ydotool {
-	void type_help();
-	int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
-	int type_text(const std::string & text, const uInputPlus::uInput * uInputContext);
-}
+void type_help();
+int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+int type_text(const std::string & text, const uInputPlus::uInput * uInputContext);
 
 #endif //YDOTOOL_TOOL_TYPE_HPP

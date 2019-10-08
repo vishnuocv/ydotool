@@ -17,9 +17,7 @@
 // External libs
 #include <uInputPlus/uInput.hpp>
 
-namespace ydotool {
-    void mouse_help(const char * argv_0);
-	int mouse_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
-}
+void mouse_help(const char * argv_0);
+int mouse_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
 
 #endif //YDOTOOL_TOOL_MOUSEMOVE_HPP

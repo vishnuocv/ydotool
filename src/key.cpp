@@ -19,7 +19,7 @@
 #include <evdevPlus/evdevPlus.hpp>
 #include <boost/program_options.hpp>
 
-void ydotool::key_help() {
+void key_help() {
 	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
 		<< "  --help                Show this help.\n"
 		<< "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
@@ -86,7 +86,7 @@ static std::vector<int> KeyStroke2Code(const std::string &ks) {
 	return list_keycodes;
 }
 
-int ydotool::key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes, const uInputPlus::uInput * uInputContext) {
+int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes, const uInputPlus::uInput * uInputContext) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
 	for (auto & it : list_keycodes) {
@@ -104,7 +104,7 @@ int ydotool::key_emit_codes(long key_delay, const std::vector<std::vector<int>> 
 	return 0;
 }
 
-int ydotool::key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	int time_delay = 100;
 	int time_keydelay = 12;
 	int time_repdelay = 0;
@@ -195,6 +195,6 @@ int ydotool::key_run(int argc, const char ** argv, const uInputPlus::uInput * uI
 	while (repeats--) {
 		key_emit_codes(time_delay, keycodes, uInputContext);
 	}
-	
+
 	return argc;
 }

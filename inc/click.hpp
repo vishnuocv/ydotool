@@ -17,9 +17,7 @@
 // External libs
 #include <uInputPlus/uInput.hpp>
 
-namespace ydotool {
-	void click_help();
-	int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
-}
+void click_help();
+int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
 
 #endif //YDOTOOL_TOOL_CLICK_HPP

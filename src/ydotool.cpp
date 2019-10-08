@@ -90,15 +90,15 @@ int main(int argc, const char ** argv) {
 
 	int ret = 0;
 	if ( !strcmp(argv[1], "click") ) {
-		ret = ydotool::click_run(argc-1, &argv[1], uInputContext);
+		ret = click_run(argc-1, &argv[1], uInputContext);
 	} else if ( !strcmp(argv[1], "key") ) {
-		ret = ydotool::key_run(argc-1, &argv[1], uInputContext);
+		ret = key_run(argc-1, &argv[1], uInputContext);
 	} else if ( !strcmp(argv[1], "mouse") ) {
-		ret = ydotool::mouse_run(argc-1, &argv[1], uInputContext);
+		ret = mouse_run(argc-1, &argv[1], uInputContext);
 	} else if ( !strcmp(argv[1], "recorder") ) {
-		ret = ydotool::recorder_run(argc-1, &argv[1], uInputContext);
+		ret = recorder_run(argc-1, &argv[1], uInputContext);
 	} else if ( !strcmp(argv[1], "type") ) {
-		ret = ydotool::type_run(argc-1, &argv[1], uInputContext);
+		ret = type_run(argc-1, &argv[1], uInputContext);
 	} else {
 		std::cerr <<  "ydotool: Unknown option: " << argv[1] << "\n"
 			<< "Run 'ydotool help' for a list of arguments" << std::endl;

@@ -19,7 +19,7 @@
 
 int time_keydelay = 12;
 
-void ydotool::type_help(){
+void type_help(){
 	std::cerr <<  "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N]"
 		"[--file <filepath>] <things to type>\n"
 		<< "  --help                    Show this help.\n"
@@ -29,7 +29,7 @@ void ydotool::type_help(){
 				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
 }
 
-int ydotool::type_text(const std::string & text, const uInputPlus::uInput * uInputContext) {
+int type_text(const std::string & text, const uInputPlus::uInput * uInputContext) {
 	int pos = 0;
 
 	for (auto & c : text) {
@@ -76,7 +76,7 @@ int ydotool::type_text(const std::string & text, const uInputPlus::uInput * uInp
 	return pos;
 }
 
-int ydotool::type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	int time_delay = 100;
 
 	std::string file_path;

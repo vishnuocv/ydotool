@@ -25,7 +25,7 @@
 #include <evdevPlus/evdevPlus.hpp>
 #include <boost/program_options.hpp>
 
-void ydotool::recorder_help(const char * argv_0){
+void recorder_help(const char * argv_0){
 	std::cerr << "Usage: " << argv_0 << " [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
 		  << "  --help                Show this help.\n"
 		  << "  --record                \n"
@@ -41,7 +41,7 @@ void ydotool::recorder_help(const char * argv_0){
 int fd_file = -1;
 
 std::vector<uint8_t> record_buffer;
-ydotool::file_header header;
+file_header header;
 
 void generate_header() {
 	auto & m = header.magic;
@@ -52,7 +52,7 @@ void generate_header() {
 
 	header.feature_mask = 0;
 	header.size = record_buffer.size();
-	header.crc32 = ydotool::Utils::crc32(record_buffer.data(), record_buffer.size());
+	header.crc32 = crc32(record_buffer.data(), record_buffer.size());
 }
 
 void stop_handler(__attribute__((unused)) int whatever) {
@@ -70,7 +70,7 @@ void stop_handler(__attribute__((unused)) int whatever) {
 }
 
 
-int ydotool::recorder_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int recorder_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
 	std::vector<std::string> extra_args;
 
 	int delay = 5000;
@@ -192,7 +192,7 @@ int ydotool::recorder_run(int argc, const char ** argv, const uInputPlus::uInput
 	return 0;
 }
 
-void ydotool::do_replay(const uInputPlus::uInput * uInputContext) {
+void do_replay(const uInputPlus::uInput * uInputContext) {
 	struct stat statat;
 
 	fstat(fd_file, &statat);
@@ -221,7 +221,7 @@ void ydotool::do_replay(const uInputPlus::uInput * uInputContext) {
 		abort();
 	}
 
-	auto crc32_cur = Utils::crc32(data_start, size_cur);
+	auto crc32_cur = crc32(data_start, size_cur);
 
 	if (crc32_cur == file_hdr->crc32) {
 		fprintf(stderr, "CRC32 match\n");
@@ -242,7 +242,7 @@ void ydotool::do_replay(const uInputPlus::uInput * uInputContext) {
 	}
 }
 
-void ydotool::do_display() {
+void do_display() {
 	struct stat statat;
 
 	fstat(fd_file, &statat);
@@ -263,7 +263,7 @@ void ydotool::do_display() {
 	auto cur_pos = data_start;
 
 	auto size_cur = file_end - data_start;
-	auto crc32_cur = Utils::crc32(data_start, size_cur);
+	auto crc32_cur = crc32(data_start, size_cur);
 
 
 	printf("CRC32: 0x%08x / 0x%08x\n", crc32_cur, file_hdr->crc32);
@@ -281,7 +281,7 @@ void ydotool::do_display() {
 	}
 }
 
-void ydotool::do_record(const std::vector<std::string> &__devices) {
+void do_record(const std::vector<std::string> &__devices) {
 
 	int fd_epoll = epoll_create(42);
 	assert(fd_epoll > 0);
@@ -319,7 +319,7 @@ void ydotool::do_record(const std::vector<std::string> &__devices) {
 
 			clock_gettime(CLOCK_MONOTONIC, &tm_now2);
 
-			Utils::timespec_diff(&tm_now, &tm_now2, &tm_diff);
+			timespec_diff(&tm_now, &tm_now2, &tm_diff);
 
 			tm_now = tm_now2;
 
@@ -334,11 +334,11 @@ void ydotool::do_record(const std::vector<std::string> &__devices) {
 	}
 }
 
-std::vector<std::string> ydotool::find_all_devices() {
+std::vector<std::string> find_all_devices() {
 	std::vector<std::string> ret;
 
 	try {
-		Utils::dir_foreach("/dev/input", [&](const std::string &path_base, struct dirent *ent) {
+		dir_foreach("/dev/input", [&](const std::string &path_base, struct dirent *ent) {
 			if (ent->d_type != DT_CHR || ent->d_name[0] != 'e')
 				return 1;
 
