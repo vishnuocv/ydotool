@@ -12,7 +12,7 @@
 */
 
 // Local includes
-#include "type.hpp"
+#include "tools.hpp"
 // External libs
 #include <boost/program_options.hpp>
 #include <evdevPlus/evdevPlus.hpp>

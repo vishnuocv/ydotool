@@ -12,7 +12,7 @@
 */
 
 // Local includes
-#include "mouse.hpp"
+#include "tools.hpp"
 // C++ system includes
 #include <iostream>
 // External libs

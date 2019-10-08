@@ -12,7 +12,7 @@
 */
 
 // Local includes
-#include "recorder.hpp"
+#include "tools.hpp"
 // C system includes
 #include <signal.h>
 #include <dirent.h>

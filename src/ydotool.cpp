@@ -12,11 +12,7 @@
 */
 
 // Local includes
-#include "click.hpp"
-#include "key.hpp"
-#include "mouse.hpp"
-#include "recorder.hpp"
-#include "type.hpp"
+#include "tools.hpp"
 // C++ system includes
 #include <sstream>
 #include <iostream>

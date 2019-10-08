@@ -11,8 +11,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef YDOTOOL_LIB_UTILS_HPP
-#define YDOTOOL_LIB_UTILS_HPP
+#ifndef YDOTOOL_UTILS_HPP
+#define YDOTOOL_UTILS_HPP
 
 // C system includes
 #include <dirent.h>
@@ -23,4 +23,4 @@ void timespec_diff(struct timespec * start, struct timespec * stop, struct times
 void dir_foreach(const std::string & path, const std::function<int(const std::string &, struct dirent *)> & callback, bool recursive=false);
 uint32_t crc32(const void * buf, size_t len);
 
-#endif //YDOTOOL_LIB_UTILS_HPP
+#endif //YDOTOOL_UTILS_HPP
