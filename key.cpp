@@ -104,7 +104,7 @@ int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_ke
 	return 0;
 }
 
-int key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int key_run(int argc, char ** argv) {
 	int time_delay = 100;
 	int time_keydelay = 12;
 	int time_repdelay = 0;
@@ -192,6 +192,7 @@ int key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputConte
 		keycodes.emplace_back(thiskc);
 	}
 
+    const uInputPlus::uInput * uInputContext = ydotool_get_context();
 	while (repeats--) {
 		key_emit_codes(time_delay, keycodes, uInputContext);
 	}

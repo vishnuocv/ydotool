@@ -17,19 +17,21 @@
 // External libs
 #include <uInputPlus/uInput.hpp>
 
+const uInputPlus::uInput * ydotool_get_context();
+
 void click_help();
-int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+int click_run(int argc, char ** argv);
 
 void key_help();
-int key_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+int key_run(int argc, char ** argv);
 
-void mouse_help(const char * argv_0);
-int mouse_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+void mouse_help(char * argv_0);
+int mouse_run(int argc, char ** argv);
 
-void recorder_help(const char * argv_0);
-int recorder_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+void recorder_help(char * argv_0);
+int recorder_run(int argc, char ** argv);
 
 void type_help();
-int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext);
+int type_run(int argc, char ** argv);
 
 #endif //YDOTOOL_TOOLS_HPP

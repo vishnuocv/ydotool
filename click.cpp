@@ -15,8 +15,8 @@
 #include "tools.hpp"
 // C++ system includes
 #include <iostream>
-// External libs
-#include <boost/program_options.hpp>
+// C system includes
+#include <unistd.h>
 
 void click_help(){
 	std::cerr << "Usage: click [--delay <ms>] <button>\n"
@@ -25,56 +25,61 @@ void click_help(){
 		<< "  button                1: left 2: right 3: middle" << std::endl;
 }
 
-int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int click_run(int argc, char ** argv) {
 	int time_delay = 100;
-	std::vector<std::string> extra_args;
+    int opt = 0;
 
-    // TODO: Convert to use getopt (see: man 3 getopt) instead of boost
-	try {
-        boost::program_options::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("delay", boost::program_options::value<int>())
-			("extra-args", boost::program_options::value(&extra_args));
+    // TODO: Add long options --help and --delay
+    while( ( opt = getopt( argc, argv, "hd:" ) ) != -1 )
+    {
+        switch( opt )
+        {
+            case 'd':
+                time_delay = atoi( optarg );
+                if ( errno == ERANGE )
+                {
+                    std::cerr << "Failed to parse delay argument parameter" << std::endl;
+                    click_help();
+                    return -1;
+                }
+                break;
+            case 'h':
+            case '?':
+                click_help();
+                return -1;
+        }
+    }
 
-        boost::program_options::positional_options_description p;
-		p.add("extra-args", -1);
+    if ( argc - optind != 1 )
+    {
+        if ( argc - optind > 1 )
+        {
+            std::cerr << "Too many arguments!" << std::endl;
+        }
+        else
+        {
+            std::cerr << "Not enough arguments!" << std::endl;
+        }
+        click_help();
+        return -1;
+    }
 
-        boost::program_options::variables_map vm;
-        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-        boost::program_options::notify(vm);
+    int button = atoi( argv[optind] );
+    if ( errno == ERANGE )
+    {
+        std::cerr << "Failed to parse button argument!" << std::endl;
+        click_help();
+        return -1;
+    }
 
-		if (vm.count("help")) {
-			click_help();
-			return -1;
-		}
-
-		if (vm.count("delay")) {
-			time_delay = vm["delay"].as<int>();
-			std::cerr << "Delay was set to "
-				  << time_delay << " milliseconds.\n";
-		}
-
-		if (extra_args.size() != 1) {
-			std::cerr << "Which mouse button do you want to click?\n"
-				     "Use `ydotool " << argv[0] << " --help' for help.\n";
-
-			return 1;
-		}
-	} catch (std::exception &e) {
-		std::cerr << "ydotool: click: error: " << e.what() << std::endl;
-		return 2;
-	}
-
-	if (time_delay)
-		usleep(time_delay * 1000);
+    std::cout << "button = " << button << std::endl;
 
 	int keycode = BTN_LEFT;
 
-	switch (strtol(extra_args[0].c_str(), NULL, 10)) {
+	switch (button)
+    {
+        case 1:
+            break;
 		case 2:
 			keycode = BTN_RIGHT;
 			break;
@@ -82,8 +87,15 @@ int click_run(int argc, const char ** argv, const uInputPlus::uInput * uInputCon
 			keycode = BTN_MIDDLE;
 			break;
 		default:
-			break;
+            std::cerr << "Invalid button argument!" << std::endl;
+            click_help();
+            return -1;
 	}
+
+	if (time_delay)
+		usleep(time_delay * 1000);
+
+    const uInputPlus::uInput * uInputContext = ydotool_get_context();
 
     uInputContext->SendKey(keycode, 1);
     uInputContext->SendKey(keycode, 0);

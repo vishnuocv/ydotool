@@ -29,7 +29,7 @@ void type_help(){
 				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
 }
 
-int type_text(const std::string & text, const uInputPlus::uInput * uInputContext) {
+int type_text(const std::string & text) {
 	int pos = 0;
 
 	for (auto & c : text) {
@@ -54,6 +54,7 @@ int type_text(const std::string & text, const uInputPlus::uInput * uInputContext
 
 		int sleep_time;
 
+        const uInputPlus::uInput * uInputContext = ydotool_get_context();
 		if (isUpper) {
 			sleep_time = 250 * time_keydelay;
 			uInputContext->SendKey(KEY_LEFTSHIFT, 1);
@@ -76,7 +77,7 @@ int type_text(const std::string & text, const uInputPlus::uInput * uInputContext
 	return pos;
 }
 
-int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int type_run(int argc, char ** argv) {
 	int time_delay = 100;
 
 	std::string file_path;
@@ -164,7 +165,7 @@ int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputCont
 		while ((rc = read(fd, &buf[0], 128))) {
 			if (rc > 0) {
 				buf.resize(rc);
-				type_text(buf, uInputContext);
+				type_text(buf);
 				buf.resize(128);
 			} else if (rc < 0) {
 				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path.c_str(), strerror(errno));
@@ -175,7 +176,7 @@ int type_run(int argc, const char ** argv, const uInputPlus::uInput * uInputCont
 		close(fd);
 	} else {
 		for (auto &txt : extra_args) {
-			type_text(txt, uInputContext);
+			type_text(txt);
 		}
 	}
 

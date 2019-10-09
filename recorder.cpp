@@ -165,7 +165,7 @@ std::vector<std::string> find_all_devices() {
 	return ret;
 }
 
-void recorder_help(const char * argv_0){
+void recorder_help(char * argv_0){
 	std::cerr << "Usage: " << argv_0 << " [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
 		  << "  --help                Show this help.\n"
 		  << "  --record                \n"
@@ -293,7 +293,7 @@ void do_display() {
 	}
 }
 
-int recorder_run(int argc, const char ** argv, const uInputPlus::uInput * uInputContext) {
+int recorder_run(int argc, char ** argv) {
 	std::vector<std::string> extra_args;
 
 	int delay = 5000;
@@ -407,6 +407,7 @@ int recorder_run(int argc, const char ** argv, const uInputPlus::uInput * uInput
 		if (delay)
 			usleep(delay * 1000);
 
+        const uInputPlus::uInput * uInputContext = ydotool_get_context();
 		do_replay(uInputContext);
 	} else if (mode == 3) {
 		do_display();

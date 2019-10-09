@@ -59,7 +59,30 @@ int socket_callback(uint16_t type, uint16_t code, int32_t val, void * userp) {
 	return 0;
 }
 
-int main(int argc, const char ** argv) {
+uInputPlus::uInput * uInputContext = nullptr;
+
+const uInputPlus::uInput * ydotool_get_context()
+{
+    if ( uInputContext == nullptr )
+    {
+        uInputContext = new uInputPlus::uInput();
+        const char path_socket[] = "/tmp/.ydotool_socket";
+        int fd_client = connect_socket( path_socket );
+
+        if (fd_client > 0) {
+            std::cerr << "ydotool: notice: Using ydotoold backend\n";
+            uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
+        } else {
+            std::cerr << "ydotool: notice: ydotoold backend unavailable (may have latency+delay issues)\n";
+            uInputContext->Init({{"ydotool virtual device"}});
+        }
+    }
+
+    return uInputContext;
+}
+
+
+int main(int argc, char ** argv) {
 	if (argc < 2 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--h", 3) == 0 || strcmp(argv[1], "help") == 0) {
 		std::cerr << "Usage: " << argv[0] << " <cmd> <args>\n"
 			<< "Available commands:\n"
@@ -71,30 +94,17 @@ int main(int argc, const char ** argv) {
 		exit(1);
 	}
 
-	uInputPlus::uInput * uInputContext = new uInputPlus::uInput();
-
-	const char path_socket[] = "/tmp/.ydotool_socket";
-	int fd_client = connect_socket(path_socket);
-
-	if (fd_client > 0) {
-		std::cerr << "ydotool: notice: Using ydotoold backend\n";
-		uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
-	} else {
-		std::cerr << "ydotool: notice: ydotoold backend unavailable (may have latency+delay issues)\n";
-		uInputContext->Init({{"ydotool virtual device"}});
-	}
-
 	int ret = 0;
 	if ( !strcmp(argv[1], "click") ) {
-		ret = click_run(argc-1, &argv[1], uInputContext);
+		ret = click_run(argc-1, &argv[1]);
 	} else if ( !strcmp(argv[1], "key") ) {
-		ret = key_run(argc-1, &argv[1], uInputContext);
+		ret = key_run(argc-1, &argv[1]);
 	} else if ( !strcmp(argv[1], "mouse") ) {
-		ret = mouse_run(argc-1, &argv[1], uInputContext);
+		ret = mouse_run(argc-1, &argv[1]);
 	} else if ( !strcmp(argv[1], "recorder") ) {
-		ret = recorder_run(argc-1, &argv[1], uInputContext);
+		ret = recorder_run(argc-1, &argv[1]);
 	} else if ( !strcmp(argv[1], "type") ) {
-		ret = type_run(argc-1, &argv[1], uInputContext);
+		ret = type_run(argc-1, &argv[1]);
 	} else {
 		std::cerr <<  "ydotool: Unknown option: " << argv[1] << "\n"
 			<< "Run 'ydotool help' for a list of arguments" << std::endl;
