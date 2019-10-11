@@ -19,12 +19,13 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/epoll.h>
+#include <getopt.h>
 // C++ system includes
 #include <thread>
+#include <functional>
 // External libs
 #include <boost/crc.hpp>
 #include <evdevPlus/evdevPlus.hpp>
-#include <boost/program_options.hpp>
 
 struct file_header {
     char magic[4];
@@ -165,8 +166,8 @@ std::vector<std::string> find_all_devices() {
 	return ret;
 }
 
-void recorder_help(char * argv_0){
-	std::cerr << "Usage: " << argv_0 << " [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
+void recorder_help(){
+	std::cerr << "Usage: recorder [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
 		  << "  --help                Show this help.\n"
 		  << "  --record                \n"
 		  << "  devices               Devices to record from. Default is all, including non-keyboard devices.\n"
@@ -204,7 +205,7 @@ void stop_handler(__attribute__((unused)) int whatever) {
 	exit(0);
 }
 
-void do_replay(const uInputPlus::uInput * uInputContext) {
+void do_replay() {
 	struct stat statat;
 
 	fstat(fd_file, &statat);
@@ -243,6 +244,8 @@ void do_replay(const uInputPlus::uInput * uInputContext) {
 	}
 
 	std::cerr << "Started replaying\n";
+
+    const uInputPlus::uInput * uInputContext = ydotool_get_context();
 
 	while (cur_pos < file_end) {
 		auto dat = (data_chunk *)cur_pos;
@@ -294,71 +297,72 @@ void do_display() {
 }
 
 int recorder_run(int argc, char ** argv) {
-	std::vector<std::string> extra_args;
-
 	int delay = 5000;
 	int duration = 0;
 	int mode = 0;
+    int opt = 0;
 
-	try {
-		boost::program_options::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("record", "")
-			("replay", "")
-			("display", "")
-			("delay", boost::program_options::value<int>())
-			("duration", boost::program_options::value<int>())
-			("extra-args", boost::program_options::value(&extra_args));
+    typedef enum {
+        opt_help,
+        opt_record,
+        opt_replay,
+        opt_display,
+        opt_delay,
+        opt_duration
+    } optlist_t;
 
-		boost::program_options::positional_options_description p;
-		p.add("extra-args", -1);
+    static struct option long_options[] = {
+        { "help",     no_argument,       NULL, opt_help     },
+        { "record",   no_argument,       NULL, opt_record   },
+        { "replay",   no_argument,       NULL, opt_replay   },
+        { "display",  no_argument,       NULL, opt_display  },
+        { "delay",    required_argument, NULL, opt_delay    },
+        { "duration", required_argument, NULL, opt_duration }
+    };
 
-		boost::program_options::variables_map vm;
-		boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		boost::program_options::notify(vm);
+    while ((opt = getopt_long_only(argc, argv, "hrpyd:u:", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'r':
+            case opt_record:
+                mode = 1;
+                break;
+            case 'p':
+            case opt_replay:
+                mode = 2;
+                break;
+            case 'y':
+            case opt_display:
+                mode = 3;
+                break;
+            case 'd':
+            case opt_delay:
+                delay = strtoul(optarg, NULL, 10);
+                break;
+            case 'u':
+            case opt_duration:
+                duration = strtoul(optarg, NULL, 10);
+            case 'h':
+            case opt_help:
+            case '?':
+                recorder_help();
+                return -1;
+        }
+    }
 
-		if (vm.count("delay")) {
-			delay = vm["delay"].as<int>();
-		}
+    if (!mode) {
+        std::cerr << "Mode not specified!" << std::endl;
+        recorder_help();
+        return -1;
+    }
 
-		if (vm.count("duration")) {
-			duration = vm["duration"].as<int>();
-		}
+    int extra_args = argc - optind;
+    if (!extra_args) {
+        std::cerr << "file not specified" << std::endl;
+        recorder_help();
+        return -1;
+    }
 
-		if (vm.count("help")) {
-			recorder_help(argv[0]);
-			return -1;
-		}
-
-		if (vm.count("record")) {
-			mode = 1;
-		}
-
-		if (vm.count("replay")) {
-			mode = 2;
-		}
-
-		if (vm.count("display")) {
-			mode = 3;
-		}
-
-		if (!mode)
-			throw std::invalid_argument("mode not specified");
-
-		if (extra_args.empty())
-			throw std::invalid_argument("file not specified");
-	} catch (std::exception & e) {
-		std::cerr <<  "ydotool: " << argv[0] << ": error: " << e.what() << std::endl;
-		std::cerr << "Use --help for help.\n";
-
-		return 2;
-	}
-
-	auto & filepath = extra_args.front();
+	const std::string & filepath = argv[optind++];
 
 	if (mode == 1)
 		fd_file = open(filepath.c_str(), O_WRONLY|O_CREAT, 0644);
@@ -375,17 +379,16 @@ int recorder_run(int argc, char ** argv) {
 		  << delay << " milliseconds.\n";
 
 	if (mode == 1) {
-		extra_args.erase(extra_args.begin());
-
-		auto &device_list = extra_args;
-
-		if (device_list.empty()) {
+        std::vector<std::string> device_list = {};
+        if (extra_args > 1) {
+            for (; optind != argc; optind++) {
+                device_list.push_back( argv[optind] );
+            }
+        } else {
 			device_list = find_all_devices();
-
 			if (device_list.empty()) {
-				std::cerr << "ydotool: " << argv[0] << ": error: no event device found in /dev/input/"
-					  << std::endl;
-				return 2;
+				std::cerr << "No event device found in /dev/input/" << std::endl;
+				return -1;
 			}
 		}
 
@@ -407,8 +410,7 @@ int recorder_run(int argc, char ** argv) {
 		if (delay)
 			usleep(delay * 1000);
 
-        const uInputPlus::uInput * uInputContext = ydotool_get_context();
-		do_replay(uInputContext);
+		do_replay();
 	} else if (mode == 3) {
 		do_display();
 	}

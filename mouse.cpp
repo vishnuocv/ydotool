@@ -15,67 +15,60 @@
 #include "tools.hpp"
 // C++ system includes
 #include <iostream>
-// External libs
-#include <boost/program_options.hpp>
+// C system includes
+#include <getopt.h>
 
-void mouse_help(char * argv_0){
-	std::cerr << "Usage: " << argv_0 << " [--delay <ms>] <x> <y>\n"
+void mouse_help(){
+	std::cerr << "Usage: mouse [--delay <ms>] <x> <y>\n"
 			<< "  --help                Show this help.\n"
 			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
 }
 
 int mouse_run(int argc, char ** argv) {
 	int time_delay = 100;
+    int opt = 0;
 
-	std::vector<std::string> extra_args;
+    typedef enum {
+        opt_help,
+        opt_delay
+    } optlist_t;
 
-	try {
-		boost::program_options::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("delay", boost::program_options::value<int>())
-			("extra-args", boost::program_options::value(&extra_args));
+    static struct option long_options[] = {
+        {"help",  no_argument,       NULL, opt_help  },
+        {"delay", required_argument, NULL, opt_delay }
+    };
 
+    while ((opt = getopt_long_only(argc, argv, "hd:", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'd':
+            case opt_delay:
+                time_delay = strtoul(optarg, NULL, 10);
+                break;
+            case 'h':
+            case opt_help:
+            case '?':
+                mouse_help();
+                return -1;
+        }
+    }
 
-		boost::program_options::positional_options_description p;
-		p.add("extra-args", -1);
-
-		boost::program_options::variables_map vm;
-		boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		boost::program_options::notify(vm);
-
-		if (vm.count("help")) {
-			mouse_help(argv[0]);
-			return -1;
-		}
-
-		if (vm.count("delay")) {
-			time_delay = vm["delay"].as<int>();
-			std::cerr << "Delay was set to "
-				  << time_delay << " milliseconds.\n";
-		}
-
-		if (extra_args.size() != 2) {
-			std::cerr << "Which coordinate do you want to move to?\n"
-				     "Use `ydotool " << argv[0] << " --help' for help.\n";
-
-			return 1;
-		}
-	} catch (std::exception &e) {
-		std::cerr <<  "ydotool: " << argv[0] << ": error: " << e.what() << std::endl;
-		return 2;
-	}
+    int extra_args = argc - optind;
+    if (extra_args != 2) {
+        if (extra_args > 2) {
+            std::cerr << "Too many args!" << std::endl;
+        } else {
+            std::cerr << "Too few args!" << std::endl;
+        }
+    }
 
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	auto x = (int32_t)strtol(extra_args[0].c_str(), nullptr, 10);
-	auto y = (int32_t)strtol(extra_args[1].c_str(), nullptr, 10);
+	int32_t x = (int32_t)strtol(argv[optind++], nullptr, 10);
+	int32_t y = (int32_t)strtol(argv[optind],   nullptr, 10);
 
     const uInputPlus::uInput * uInputContext = ydotool_get_context();
+
 	if (!strchr(argv[0], '_')) {
 		uInputContext->RelativeMove({-INT32_MAX, -INT32_MAX});
 	}

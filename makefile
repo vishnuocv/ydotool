@@ -6,7 +6,6 @@ OPT += -pthread
 
 LIB += -levdevPlus
 LIB += -luInputPlus
-LIB += -lboost_program_options
 LIB += -ldl
 
 CXXFLAGS := $(WARN) $(INC) $(OPT)

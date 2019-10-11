@@ -18,7 +18,7 @@ In most times, replace `x` with `y`. :P
 Currently implemented command(s):
 - `type` - Type a string
 - `key` - Press keys
-- `mousemove` - Move mouse pointer to absolute position
+- `mouse` - Move mouse pointer to absolute position
 - `click` - Click on mouse buttons
 - `recorder` - Record/replay input events
 
@@ -37,11 +37,7 @@ Close a window in graphical environment:
 
 Move mouse pointer to 100,100:
 
-    ydotool mousemove 100 100
-
-Relatively move mouse pointer to -100,100:
-
-    ydotool mousemove_relative -- -100 100
+    ydotool mouse 100 100
 
 Mouse right click:
 
@@ -67,7 +63,7 @@ In order to solve this problem, I made a persistent background service, ydotoold
 ### Dependencies
 - [uInputPlus]
 - [libevdevPlus]
-- boost::program\_options
+- boost::crc32
 
 ### Compile
 

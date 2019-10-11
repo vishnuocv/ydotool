@@ -13,8 +13,9 @@
 
 // Local includes
 #include "tools.hpp"
+// C system includes
+#include <getopt.h>
 // External libs
-#include <boost/program_options.hpp>
 #include <evdevPlus/evdevPlus.hpp>
 
 int time_keydelay = 12;
@@ -33,11 +34,8 @@ int type_text(const std::string & text) {
 	int pos = 0;
 
 	for (auto & c : text) {
-
 		int isUpper = 0;
-
 		int key_code;
-
 		auto itk = evdevPlus::Table_LowerKeys.find(c);
 
 		if (itk != evdevPlus::Table_LowerKeys.end()) {
@@ -53,8 +51,8 @@ int type_text(const std::string & text) {
 		}
 
 		int sleep_time;
-
         const uInputPlus::uInput * uInputContext = ydotool_get_context();
+
 		if (isUpper) {
 			sleep_time = 250 * time_keydelay;
 			uInputContext->SendKey(KEY_LEFTSHIFT, 1);
@@ -79,63 +77,51 @@ int type_text(const std::string & text) {
 
 int type_run(int argc, char ** argv) {
 	int time_delay = 100;
-
 	std::string file_path;
-	std::vector<std::string> extra_args;
+    int opt = 0;
 
-	try {
-		boost::program_options::options_description desc("");
-		desc.add_options()
-			("help", "Show this help")
-			("delay", boost::program_options::value<int>())
-			("key-delay", boost::program_options::value<int>())
-			("file", boost::program_options::value<std::string>())
-			("extra-args", boost::program_options::value(&extra_args));
+    typedef enum {
+        opt_help,
+        opt_delay,
+        opt_key_delay,
+        opt_file
+    } optlist_t;
 
+    static struct option long_options[] = {
+        { "help",      no_argument,       NULL, opt_help      },
+        { "delay",     required_argument, NULL, opt_delay     },
+        { "key-delay", required_argument, NULL, opt_key_delay },
+        { "file",      required_argument, NULL, opt_file      }
+    };
 
-		boost::program_options::positional_options_description p;
-		p.add("extra-args", -1);
+    while ((opt = getopt_long_only(argc, argv, "hd:k:f:", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'd':
+            case opt_delay:
+                time_delay = strtoul(optarg, NULL, 10);
+                break;
+            case 'k':
+            case opt_key_delay:
+                time_keydelay = strtoul(optarg, NULL, 10);
+                break;
+            case 'f':
+            case opt_file:
+                file_path = strtoul(optarg, NULL, 10);
+                break;
+            case 'h':
+            case opt_help:
+            case '?':
+                type_help();
+                return -1;
+        }
+    }
 
-		boost::program_options::variables_map vm;
-		boost::program_options::store(boost::program_options::command_line_parser(argc, argv).
-			options(desc).
-			positional(p).
-			run(), vm);
-		boost::program_options::notify(vm);
-
-		if (vm.count("help")) {
-			type_help();
-			return -1;
-		}
-
-		if (vm.count("delay")) {
-			time_delay = vm["delay"].as<int>();
-			std::cerr << "Delay was set to "
-				  << time_delay << " milliseconds.\n";
-		}
-
-		if (vm.count("key-delay")) {
-			time_keydelay = vm["key-delay"].as<int>();
-			std::cerr << "Key delay was set to "
-				  << time_keydelay << " milliseconds.\n";
-		}
-
-		if (vm.count("file")) {
-			file_path = vm["file"].as<std::string>();
-			std::cerr << "File path was set to "
-				  << file_path << ".\n";
-		} else {
-			if (extra_args.empty()) {
-				std::cerr << "What do you want to type?\n"
-					     "Use `ydotool type --help' for help.\n";
-
-				return 1;
-			}
-		}
-	} catch (std::exception & e) {
-		fprintf(stderr, "ydotool: type: error: %s\n", e.what());
-		return 2;
-	}
+    int extra_args = argc - optind;
+    if (!extra_args) {
+        std::cerr << "Not enough args!" << std::endl;
+        type_help();
+        return -1;
+    }
 
 	int fd = -1;
 
@@ -175,9 +161,11 @@ int type_run(int argc, char ** argv) {
 
 		close(fd);
 	} else {
-		for (auto &txt : extra_args) {
-			type_text(txt);
-		}
+        std::string txt = "";
+        for (; optind != argc; ++optind) {
+            txt += argv[optind];
+        }
+        type_text(txt);
 	}
 
 	return argc;

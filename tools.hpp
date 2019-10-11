@@ -25,10 +25,10 @@ int click_run(int argc, char ** argv);
 void key_help();
 int key_run(int argc, char ** argv);
 
-void mouse_help(char * argv_0);
+void mouse_help();
 int mouse_run(int argc, char ** argv);
 
-void recorder_help(char * argv_0);
+void recorder_help();
 int recorder_run(int argc, char ** argv);
 
 void type_help();
