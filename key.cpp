@@ -12,7 +12,7 @@
 */
 
 // Local Includes
-#include "tools.hpp"
+#include "ydotool.hpp"
 // C++ system Includes
 #include <sstream>
 // C system includes
@@ -107,29 +107,22 @@ int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_ke
 
 int key_run(int argc, char ** argv) {
 	int time_delay = 100;
-	int time_keydelay = 12;
-	int time_repdelay = 0;
-
 	int repeats = 1;
     int opt = 0;
 
     typedef enum {
         opt_help,
         opt_delay,
-        opt_key_delay,
         opt_repeat,
-        opt_repeat_delay
     } optlist_t;
 
     static struct option long_options[] = {
         { "help",         no_argument,       NULL, opt_help         },
         { "delay",        required_argument, NULL, opt_delay        },
-        { "key-delay",    required_argument, NULL, opt_key_delay    },
         { "repeat",       required_argument, NULL, opt_repeat       },
-        { "repeat-delay", required_argument, NULL, opt_repeat_delay }
     };
 
-    while((opt = getopt_long_only(argc, argv, "hd:k:r:y:", long_options, NULL)) != -1 )
+    while((opt = getopt_long_only(argc, argv, "hd:r:", long_options, NULL)) != -1 )
     {
         switch (opt)
         {
@@ -137,15 +130,10 @@ int key_run(int argc, char ** argv) {
             case opt_delay:
                 time_delay = strtoul(optarg, NULL, 10);
                 break;
-            case 'k':
-            case opt_key_delay:
-                time_keydelay = strtoul(optarg, NULL, 10);
             case 'r':
             case opt_repeat:
                 repeats = strtoul(optarg, NULL, 10);
-            case 'y':
-            case opt_repeat_delay:
-                time_repdelay = strtoul(optarg, NULL, 10);
+                break;
             case 'h':
             case opt_help:
             case '?':

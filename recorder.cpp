@@ -12,7 +12,7 @@
 */
 
 // Local includes
-#include "tools.hpp"
+#include "ydotool.hpp"
 // C system includes
 #include <signal.h>
 #include <dirent.h>
@@ -341,6 +341,7 @@ int recorder_run(int argc, char ** argv) {
             case 'u':
             case opt_duration:
                 duration = strtoul(optarg, NULL, 10);
+                break;
             case 'h':
             case opt_help:
             case '?':

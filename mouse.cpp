@@ -12,7 +12,7 @@
 */
 
 // Local includes
-#include "tools.hpp"
+#include "ydotool.hpp"
 // C++ system includes
 #include <iostream>
 // C system includes
