@@ -17,9 +17,14 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-// C system includes
+
+extern "C" {
+/* Local includes */
+#include "uinput.h"
+// System includes
 #include <sys/socket.h>
 #include <sys/un.h>
+}
 
 std::vector<std::string> explode(const std::string & str, char delim) {
 	std::vector<std::string> result;
@@ -110,6 +115,8 @@ int main(int argc, char ** argv) {
 			<< "Run 'ydotool help' for a list of arguments" << std::endl;
 		ret = 1;
 	}
+
+    uinput_destroy();
 
 	return ret;
 }

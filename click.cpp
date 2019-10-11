@@ -11,12 +11,15 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-// Local includes
-#include "ydotool.hpp"
+extern "C" {
+/* Local includes */
+#include "uinput.h"
+/* System includes */
+#include <getopt.h>
+#include <unistd.h>
+}
 // C++ system includes
 #include <iostream>
-// C system includes
-#include <getopt.h>
 
 void click_help() {
 	std::cerr << "Usage: click [--delay <ms>] <button>\n"
@@ -35,8 +38,8 @@ int click_run(int argc, char ** argv) {
     } optlist_t;
 
     static struct option long_options[] = {
-        { "help", no_argument, NULL, opt_help },
-        { "delay", required_argument, NULL, opt_delay }
+        {"help",  no_argument,       NULL, opt_help },
+        {"delay", required_argument, NULL, opt_delay}
     };
 
     while ((opt = getopt_long_only(argc, argv, "hd:", long_options, NULL)) != -1) {
@@ -86,10 +89,7 @@ int click_run(int argc, char ** argv) {
 		usleep(time_delay * 1000);
     }
 
-    const uInputPlus::uInput * uInputContext = ydotool_get_context();
-
-    uInputContext->SendKey(keycode, 1);
-    uInputContext->SendKey(keycode, 0);
+    uinput_send_keypress(keycode);
 
 	return argc;
 }

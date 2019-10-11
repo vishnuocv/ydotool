@@ -14,6 +14,7 @@
 // Local includes
 #include "ydotool.hpp"
 // C system includes
+#include <assert.h>
 #include <signal.h>
 #include <dirent.h>
 #include <sys/mman.h>
