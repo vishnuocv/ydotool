@@ -12,7 +12,7 @@
 */
 
 // Local includes
-#include "ydotool.hpp"
+#include "recorder.h"
 extern "C" {
 // System includes
 #include <assert.h>

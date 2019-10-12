@@ -12,7 +12,9 @@
 */
 
 // Local includes
-#include "ydotool.hpp"
+#include "key.h"
+#include "recorder.h"
+#include "type.h"
 // C++ system includes
 #include <sstream>
 #include <iostream>

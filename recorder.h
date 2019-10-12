@@ -11,10 +11,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef __CLICK_H__
-#define __CLICK_H__
+#ifndef __RECORDER_H__
+#define __RECORDER_H__
 
-void click_help();
-int click_run(int argc, char ** argv);
+void recorder_help();
+int recorder_run(int argc, char ** argv);
 
-#endif /* __CLICK_H__ */
+#endif /* __RECORDER_H__ */

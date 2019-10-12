@@ -12,81 +12,41 @@
 */
 
 // Local includes
-#include "ydotool.hpp"
+#include "type.h"
 extern "C" {
 #include <getopt.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
 #include "uinput.h"
 }
-// External libs
-#include <evdevPlus/evdevPlus.hpp>
 
 int time_keydelay = 12;
 
 void type_help(){
-	std::cerr <<  "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N]"
-		"[--file <filepath>] <things to type>\n"
-		<< "  --help                    Show this help.\n"
-		<< "  --delay milliseconds      Delay time before start typing.\n"
-		<< "  --key-delay milliseconds  Delay time between keystrokes. Default 12ms.\n"
-		<< "  --file filepath           Specify a file, the contents of which will be be typed as if passed as"
-				"an argument. The filepath may also be '-' to read from stdin." << std::endl;
+	fprintf(stderr, "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n\t--help\t\tShow this help\n\t--delay milliseconds\tDelay time before start typing\n\t--key-delay milliseconds\tDelay time between keystrokes. Default 12ms.\n\t--file filepath\tSpecify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin.\n");
 }
 
-int type_text(const std::string & text) {
-	int pos = 0;
-
-	for (auto & c : text) {
-		int isUpper = 0;
-		int key_code;
-		auto itk = evdevPlus::Table_LowerKeys.find(c);
-
-		if (itk != evdevPlus::Table_LowerKeys.end()) {
-			key_code = itk->second;
-		} else {
-			auto itku = evdevPlus::Table_UpperKeys.find(c);
-			if (itku != evdevPlus::Table_UpperKeys.end()) {
-				isUpper = 1;
-				key_code = itku->second;
-			} else {
-				return -(pos+1);
-			}
-		}
-
-		int sleep_time;
-
-		if (isUpper) {
-			sleep_time = 250 * time_keydelay;
-            uinput_send_key(KEY_LEFTSHIFT, 1);
-			usleep(sleep_time);
-		} else {
-			sleep_time = 500 * time_keydelay;
-		}
-
-        uinput_send_key(key_code, 1);
-		usleep(sleep_time);
-        uinput_send_key(key_code, 0);
-		usleep(sleep_time);
-
-		if (isUpper) {
-            uinput_send_key(KEY_LEFTSHIFT, 0);
-			usleep(sleep_time);
-		}
+void type_text(char * text) {
+	for (int i=0; text[i] != '\0'; ++i) {
+        uinput_enter_char(c);
 	}
-
-	return pos;
 }
 
 int type_run(int argc, char ** argv) {
 	int time_delay = 100;
-	std::string file_path;
+	char file_path[100] = "";
     int opt = 0;
 
-    typedef enum {
+    enum optlist_t {
         opt_help,
         opt_delay,
         opt_key_delay,
         opt_file
-    } optlist_t;
+    };
 
     static struct option long_options[] = {
         { "help",      no_argument,       NULL, opt_help      },
@@ -107,7 +67,7 @@ int type_run(int argc, char ** argv) {
                 break;
             case 'f':
             case opt_file:
-                file_path = strtoul(optarg, NULL, 10);
+                strcat(file_path, optarg);
                 break;
             case 'h':
             case opt_help:
@@ -119,7 +79,7 @@ int type_run(int argc, char ** argv) {
 
     int extra_args = argc - optind;
     if (!extra_args) {
-        std::cerr << "Not enough args!" << std::endl;
+        fprintf(stderr, "Not enough args!\n");
         type_help();
         return -1;
     }
@@ -145,8 +105,7 @@ int type_run(int argc, char ** argv) {
 		usleep(time_delay * 1000);
 
 	if (fd >= 0) {
-		std::string buf;
-		buf.resize(128);
+		char[128] buf;
 
 		ssize_t rc;
 		while ((rc = read(fd, &buf[0], 128))) {

@@ -12,7 +12,7 @@
 */
 
 // Local Includes
-#include "ydotool.hpp"
+#include "key.h"
 // C++ system Includes
 #include <sstream>
 extern "C" {

@@ -1,3 +1,16 @@
+/*
+    This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
+    Copyright (C) 2018-2019 ReimuNotMoe
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the MIT License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
 /* Local includes */
 #include "uinput.h"
 /* System includes */
@@ -10,21 +23,68 @@
 #include <sys/utsname.h>
 #include <sys/stat.h>
 
+/* Wrapper macro for errno error check */
 #define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); exit(-1); }
 
+/* uinput file descriptor */
 int FD = -1;
 
-int KEYCODES[] = {
-    BTN_LEFT,
-    BTN_RIGHT,
-    BTN_MIDDLE
+/* All valid keycodes */
+const int KEYCODES[] = {
+    BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
+    KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_Q, KEY_W,
+    KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LEFTBRACE,
+    KEY_RIGHTBRACE, KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J,
+    KEY_K, KEY_L, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_GRAVE, KEY_LEFTSHIFT,
+    KEY_BACKSLASH, KEY_102ND, KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N,
+    KEY_M, KEY_COMMA, KEY_DOT, KEY_SLASH, KEY_SPACE
 };
 
+/* All valid event codes */
 int EVCODES[] = {
     EV_KEY,
     EV_REL,
     EV_ABS,
     EV_SYN
+};
+
+/* All valid non-shifted characters */
+const char NORMAL_KEYS[] = {
+    ' ', '#', '\'', ',', '-', '.', '/', '0', '1', '2', '3', '4',
+    '5', '6', '7', '8', '9', ';', '=', '[', '\\', ']', '`', 'a',
+    'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+    'z', '\n', '\t'
+};
+
+/* All valid non-shifted keycodes */
+const int NORMAL_KEYCODES[] = {
+    KEY_SPACE, KEY_BACKSLASH, KEY_APOSTROPHE, KEY_COMMA, KEY_MINUS,
+    KEY_DOT, KEY_SLASH, KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
+    KEY_6, KEY_7, KEY_8, KEY_9, KEY_SEMICOLON, KEY_EQUAL,
+    KEY_LEFTBRACE, KEY_102ND, KEY_RIGHTBRACE, KEY_GRAVE, KEY_A,
+    KEY_B, KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H, KEY_I, KEY_J,
+    KEY_K, KEY_L, KEY_M, KEY_N, KEY_O, KEY_P, KEY_Q, KEY_R, KEY_S,
+    KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z, KEY_ENTER,
+    KEY_TAB
+};
+
+/* All valid shifted characters */
+const char SHIFTED_KEYS[] = {
+    '!', '"', '$', '%', '&', '(', ')', '*', '+', ':', '<', '>',
+    '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+    'W', 'X', 'Y', 'Z', '^', '_', '{', '|', '}', '~'
+};
+
+/* All valid shifted keycodes */
+const int SHIFTED_KEYCODES[] = {
+    KEY_1, KEY_2, KEY_4, KEY_5, KEY_7, KEY_9, KEY_0, KEY_8, KEY_EQUAL,
+    KEY_SEMICOLON, KEY_COMMA, KEY_DOT, KEY_SLASH, KEY_APOSTROPHE,
+    KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H, KEY_I,
+    KEY_J, KEY_K, KEY_L, KEY_M, KEY_N, KEY_O, KEY_P, KEY_Q, KEY_R,
+    KEY_S, KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z, KEY_6,
+    KEY_MINUS, KEY_LEFTBRACE, KEY_102ND, KEY_RIGHTBRACE, KEY_BACKSLASH
 };
 
 /* Safely exit program with error code */
@@ -35,11 +95,13 @@ void uinput_error() {
 
 /* Initialise the input device */
 void uinput_init() {
+    /* Check write access to uinput driver device */
     if (access("/dev/uinput", W_OK)) {
         fprintf(stderr, "Do not have access to write to /dev/uinput!\nTry running as root\n");
         uinput_error();
     }
 
+    /* Confirm availability of uinput kernel module */
     struct utsname uname_buffer;
     CHECK( uname(&uname_buffer) );
     char kernel_mod_dir[50] = "/lib/modules/";
@@ -51,6 +113,7 @@ void uinput_init() {
         uinput_error();
     }
 
+    /* Open uinput driver device */
     CHECK( (FD = open("/dev/uinput", O_WRONLY|O_NONBLOCK)) );
 
     /* Events/Keys setup */
@@ -86,6 +149,26 @@ void uinput_destroy() {
     }
 }
 
+/* Character pointer comparer for use with bsearch */
+int cmp_chars(const void * a, const void * b) {
+    return (*(char *)a - *(char *)b);
+}
+
+/* Simulate typing the given character on the vitual device */
+void uinput_enter_char(char c) {
+    void * found;
+    void * begin_norm = (void *)&NORMAL_KEYS;
+    void * begin_shift = (void *)&SHIFTED_KEYS;
+
+    if ((found = bsearch(&c, begin_norm, sizeof(NORMAL_KEYS)/sizeof(char), sizeof(char), cmp_chars))) {
+        uinput_send_keypress(NORMAL_KEYCODES[((char *)found - (char *)begin_norm)/sizeof(char)]);
+    } else if ((found = bsearch(&c, begin_shift, sizeof(SHIFTED_KEYS)/sizeof(char), sizeof(char), cmp_chars))) {
+        uinput_send_shifted_keypress(SHIFTED_KEYCODES[((char *)found - (char *)begin_shift)/sizeof(char)]);
+    } else {
+        fprintf(stderr, "Unsupported character (%d:%c) cannot be entered!\n", c, c);
+    }
+}
+
 /* Trigger an input event */
 void uinput_emit(uint16_t type, uint16_t code, int32_t value) {
     struct input_event ie = {
@@ -118,6 +201,16 @@ void uinput_send_keypress(uint16_t code) {
     uinput_send_key(code, 1);
     /* send release */
     uinput_send_key(code, 0);
+}
+
+/* Simulate a shifted key press */
+void uinput_send_shifted_keypress(uint16_t code) {
+    /* Send shift press */
+    uinput_send_key(KEY_LEFTSHIFT, 1);
+    /* Simulate keypress */
+    uinput_send_keypress(code);
+    /* Send shift release */
+    uinput_send_key(KEY_LEFTSHIFT, 0);
 }
 
 /* Move the cursor to a given (x,y) position */

@@ -11,10 +11,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-#ifndef __CLICK_H__
-#define __CLICK_H__
+#ifndef __KEY_H__
+#define __KEY_H__
 
-void click_help();
-int click_run(int argc, char ** argv);
+void key_help();
+int key_run(int argc, char ** argv);
 
-#endif /* __CLICK_H__ */
+#endif /* __KEY_H__ */
