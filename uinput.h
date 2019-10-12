@@ -10,11 +10,6 @@ struct uinput_raw_data {
     int32_t value;
 } __attribute__((packed));
 
-struct uinput_coordinate {
-    int32_t x;
-    int32_t y;
-};
-
 void uinput_destroy();
 void uinput_emit(uint16_t type, uint16_t code, int32_t value);
 void uinput_send_key(uint16_t code, int32_t value);

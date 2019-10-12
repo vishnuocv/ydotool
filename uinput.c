@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/utsname.h>
+#include <sys/stat.h>
 
 #define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); exit(-1); }
 
@@ -21,15 +23,34 @@ int KEYCODES[] = {
 int EVCODES[] = {
     EV_KEY,
     EV_REL,
-    EV_ABS
+    EV_ABS,
+    EV_SYN
 };
+
+/* Safely exit program with error code */
+void uinput_error() {
+    uinput_destroy();
+    exit(-1);
+}
 
 /* Initialise the input device */
 void uinput_init() {
     if (access("/dev/uinput", W_OK)) {
         fprintf(stderr, "Do not have access to write to /dev/uinput!\nTry running as root\n");
-        exit(-1);
+        uinput_error();
     }
+
+    struct utsname uname_buffer;
+    CHECK( uname(&uname_buffer) );
+    char kernel_mod_dir[50] = "/lib/modules/";
+    strcat(kernel_mod_dir, uname_buffer.release);
+    struct stat stats;
+    stat(kernel_mod_dir, &stats);
+    if (!S_ISDIR(stats.st_mode)) {
+        fprintf(stderr, "Dir (%s) doesn't exist!\nHave you recently updated your kernel version?\nRestart your system to use new kernel modules\n", kernel_mod_dir);
+        uinput_error();
+    }
+
     CHECK( (FD = open("/dev/uinput", O_WRONLY|O_NONBLOCK)) );
 
     /* Events/Keys setup */
