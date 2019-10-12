@@ -11,31 +11,26 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-extern "C" {
 /* Local includes */
 #include "uinput.h"
 /* System includes */
 #include <getopt.h>
+#include <stdio.h>
 #include <unistd.h>
-}
-// C++ system includes
-#include <iostream>
+#include <stdlib.h>
 
 void click_help() {
-	std::cerr << "Usage: click [--delay <ms>] <button>\n"
-		<< "  --help                Show this help.\n"
-		<< "  --delay ms            Delay time before start clicking. Default 100ms.\n"
-		<< "  button                1: left 2: right 3: middle" << std::endl;
+	fprintf(stderr, "Usage: click [--delay <ms>] <button>\n\t--help\tShow this help\n\t--delay ms\tDelay time before start clicking. Default 100ms.\n\tbutton\t\t1: left 2: right 3: middle\n");
 }
 
 int click_run(int argc, char ** argv) {
 	int time_delay = 100;
     int opt = 0;
 
-    typedef enum {
+    enum optlist_t {
         opt_help,
         opt_delay
-    } optlist_t;
+    };
 
     static struct option long_options[] = {
         {"help",  no_argument,       NULL, opt_help },
@@ -59,9 +54,9 @@ int click_run(int argc, char ** argv) {
     int extra_args = argc - optind;
     if (extra_args != 1) {
         if (extra_args > 1 ) {
-            std::cerr << "Too many arguments!" << std::endl;
+            fprintf(stderr, "Too many arguments!\n");
         } else {
-            std::cerr << "Not enough arguments!" << std::endl;
+            fprintf(stderr, "Not enough arguments!\n");
         }
         click_help();
         return -1;
@@ -80,7 +75,7 @@ int click_run(int argc, char ** argv) {
 			keycode = BTN_MIDDLE;
 			break;
 		default:
-            std::cerr << "Invalid button argument!" << std::endl;
+            fprintf(stderr, "Invalid button argument!\n");
             click_help();
             return -1;
 	}
@@ -91,5 +86,5 @@ int click_run(int argc, char ** argv) {
 
     uinput_send_keypress(keycode);
 
-	return argc;
+	return 0;
 }

@@ -14,8 +14,10 @@
 #ifndef YDOTOOL_TOOLS_HPP
 #define YDOTOOL_TOOLS_HPP
 
-void click_help();
-int click_run(int argc, char ** argv);
+extern "C" {
+    void click_help();
+    int click_run(int argc, char ** argv);
+}
 
 void key_help();
 int key_run(int argc, char ** argv);
