@@ -14,21 +14,24 @@
 // C++ system includes
 #include <thread>
 #include <iostream>
-// C system includes
+extern "C" {
+/* System includes */
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-// External libs
-#include <uInputPlus/uInput.hpp>
+#include <unistd.h>
+/* Local includes */
+#include "uinput.h"
+}
 
-static int client_handler(int fd, const uInputPlus::uInput * uInputContext) {
-	uInputPlus::uInputRawData buf;
+static int client_handler(int fd) {
+	uinput_raw_data buf;
 
 	while (true) {
 		int rc = recv(fd, &buf, sizeof(buf), MSG_WAITALL);
 
 		if (rc == sizeof(buf)) {
-			uInputContext->Emit(buf.type, buf.code, buf.value);
+			uinput_emit(buf.type, buf.code, buf.value);
 		} else {
 			return 0;
 		}
@@ -63,13 +66,12 @@ int main() {
 	chmod(path_socket, 0600);
 	std::cerr << "ydotoold: " << "listening on socket " << path_socket << "\n";
 
-	uInputPlus::uInput * uInputContext = new uInputPlus::uInput();
-	uInputContext->Init({{"ydotoold virtual device"}});
-
 	while (int fd_client = accept(fd_listener, nullptr, nullptr)) {
 		std::cerr << "ydotoold: accepted client\n";
 
-		std::thread thd(client_handler, fd_client, uInputContext);
+		std::thread thd(client_handler, fd_client);
 		thd.detach();
 	}
+
+    uinput_destroy();
 }

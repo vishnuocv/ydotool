@@ -15,8 +15,10 @@
 #include "ydotool.hpp"
 // C++ system Includes
 #include <sstream>
-// C system includes
+extern "C" {
 #include <getopt.h>
+#include "uinput.h"
+}
 // External libs
 #include <evdevPlus/evdevPlus.hpp>
 
@@ -87,17 +89,17 @@ static std::vector<int> keys_to_codes(const std::string & ks) {
 	return list_keycodes;
 }
 
-int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes, const uInputPlus::uInput * uInputContext) {
+int key_emit_codes(long key_delay, const std::vector<std::vector<int>> & list_keycodes) {
 	auto sleep_time = (uint)(key_delay * 1000 / (list_keycodes.size() * 2));
 
 	for (auto & it : list_keycodes) {
 		for (auto & it_m : it) {
-			uInputContext->SendKey(it_m, 1);
+            uinput_send_key(it_m, 1);
 			usleep(sleep_time);
 		}
 
 		for (auto i = it.size(); i-- > 0;) {
-			uInputContext->SendKey(it[i], 0);
+            uinput_send_key(it[i], 0);
 			usleep(sleep_time);
 		}
 	}
@@ -158,10 +160,8 @@ int key_run(int argc, char ** argv) {
         keycodes.emplace_back( keys_to_codes(argv[optind]) );
     }
 
-    const uInputPlus::uInput * uInputContext = ydotool_get_context();
-
 	while (repeats--) {
-		key_emit_codes(time_delay, keycodes, uInputContext);
+		key_emit_codes(time_delay, keycodes);
 	}
 
 	return argc;

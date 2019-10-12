@@ -57,35 +57,12 @@ int connect_socket(const char * path_socket) {
 }
 
 int socket_callback(uint16_t type, uint16_t code, int32_t val, void * userp) {
-	uInputPlus::uInputRawData buf {type, code, val};
+	uinput_raw_data buf {type, code, val};
 	int fd = (intptr_t)userp;
 	send(fd, &buf, sizeof(buf), 0);
 
 	return 0;
 }
-
-uInputPlus::uInput * uInputContext = nullptr;
-
-const uInputPlus::uInput * ydotool_get_context()
-{
-    if ( uInputContext == nullptr )
-    {
-        uInputContext = new uInputPlus::uInput();
-        const char path_socket[] = "/tmp/.ydotool_socket";
-        int fd_client = connect_socket( path_socket );
-
-        if (fd_client > 0) {
-            std::cerr << "ydotool: notice: Using ydotoold backend\n";
-            uInputContext->Init(&socket_callback, (void *)(intptr_t)fd_client);
-        } else {
-            std::cerr << "ydotool: notice: ydotoold backend unavailable (may have latency+delay issues)\n";
-            uInputContext->Init({{"ydotool virtual device"}});
-        }
-    }
-
-    return uInputContext;
-}
-
 
 int main(int argc, char ** argv) {
 	if (argc < 2 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--h", 3) == 0 || strcmp(argv[1], "help") == 0) {

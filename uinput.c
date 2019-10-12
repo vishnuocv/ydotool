@@ -99,6 +99,20 @@ void uinput_send_keypress(uint16_t code) {
     uinput_send_key(code, 0);
 }
 
-//void uinput_move_mouse(int32_t x, int32_t y);
+/* Move the cursor to a given (x,y) position */
+void uinput_move_mouse(int32_t x, int32_t y) {
+    uinput_emit(EV_ABS, ABS_X, x);
+    uinput_emit(EV_ABS, ABS_Y, y);
+    uinput_emit(EV_SYN, SYN_REPORT, 0);
+}
 
-//void uinput_relative_move_mouse(int32_t x, int32_t y);
+/* Move the cursor a given (x,y) relative to the current position */
+void uinput_relative_move_mouse(int32_t x, int32_t y) {
+    if (x) {
+        uinput_emit(EV_REL, REL_X, x);
+    }
+    if (y) {
+        uinput_emit(EV_REL, REL_Y, y);
+    }
+    uinput_emit(EV_SYN, SYN_REPORT, 0);
+}

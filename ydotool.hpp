@@ -14,11 +14,6 @@
 #ifndef YDOTOOL_TOOLS_HPP
 #define YDOTOOL_TOOLS_HPP
 
-// External libs
-#include <uInputPlus/uInput.hpp>
-
-const uInputPlus::uInput * ydotool_get_context();
-
 void click_help();
 int click_run(int argc, char ** argv);
 

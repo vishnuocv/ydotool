@@ -1,10 +1,9 @@
 # ydotool
 Generic Linux command-line automation tool (no X!)
 
-Forked to try to clean up the code and use a single GNU Makefile instead of CMake.
-
-Might convert to C code to avoid need for extra C++ libraries ([libevdevPlus] and [uInputPlus]).
-Then I could use `uinput` directly from the linux kernel.
+Forked to try to clean up the code and use a single GNU Makefile instead of CMake
+and convert to C code to avoid need for extra C++ libraries ([libevdevPlus] and
+[uInputPlus]), by using `uinput` directly from the linux kernel.
 
 #### Contents
 - [Usage](#usage)
@@ -61,7 +60,6 @@ In order to solve this problem, I made a persistent background service, ydotoold
 
 ## Build
 ### Dependencies
-- [uInputPlus]
 - [libevdevPlus]
 - boost::crc32
 

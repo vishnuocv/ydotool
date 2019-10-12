@@ -13,7 +13,8 @@
 
 // Local includes
 #include "ydotool.hpp"
-// C system includes
+extern "C" {
+// System includes
 #include <assert.h>
 #include <signal.h>
 #include <dirent.h>
@@ -21,6 +22,9 @@
 #include <sys/stat.h>
 #include <sys/epoll.h>
 #include <getopt.h>
+// Local includes
+#include "uinput.h"
+}
 // C++ system includes
 #include <thread>
 #include <functional>
@@ -246,13 +250,11 @@ void do_replay() {
 
 	std::cerr << "Started replaying\n";
 
-    const uInputPlus::uInput * uInputContext = ydotool_get_context();
-
 	while (cur_pos < file_end) {
 		auto dat = (data_chunk *)cur_pos;
 		usleep(dat->delay[0] * 1000000 + dat->delay[1] / 1000);
 
-		uInputContext->Emit(dat->ev_type, dat->ev_code, dat->ev_value);
+        uinput_emit(dat->ev_type, dat->ev_code, dat->ev_value);
 
 		cur_pos += sizeof(data_chunk);
 	}

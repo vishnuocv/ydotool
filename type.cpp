@@ -13,8 +13,10 @@
 
 // Local includes
 #include "ydotool.hpp"
-// C system includes
+extern "C" {
 #include <getopt.h>
+#include "uinput.h"
+}
 // External libs
 #include <evdevPlus/evdevPlus.hpp>
 
@@ -51,23 +53,22 @@ int type_text(const std::string & text) {
 		}
 
 		int sleep_time;
-        const uInputPlus::uInput * uInputContext = ydotool_get_context();
 
 		if (isUpper) {
 			sleep_time = 250 * time_keydelay;
-			uInputContext->SendKey(KEY_LEFTSHIFT, 1);
+            uinput_send_key(KEY_LEFTSHIFT, 1);
 			usleep(sleep_time);
 		} else {
 			sleep_time = 500 * time_keydelay;
 		}
 
-		uInputContext->SendKey(key_code, 1);
+        uinput_send_key(key_code, 1);
 		usleep(sleep_time);
-		uInputContext->SendKey(key_code, 0);
+        uinput_send_key(key_code, 0);
 		usleep(sleep_time);
 
 		if (isUpper) {
-			uInputContext->SendKey(KEY_LEFTSHIFT, 0);
+            uinput_send_key(KEY_LEFTSHIFT, 0);
 			usleep(sleep_time);
 		}
 	}

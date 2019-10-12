@@ -15,8 +15,14 @@
 #include "ydotool.hpp"
 // C++ system includes
 #include <iostream>
-// C system includes
+#include <cstring>
+extern "C" {
+/* System includes */
 #include <getopt.h>
+#include <unistd.h>
+/* Local includes */
+#include "uinput.h"
+}
 
 void mouse_help(){
 	std::cerr << "Usage: mouse [--delay <ms>] <x> <y>\n"
@@ -67,13 +73,11 @@ int mouse_run(int argc, char ** argv) {
 	int32_t x = (int32_t)strtol(argv[optind++], nullptr, 10);
 	int32_t y = (int32_t)strtol(argv[optind],   nullptr, 10);
 
-    const uInputPlus::uInput * uInputContext = ydotool_get_context();
-
 	if (!strchr(argv[0], '_')) {
-		uInputContext->RelativeMove({-INT32_MAX, -INT32_MAX});
-	}
-
-	uInputContext->RelativeMove({x, y});
+		uinput_move_mouse(x, y);
+	} else {
+        uinput_relative_move_mouse(x, y);
+    }
 
 	return argc;
 }
