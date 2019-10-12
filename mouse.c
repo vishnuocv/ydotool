@@ -11,33 +11,28 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-// Local includes
-#include "ydotool.hpp"
-// C++ system includes
-#include <iostream>
-#include <cstring>
-extern "C" {
 /* System includes */
 #include <getopt.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 /* Local includes */
+#include "mouse.h"
 #include "uinput.h"
-}
 
 void mouse_help(){
-	std::cerr << "Usage: mouse [--delay <ms>] <x> <y>\n"
-			<< "  --help                Show this help.\n"
-			<< "  --delay ms            Delay time before start moving. Default 100ms." << std::endl;
+	fprintf(stderr, "Usage: mouse [--delay <ms>] <x> <y>\n\t--help\t\tShow this help\n\t--delay ms\tDelay time before start moving. Default 100ms.\n");
 }
 
 int mouse_run(int argc, char ** argv) {
 	int time_delay = 100;
     int opt = 0;
 
-    typedef enum {
+    enum optlist_t {
         opt_help,
         opt_delay
-    } optlist_t;
+    };
 
     static struct option long_options[] = {
         {"help",  no_argument,       NULL, opt_help  },
@@ -61,17 +56,21 @@ int mouse_run(int argc, char ** argv) {
     int extra_args = argc - optind;
     if (extra_args != 2) {
         if (extra_args > 2) {
-            std::cerr << "Too many args!" << std::endl;
+            fprintf(stderr, "Too many args!\n");
+            mouse_help();
+            return -1;
         } else {
-            std::cerr << "Too few args!" << std::endl;
+            fprintf(stderr, "Too few args!\n");
+            mouse_help();
+            return -1;
         }
     }
 
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	int32_t x = (int32_t)strtol(argv[optind++], nullptr, 10);
-	int32_t y = (int32_t)strtol(argv[optind],   nullptr, 10);
+	int32_t x = (int32_t)strtol(argv[optind++], NULL, 10);
+	int32_t y = (int32_t)strtol(argv[optind],   NULL, 10);
 
 	if (!strchr(argv[0], '_')) {
 		uinput_move_mouse(x, y);

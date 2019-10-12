@@ -14,16 +14,8 @@
 #ifndef YDOTOOL_TOOLS_HPP
 #define YDOTOOL_TOOLS_HPP
 
-extern "C" {
-    void click_help();
-    int click_run(int argc, char ** argv);
-}
-
 void key_help();
 int key_run(int argc, char ** argv);
-
-void mouse_help();
-int mouse_run(int argc, char ** argv);
 
 void recorder_help();
 int recorder_run(int argc, char ** argv);

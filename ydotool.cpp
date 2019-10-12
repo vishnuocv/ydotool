@@ -20,6 +20,8 @@
 
 extern "C" {
 /* Local includes */
+#include "click.h"
+#include "mouse.h"
 #include "uinput.h"
 // System includes
 #include <sys/socket.h>
