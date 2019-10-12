@@ -11,31 +11,33 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-// C++ system includes
-#include <thread>
-#include <iostream>
-extern "C" {
 /* System includes */
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <stdio.h>
+#include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <pthread.h>
 /* Local includes */
 #include "uinput.h"
-}
 
-static int client_handler(int fd) {
-	uinput_raw_data buf;
+void * client_handler(void * fdp) {
+	struct uinput_raw_data buf;
+    int fd = *(int *)fdp;
 
-	while (true) {
+	for (;;) {
 		int rc = recv(fd, &buf, sizeof(buf), MSG_WAITALL);
 
 		if (rc == sizeof(buf)) {
 			uinput_emit(buf.type, buf.code, buf.value);
 		} else {
-			return 0;
+			break;
 		}
 	}
+
+    pthread_exit(NULL);
 }
 
 int main() {
@@ -44,34 +46,44 @@ int main() {
 	int fd_listener = socket(AF_UNIX, SOCK_STREAM, 0);
 
 	if (fd_listener == -1) {
-		std::cerr << "ydotoold: " << "failed to create socket: " << strerror(errno) << "\n";
+		fprintf(stderr, "ydotoold: failed to create socket: %s\n", strerror(errno));
 		abort();
 	}
 
-	sockaddr_un addr;
+	struct sockaddr_un addr;
 	memset(&addr, 0, sizeof(addr));
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, path_socket, sizeof(addr.sun_path)-1);
 
 	if (bind(fd_listener, (struct sockaddr *)&addr, sizeof(addr))) {
-		std::cerr << "ydotoold: " << "failed to bind to socket [" << path_socket << "]: " << strerror(errno) << "\n";
+		fprintf(stderr, "ydotoold: failed to bind to socket [%s]: %s\n", path_socket, strerror(errno));
 		abort();
 	}
 
 	if (listen(fd_listener, 16)) {
-		std::cerr << "ydotoold: " << "failed to listen on socket [" << path_socket << "]: " << strerror(errno) << "\n";
+		fprintf(stderr, "ydotoold: failed to listen on socket [%s]: %s\n", path_socket, strerror(errno));
 		abort();
 	}
 
 	chmod(path_socket, 0600);
-	std::cerr << "ydotoold: " << "listening on socket " << path_socket << "\n";
+	printf("ydotoold: listening on socket %s\n", path_socket);
 
-	while (int fd_client = accept(fd_listener, nullptr, nullptr)) {
-		std::cerr << "ydotoold: accepted client\n";
+    int fd_client = 0;
+	while ((fd_client = accept(fd_listener, NULL, NULL))) {
+		printf("ydotoold: accepted client\n");
 
-		std::thread thd(client_handler, fd_client);
-		thd.detach();
+        pthread_t thd;
+        if (pthread_create(&thd, NULL, client_handler, (void *)&fd_client)) {
+            fprintf(stderr, "ydotoold: Error creating thread!\n");
+            abort();
+        }
+
+        if (pthread_detach(thd)) {
+            fprintf(stderr, "ydotoold: Error detaching thread!\n");
+            abort();
+        }
 	}
 
     uinput_destroy();
+    return 0;
 }
