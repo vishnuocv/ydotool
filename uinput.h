@@ -26,6 +26,7 @@ struct uinput_raw_data {
 void uinput_destroy();
 void uinput_enter_char(char c);
 void uinput_emit(uint16_t type, uint16_t code, int32_t value);
+void uinput_enter_key(const char * key_string);
 void uinput_send_key(uint16_t code, int32_t value);
 void uinput_send_keypress(uint16_t code);
 void uinput_send_shifted_keypress(uint16_t code);

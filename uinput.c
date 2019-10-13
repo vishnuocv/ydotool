@@ -37,7 +37,7 @@ const int KEYCODES[] = {
     KEY_RIGHTBRACE, KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J,
     KEY_K, KEY_L, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_GRAVE, KEY_LEFTSHIFT,
     KEY_BACKSLASH, KEY_102ND, KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N,
-    KEY_M, KEY_COMMA, KEY_DOT, KEY_SLASH, KEY_SPACE
+    KEY_M, KEY_COMMA, KEY_DOT, KEY_SLASH, KEY_SPACE, KEY_TAB, KEY_ENTER
 };
 
 /* All valid event codes */
@@ -50,23 +50,21 @@ int EVCODES[] = {
 
 /* All valid non-shifted characters */
 const char NORMAL_KEYS[] = {
-    ' ', '#', '\'', ',', '-', '.', '/', '0', '1', '2', '3', '4',
+    '\t', '\n', ' ', '#', '\'', ',', '-', '.', '/', '0', '1', '2', '3', '4',
     '5', '6', '7', '8', '9', ';', '=', '[', '\\', ']', '`', 'a',
     'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-    'z', '\n', '\t'
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
 };
 
 /* All valid non-shifted keycodes */
 const int NORMAL_KEYCODES[] = {
-    KEY_SPACE, KEY_BACKSLASH, KEY_APOSTROPHE, KEY_COMMA, KEY_MINUS,
+    KEY_TAB, KEY_ENTER, KEY_SPACE, KEY_BACKSLASH, KEY_APOSTROPHE, KEY_COMMA, KEY_MINUS,
     KEY_DOT, KEY_SLASH, KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
     KEY_6, KEY_7, KEY_8, KEY_9, KEY_SEMICOLON, KEY_EQUAL,
     KEY_LEFTBRACE, KEY_102ND, KEY_RIGHTBRACE, KEY_GRAVE, KEY_A,
     KEY_B, KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H, KEY_I, KEY_J,
     KEY_K, KEY_L, KEY_M, KEY_N, KEY_O, KEY_P, KEY_Q, KEY_R, KEY_S,
-    KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z, KEY_ENTER,
-    KEY_TAB
+    KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z
 };
 
 /* All valid shifted characters */
@@ -87,32 +85,24 @@ const int SHIFTED_KEYCODES[] = {
     KEY_MINUS, KEY_LEFTBRACE, KEY_102ND, KEY_RIGHTBRACE, KEY_BACKSLASH
 };
 
-const char * MODIFIER_STRINGS[] = {
-	"ALT", "ALT_L", "ALT_R", "SHIFT", "SHIFT_L", "SHIFT_R", "CTRL",
-    "CTRL_L", "CTRL_R", "SUPER", "SUPER_L", "SUPER_R", "META",
-    "META_L", "META_R"
+struct key {
+    char string[11];
+    int code;
 };
 
-const int MODIFIER_KEYCODES[] = {
-	KEY_LEFTALT, KEY_LEFTALT, KEY_RIGHTALT, KEY_LEFTSHIFT, KEY_LEFTSHIFT,
-    KEY_RIGHTSHIFT, KEY_LEFTCTRL, KEY_LEFTCTRL, KEY_RIGHTCTRL,
-	KEY_LEFTMETA, KEY_LEFTMETA, KEY_RIGHTMETA, KEY_LEFTMETA, KEY_LEFTMETA,
-    KEY_RIGHTMETA
+const struct key MODIFIER_KEYS[] = {
+	{"ALT", KEY_LEFTALT}, {"ALT_L", KEY_LEFTALT}, {"ALT_R", KEY_RIGHTALT},
+	{"SHIFT", KEY_LEFTSHIFT}, {"SHIFT_L", KEY_LEFTSHIFT}, {"SHIFT_R", KEY_RIGHTSHIFT},
+	{"CTRL", KEY_LEFTCTRL}, {"CTRL_L", KEY_LEFTCTRL}, {"CTRL_R", KEY_RIGHTCTRL},
+	{"SUPER", KEY_LEFTMETA}, {"SUPER_L", KEY_LEFTMETA}, {"SUPER_R", KEY_RIGHTMETA},
+	{"META", KEY_LEFTMETA}, {"META_L", KEY_LEFTMETA}, {"META_R", KEY_RIGHTMETA}
 };
 
-const char * FUNCTION_STRINGS[] = {
-	"UP", "DOWN", "LEFT", "RIGHT", "TAB", "CAPSLOCK", "NUMLOCK", "SCROLLLOCK",
-    "ESC", "ENTER", "BACKSPACE", "DELETE", "INSERT", "HOME", "END", "PAGEUP",
-    "PAGEDOWN", "SYSRQ", "PAUSE", "F1", "F2", "F3", "F4", "F5", "F6", "F7",
-    "F8", "F9", "F10", "F11", "F12",
-};
-
-const int FUNCTION_KEYCODES[] = {
-	KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_TAB, KEY_CAPSLOCK, KEY_NUMLOCK,
-    KEY_SCROLLLOCK, KEY_ESC, KEY_ENTER, KEY_BACKSPACE, KEY_DELETE, KEY_INSERT,
-    KEY_HOME, KEY_END, KEY_PAGEUP, KEY_PAGEDOWN, KEY_SYSRQ, KEY_PAUSE, KEY_F1,
-    KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10,
-    KEY_F11, KEY_F12
+const struct key FUNCTION_KEYS[] = {
+	{"UP", KEY_UP}, {"DOWN", KEY_DOWN}, {"LEFT", KEY_LEFT}, {"RIGHT", KEY_RIGHT},
+	{"TAB", KEY_TAB}, {"CAPSLOCK", KEY_CAPSLOCK}, {"NUMLOCK", KEY_NUMLOCK}, {"SCROLLLOCK", KEY_SCROLLLOCK}, {"ESC", KEY_ESC}, {"ENTER", KEY_ENTER}, {"BACKSPACE", KEY_BACKSPACE}, {"DELETE", KEY_DELETE},
+	{"INSERT", KEY_INSERT}, {"HOME", KEY_HOME}, {"END", KEY_END}, {"PAGEUP", KEY_PAGEUP}, {"PAGEDOWN", KEY_PAGEDOWN}, {"SYSRQ", KEY_SYSRQ}, {"PAUSE", KEY_PAUSE},
+	{"F1", KEY_F1}, {"F2", KEY_F2}, {"F3", KEY_F3}, {"F4", KEY_F4}, {"F5", KEY_F5}, {"F6", KEY_F6}, {"F7", KEY_F7}, {"F8", KEY_F8}, {"F9", KEY_F9}, {"F10", KEY_F10}, {"F11", KEY_F11}, {"F12", KEY_F12}
 };
 
 /* Safely exit program with error code */
@@ -180,6 +170,23 @@ void uinput_destroy() {
 /* Character pointer comparer for use with bsearch */
 int cmp_chars(const void * a, const void * b) {
     return (*(char *)a - *(char *)b);
+}
+
+/* TODO: Implement binary search */
+void uinput_enter_key(const char * key_string) {
+    for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key); ++i) {
+        if (!strcmp(key_string, MODIFIER_KEYS[i].string)) {
+            uinput_send_keypress(MODIFIER_KEYS[i].code);
+            return;
+        }
+    }
+    for (int i = 0; i != sizeof(FUNCTION_KEYS)/sizeof(struct key); ++i) {
+        if (!strcmp(key_string, FUNCTION_KEYS[i].string)) {
+            uinput_send_keypress(FUNCTION_KEYS[i].code);
+            return;
+        }
+    }
+    /* TODO: Check upper/lower keys too */
 }
 
 /* Simulate typing the given character on the vitual device */

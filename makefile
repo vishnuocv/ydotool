@@ -6,7 +6,6 @@ CXXFLAGS := $(CFLAGS) -Weffc++
 
 # Libraries
 LIB += -levdevPlus
-LIB += -ldl
 
 # Executables and dependencies
 EXE := ydotool ydotoold
@@ -31,7 +30,7 @@ ydotool: $(ydotool_DEP)
 
 # Daemon application
 ydotoold: $(ydotoold_DEP)
-	$(CXX) $(CXXFLAGS) $^ $(LIB) -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 # Remove build files
 .PHONY: clean
