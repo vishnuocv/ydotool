@@ -11,6 +11,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file ydotoold.c
+ * @author Harry Austen
+ * @brief Main entry point to the ydotool daemon program. Run this in the background to speed up the ydotool program commands
+ */
+
 /* System includes */
 #include <sys/un.h>
 #include <sys/socket.h>

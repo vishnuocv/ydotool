@@ -11,9 +11,21 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file type.h
+ * @author Harry Austen
+ * @brief Interface for function for emulating typing text
+ */
+
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
+/**
+ * @brief Emulate keyboard input to type the given text using a virtual keyboard device
+ * @param argc The number of (remaining) program arguments
+ * @param argv Pointer to the (remaining) program arguments
+ * @return 0 on success, 1 on error(s)
+ */
 int type_run(int argc, char ** argv);
 
 #endif /* __TYPE_H__ */

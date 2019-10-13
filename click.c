@@ -11,6 +11,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file click.c
+ * @author Harry Austen
+ * @brief Emulate clicking the given mouse button
+ */
+
 /* Local includes */
 #include "uinput.h"
 /* System includes */

@@ -11,6 +11,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file ydotool.c
+ * @author Harry Austen
+ * @brief Main entry point to the ydotool program. Uses the first argument to run the relevant command
+ */
+
 /* Local includes */
 #include "click.h"
 #include "key.h"

@@ -11,9 +11,21 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file click.h
+ * @author Harry Austen
+ * @brief Provides a function for simluating mouse clicks
+ */
+
 #ifndef __CLICK_H__
 #define __CLICK_H__
 
+/**
+ * @brief Click a particular mouse button once
+ * @param argc The (remaining) number of program arguments
+ * @param argv Pointer to the (remaining) program arguments
+ * @return 0 on success, 1 if error(s)
+ */
 int click_run(int argc, char ** argv);
 
 #endif /* __CLICK_H__ */

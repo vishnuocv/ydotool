@@ -11,6 +11,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file key.c
+ * @author Harry Austen
+ * @brief Implementation of function to emulate entering key sequences
+ */
+
 // Local Includes
 #include "key.h"
 #include "uinput.h"

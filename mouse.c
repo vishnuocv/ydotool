@@ -11,6 +11,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file mouse.c
+ * @author Harry Austen
+ * @brief Implementation of function for emulating moving your mouse around
+ */
+
 /* System includes */
 #include <getopt.h>
 #include <unistd.h>

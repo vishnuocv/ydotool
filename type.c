@@ -11,6 +11,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file type.c
+ * @author Harry Austen
+ * @brief Implementation of function for emulating typing text
+ */
+
 // Local includes
 #include "type.h"
 #include "uinput.h"

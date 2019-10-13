@@ -11,6 +11,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+/**
+ * @file uinput.c
+ * @author Harry Austen
+ * @brief Implementation of functions for emulating input events
+ */
+
 /* Local includes */
 #include "uinput.h"
 /* System includes */
@@ -191,7 +197,7 @@ int uinput_enter_key(const char * key_string) {
     return 1;
 }
 
-/* Simulate typing the given character on the vitual device */
+/* Emulate typing the given character on the vitual device */
 int uinput_enter_char(char c) {
     void * found;
     void * begin_norm = (void *)&NORMAL_KEYS;
@@ -248,7 +254,7 @@ int uinput_send_key(uint16_t code, int32_t value) {
     return 0;
 }
 
-/* Simulate a quick key press */
+/* Emulate a quick key press */
 int uinput_send_keypress(uint16_t code) {
     /* send press */
     if (uinput_send_key(code, 1)) {
@@ -261,13 +267,13 @@ int uinput_send_keypress(uint16_t code) {
     return 0;
 }
 
-/* Simulate a shifted key press */
+/* Emulate a shifted key press */
 int uinput_send_shifted_keypress(uint16_t code) {
     /* Send shift press */
     if (uinput_send_key(KEY_LEFTSHIFT, 1)) {
         return 1;
     }
-    /* Simulate keypress */
+    /* Emulate keypress */
     if (uinput_send_keypress(code)) {
         return 1;
     }
