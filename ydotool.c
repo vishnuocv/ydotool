@@ -29,7 +29,6 @@ static const char * usage =
     "    click\n"
     "    key\n"
     "    mouse\n"
-    "    recorder\n"
     "    type\n";
 
 int main(int argc, char ** argv) {
