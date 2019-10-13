@@ -4,9 +4,6 @@ OPT += -pthread
 CFLAGS := $(WARN) $(OPT)
 CXXFLAGS := $(CFLAGS) -Weffc++
 
-# Libraries
-LIB += -levdevPlus
-
 # Executables and dependencies
 EXE := ydotool ydotoold
 ydotool_DEP := ydotool.o click.o key.o mouse.o type.o uinput.o
@@ -27,7 +24,7 @@ default: $(EXE)
 
 # Main application
 ydotool: $(ydotool_DEP)
-	$(CXX) $(CXXFLAGS) $^ $(LIB) -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 # Daemon application
 ydotoold: $(ydotoold_DEP)

@@ -60,8 +60,7 @@ In order to solve this problem, I made a persistent background service, ydotoold
 
 ## Build
 ### Dependencies
-- [libevdevPlus]
-- boost::crc32
+NONE!
 
 ### Compile
 

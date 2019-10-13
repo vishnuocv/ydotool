@@ -29,7 +29,6 @@ extern "C" {
 #include <thread>
 #include <functional>
 // External libs
-#include <boost/crc.hpp>
 #include <evdevPlus/evdevPlus.hpp>
 
 struct file_header {
@@ -85,10 +84,20 @@ void dir_foreach(const std::string & path, const std::function<int(const std::st
 	}
 }
 
-uint32_t crc32(const void *buf, size_t len) {
-	boost::crc_32_type result;
-	result.process_bytes(buf, len);
-	return result.checksum();
+uint32_t crc32(const void * buf, size_t len) {
+    /* Reverse polynomial representation of zlib/ethernet CRC32 */
+    const uint32_t poly = 0xEDB88320;
+    uint32_t crc = 0xFFFFFFFF;
+    unsigned char * current = (unsigned char *)buf;
+
+    while (len--) {
+        crc ^= *current++;
+        for (unsigned int j = 0; j < 8; ++j) {
+            crc = (crc >> 1) ^ (-int(crc & 1) & poly);
+        }
+    }
+
+	return crc;
 }
 
 void do_record(const std::vector<std::string> &__devices) {
@@ -171,17 +180,18 @@ std::vector<std::string> find_all_devices() {
 	return ret;
 }
 
+static const char * usage = "Usage: recorder [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
+    "    --help                Show this help.\n"
+    "    --record                \n"
+    "    devices               Devices to record from. Default is all, including non-keyboard devices.\n"
+    "    --replay                \n"
+    "    --display               \n"
+    "    --delay ms            Delay time before start recording/replaying. Default 5000ms.\n"
+    "    --duration ms         Record duration. Otherwise use SIGINT to stop recording.\n"
+    "The record file can't be replayed on an architecture with different endianness\n";
+
 void recorder_help(){
-	std::cerr << "Usage: recorder [--delay <ms] [--duration <ms>] [--record <output file> [devices]] [--replay <input file>]\n"
-		  << "  --help                Show this help.\n"
-		  << "  --record                \n"
-		  << "  devices               Devices to record from. Default is all, including non-keyboard devices.\n"
-		  << "  --replay                \n"
-		  << "  --display               \n"
-		  << "  --delay ms            Delay time before start recording/replaying. Default 5000ms.\n"
-		  << "  --duration ms         Record duration. Otherwise use SIGINT to stop recording.\n"
-		     "\n"
-		     "The record file can't be replayed on an architecture with different endianness." << std::endl;
+    fprintf(stderr, usage);
 }
 
 void generate_header() {
@@ -400,8 +410,7 @@ int recorder_run(int argc, char ** argv) {
 
 		if (duration)
 			std::thread([duration]() {
-				std::cerr << "Duration was set to "
-					  << duration << " milliseconds.\n";
+				printf("Duration was set to %d milliseconds\n", duration);
 				usleep(duration * 1000);
 				kill(getpid(), SIGINT);
 			}).detach();
