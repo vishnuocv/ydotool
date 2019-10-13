@@ -19,9 +19,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-void click_help() {
-	fprintf(stderr, "Usage: click [--delay <ms>] <button>\n\t--help\tShow this help\n\t--delay ms\tDelay time before start clicking. Default 100ms.\n\tbutton\t\t1: left 2: right 3: middle\n");
-}
+static const char * usage =
+    "Usage: click [--delay <ms>] <button>\n"
+    "    --help      Show this help\n"
+    "    --delay ms  Delay time before start clicking (default = 100ms)\n"
+    "    button      1: left\n"
+    "                2: right\n"
+    "                3: middle\n";
 
 int click_run(int argc, char ** argv) {
 	int time_delay = 100;
@@ -46,8 +50,8 @@ int click_run(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                click_help();
-                return -1;
+                fprintf(stderr, usage);
+                return 1;
         }
     }
 
@@ -58,8 +62,8 @@ int click_run(int argc, char ** argv) {
         } else {
             fprintf(stderr, "Not enough arguments!\n");
         }
-        click_help();
-        return -1;
+        fprintf(stderr, usage);
+        return 1;
     }
 
     int button = strtoul(argv[optind], NULL, 10);
@@ -76,15 +80,17 @@ int click_run(int argc, char ** argv) {
 			break;
 		default:
             fprintf(stderr, "Invalid button argument!\n");
-            click_help();
-            return -1;
+            fprintf(stderr, usage);
+            return 1;
 	}
 
 	if (time_delay) {
 		usleep(time_delay * 1000);
     }
 
-    uinput_send_keypress(keycode);
+    if (uinput_send_keypress(keycode)) {
+        return 1;
+    }
 
 	return 0;
 }

@@ -23,20 +23,25 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-int time_keydelay = 12;
+static const char * usage =
+    "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
+    "    --help                    Show this help\n"
+    "    --delay milliseconds      Delay time before start typing\n"
+    "    --key-delay milliseconds  Delay time between keystrokes (default = 12ms)\n"
+    "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n";
 
-void type_help(){
-	fprintf(stderr, "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n\t--help\t\tShow this help\n\t--delay milliseconds\tDelay time before start typing\n\t--key-delay milliseconds\tDelay time between keystrokes. Default 12ms.\n\t--file filepath\tSpecify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin.\n");
-}
-
-void type_text(char * text) {
+int type_text(char * text) {
 	for (int i=0; text[i] != '\0'; ++i) {
-        uinput_enter_char(text[i]);
+        if (uinput_enter_char(text[i])) {
+            return 1;
+        }
 	}
+    return 0;
 }
 
 int type_run(int argc, char ** argv) {
 	int time_delay = 100;
+    /* int time_keydelay = 12; */
 	char file_path[100] = "";
     int opt = 0;
 
@@ -48,10 +53,10 @@ int type_run(int argc, char ** argv) {
     };
 
     static struct option long_options[] = {
-        { "help",      no_argument,       NULL, opt_help      },
-        { "delay",     required_argument, NULL, opt_delay     },
-        { "key-delay", required_argument, NULL, opt_key_delay },
-        { "file",      required_argument, NULL, opt_file      }
+        {"help",      no_argument,       NULL, opt_help     },
+        {"delay",     required_argument, NULL, opt_delay    },
+        /* {"key-delay", required_argument, NULL, opt_key_delay}, */
+        {"file",      required_argument, NULL, opt_file     }
     };
 
     while ((opt = getopt_long_only(argc, argv, "hd:k:f:", long_options, NULL)) != -1) {
@@ -60,10 +65,10 @@ int type_run(int argc, char ** argv) {
             case opt_delay:
                 time_delay = strtoul(optarg, NULL, 10);
                 break;
-            case 'k':
+            /* case 'k':
             case opt_key_delay:
                 time_keydelay = strtoul(optarg, NULL, 10);
-                break;
+                break; */
             case 'f':
             case opt_file:
                 strcat(file_path, optarg);
@@ -71,16 +76,16 @@ int type_run(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                type_help();
-                return -1;
+                fprintf(stderr, usage);
+                return 1;
         }
     }
 
     int extra_args = argc - optind;
     if (!extra_args) {
         fprintf(stderr, "Not enough args!\n");
-        type_help();
-        return -1;
+        fprintf(stderr, usage);
+        return 1;
     }
 
 	int fd = -1;
@@ -94,7 +99,7 @@ int type_run(int argc, char ** argv) {
 
 			if (fd == -1) {
 				fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path, strerror(errno));
-				return 2;
+				return 1;
 			}
 		}
 	}
@@ -108,10 +113,12 @@ int type_run(int argc, char ** argv) {
 		ssize_t rc;
 		while ((rc = read(fd, &buf[0], 128))) {
 			if (rc > 0) {
-				type_text(buf);
+				if (type_text(buf)) {
+                    return 1;
+                }
 			} else if (rc < 0) {
 				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path, strerror(errno));
-				return 2;
+				return 1;
 			}
 		}
 
@@ -121,8 +128,10 @@ int type_run(int argc, char ** argv) {
         for (; optind != argc; ++optind) {
             strcat(buf, argv[optind]);
         }
-        type_text(buf);
+        if (type_text(buf)) {
+            return 1;
+        }
 	}
 
-	return argc;
+	return 0;
 }

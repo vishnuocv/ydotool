@@ -22,17 +22,25 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void key_help() {
-	fprintf(stderr, "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n\t--help\t\tShow this help.\n\t--delay ms\tDelay time before start pressing keys. Default 100ms.\n\t--key-delay ms\tDelay time between keystrokes. Default 12ms.\n\t--repeat times\t\tTimes to repeat the key sequence.\n\t--repeat-delay ms\tDelay time between repetitions. Default 0ms.\nEach key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\nSince we are emulating keyboard input, combination like Shift+# is invalid.\nBecause typing a `#' involves pressing Shift and 3.\n");
-}
+static const char * usage =
+    "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
+    "    --help             Show this help\n"
+    "    --delay ms         Delay time before start pressing keys (default = 100ms)\n"
+    "    --key-delay ms     Delay time between keystrokes (default = 12ms)\n"
+    "    --repeat times     Times to repeat the key sequence\n"
+    "    --repeat-delay ms  Delay time between repetitions (default = 0ms)\n"
+    "Each key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\n";
 
 /* TODO: Press all keys then release all keys */
-void enter_keys(char * key_string) {
+int enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
     while (ptr != NULL) {
-        uinput_enter_key(ptr);
+        if (uinput_enter_key(ptr)) {
+            return 1;
+        }
         ptr = strtok(NULL, "+");
     }
+    return 0;
 }
 
 int key_run(int argc, char ** argv) {
@@ -67,15 +75,15 @@ int key_run(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                key_help();
-                return -1;
+                fprintf(stderr, usage);
+                return 1;
         }
     }
 
     if (argc == optind) {
         fprintf(stderr, "Not enough args!\n");
-        key_help();
-        return -1;
+        fprintf(stderr, usage);
+        return 1;
     }
 
 	if (time_delay) {
@@ -86,10 +94,12 @@ int key_run(int argc, char ** argv) {
 
     while (repeats--) {
         for (; argc != optind; optind++) {
-            enter_keys(argv[optind]);
+            if (enter_keys(argv[optind])) {
+                return 1;
+            }
         }
         optind = first_arg;
     }
 
-	return argc;
+	return 0;
 }

@@ -21,9 +21,10 @@
 #include "mouse.h"
 #include "uinput.h"
 
-void mouse_help(){
-	fprintf(stderr, "Usage: mouse [--delay <ms>] <x> <y>\n\t--help\t\tShow this help\n\t--delay ms\tDelay time before start moving. Default 100ms.\n");
-}
+static const char * usage =
+    "Usage: mouse [--delay <ms>] <x> <y>\n"
+    "    --help      Show this help\n"
+    "    --delay ms  Delay time before start moving (default = 100ms)\n";
 
 int mouse_run(int argc, char ** argv) {
 	int time_delay = 100;
@@ -48,8 +49,8 @@ int mouse_run(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                mouse_help();
-                return -1;
+                fprintf(stderr, usage);
+                return 1;
         }
     }
 
@@ -57,13 +58,11 @@ int mouse_run(int argc, char ** argv) {
     if (extra_args != 2) {
         if (extra_args > 2) {
             fprintf(stderr, "Too many args!\n");
-            mouse_help();
-            return -1;
         } else {
             fprintf(stderr, "Too few args!\n");
-            mouse_help();
-            return -1;
         }
+        fprintf(stderr, usage);
+        return 1;
     }
 
 	if (time_delay)
@@ -73,10 +72,14 @@ int mouse_run(int argc, char ** argv) {
 	int32_t y = (int32_t)strtol(argv[optind],   NULL, 10);
 
 	if (!strchr(argv[0], '_')) {
-		uinput_move_mouse(x, y);
+		if (uinput_move_mouse(x, y)) {
+            return 1;
+        }
 	} else {
-        uinput_relative_move_mouse(x, y);
+        if (uinput_relative_move_mouse(x, y)) {
+            return 1;
+        }
     }
 
-	return argc;
+	return 0;
 }

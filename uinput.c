@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 
 /* Wrapper macro for errno error check */
-#define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); exit(-1); }
+#define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); return 1; }
 
 /* uinput file descriptor */
 int FD = -1;
@@ -105,18 +105,12 @@ const struct key FUNCTION_KEYS[] = {
 	{"F1", KEY_F1}, {"F2", KEY_F2}, {"F3", KEY_F3}, {"F4", KEY_F4}, {"F5", KEY_F5}, {"F6", KEY_F6}, {"F7", KEY_F7}, {"F8", KEY_F8}, {"F9", KEY_F9}, {"F10", KEY_F10}, {"F11", KEY_F11}, {"F12", KEY_F12}
 };
 
-/* Safely exit program with error code */
-void uinput_error() {
-    uinput_destroy();
-    exit(-1);
-}
-
 /* Initialise the input device */
-void uinput_init() {
+int uinput_init() {
     /* Check write access to uinput driver device */
     if (access("/dev/uinput", W_OK)) {
         fprintf(stderr, "Do not have access to write to /dev/uinput!\nTry running as root\n");
-        uinput_error();
+        return 1;
     }
 
     /* Confirm availability of uinput kernel module */
@@ -128,7 +122,7 @@ void uinput_init() {
     stat(kernel_mod_dir, &stats);
     if (!S_ISDIR(stats.st_mode)) {
         fprintf(stderr, "Dir (%s) doesn't exist!\nHave you recently updated your kernel version?\nRestart your system to use new kernel modules\n", kernel_mod_dir);
-        uinput_error();
+        return 1;
     }
 
     /* Open uinput driver device */
@@ -156,15 +150,18 @@ void uinput_init() {
 
     CHECK( ioctl(FD, UI_DEV_SETUP, &usetup) );
     CHECK( ioctl(FD, UI_DEV_CREATE) );
+
+    return 0;
 }
 
 /* Delete the input device */
-void uinput_destroy() {
+int uinput_destroy() {
     if (FD != -1) {
         CHECK( ioctl(FD, UI_DEV_DESTROY) );
         close(FD);
         FD = -1;
     }
+    return 0;
 }
 
 /* Character pointer comparer for use with bsearch */
@@ -173,39 +170,51 @@ int cmp_chars(const void * a, const void * b) {
 }
 
 /* TODO: Implement binary search */
-void uinput_enter_key(const char * key_string) {
+int uinput_enter_key(const char * key_string) {
     for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key); ++i) {
         if (!strcmp(key_string, MODIFIER_KEYS[i].string)) {
-            uinput_send_keypress(MODIFIER_KEYS[i].code);
-            return;
+            if (uinput_send_keypress(MODIFIER_KEYS[i].code)) {
+                return 1;
+            }
+            return 0;
         }
     }
     for (int i = 0; i != sizeof(FUNCTION_KEYS)/sizeof(struct key); ++i) {
         if (!strcmp(key_string, FUNCTION_KEYS[i].string)) {
-            uinput_send_keypress(FUNCTION_KEYS[i].code);
-            return;
+            if (uinput_send_keypress(FUNCTION_KEYS[i].code)) {
+                return 1;
+            }
+            return 0;
         }
     }
     /* TODO: Check upper/lower keys too */
+    return 1;
 }
 
 /* Simulate typing the given character on the vitual device */
-void uinput_enter_char(char c) {
+int uinput_enter_char(char c) {
     void * found;
     void * begin_norm = (void *)&NORMAL_KEYS;
     void * begin_shift = (void *)&SHIFTED_KEYS;
 
     if ((found = bsearch(&c, begin_norm, sizeof(NORMAL_KEYS)/sizeof(char), sizeof(char), cmp_chars))) {
-        uinput_send_keypress(NORMAL_KEYCODES[((char *)found - (char *)begin_norm)/sizeof(char)]);
+        if (uinput_send_keypress(NORMAL_KEYCODES[((char *)found - (char *)begin_norm)/sizeof(char)])) {
+            return 1;
+        }
     } else if ((found = bsearch(&c, begin_shift, sizeof(SHIFTED_KEYS)/sizeof(char), sizeof(char), cmp_chars))) {
-        uinput_send_shifted_keypress(SHIFTED_KEYCODES[((char *)found - (char *)begin_shift)/sizeof(char)]);
+        if (uinput_send_shifted_keypress(SHIFTED_KEYCODES[((char *)found - (char *)begin_shift)/sizeof(char)])) {
+            return 1;
+        }
     } else {
         fprintf(stderr, "Unsupported character (%d:%c) cannot be entered!\n", c, c);
+        return 1;
     }
+
+    return 0;
 }
 
 /* Trigger an input event */
-void uinput_emit(uint16_t type, uint16_t code, int32_t value) {
+int uinput_emit(uint16_t type, uint16_t code, int32_t value) {
     struct input_event ie = {
         /* Ignore timestamp values */
         {0,0},
@@ -215,53 +224,88 @@ void uinput_emit(uint16_t type, uint16_t code, int32_t value) {
     };
 
     if (FD == -1) {
-        uinput_init();
+        if (uinput_init()) {
+            return 1;
+        }
     }
 
     CHECK( write(FD, &ie, sizeof(ie)) );
 
     /* Allow processing time for uinput before sending next event */
     usleep( 50 );
+
+    return 0;
 }
 
 /* Single key event and report */
-void uinput_send_key(uint16_t code, int32_t value) {
-    uinput_emit(EV_KEY, code,       value);
-    uinput_emit(EV_SYN, SYN_REPORT, 0    );
+int uinput_send_key(uint16_t code, int32_t value) {
+    if (uinput_emit(EV_KEY, code, value)) {
+        return 1;
+    }
+    if (uinput_emit(EV_SYN, SYN_REPORT, 0)) {
+        return 1;
+    }
+    return 0;
 }
 
 /* Simulate a quick key press */
-void uinput_send_keypress(uint16_t code) {
+int uinput_send_keypress(uint16_t code) {
     /* send press */
-    uinput_send_key(code, 1);
+    if (uinput_send_key(code, 1)) {
+        return 1;
+    }
     /* send release */
-    uinput_send_key(code, 0);
+    if (uinput_send_key(code, 0)) {
+        return 1;
+    }
+    return 0;
 }
 
 /* Simulate a shifted key press */
-void uinput_send_shifted_keypress(uint16_t code) {
+int uinput_send_shifted_keypress(uint16_t code) {
     /* Send shift press */
-    uinput_send_key(KEY_LEFTSHIFT, 1);
+    if (uinput_send_key(KEY_LEFTSHIFT, 1)) {
+        return 1;
+    }
     /* Simulate keypress */
-    uinput_send_keypress(code);
+    if (uinput_send_keypress(code)) {
+        return 1;
+    }
     /* Send shift release */
-    uinput_send_key(KEY_LEFTSHIFT, 0);
+    if (uinput_send_key(KEY_LEFTSHIFT, 0)) {
+        return 1;
+    }
+    return 0;
 }
 
 /* Move the cursor to a given (x,y) position */
-void uinput_move_mouse(int32_t x, int32_t y) {
-    uinput_emit(EV_ABS, ABS_X, x);
-    uinput_emit(EV_ABS, ABS_Y, y);
-    uinput_emit(EV_SYN, SYN_REPORT, 0);
+int uinput_move_mouse(int32_t x, int32_t y) {
+    if (uinput_emit(EV_ABS, ABS_X, x)) {
+        return 1;
+    }
+    if (uinput_emit(EV_ABS, ABS_Y, y)) {
+        return 1;
+    }
+    if (uinput_emit(EV_SYN, SYN_REPORT, 0)) {
+        return 1;
+    }
+    return 0;
 }
 
 /* Move the cursor a given (x,y) relative to the current position */
-void uinput_relative_move_mouse(int32_t x, int32_t y) {
+int uinput_relative_move_mouse(int32_t x, int32_t y) {
     if (x) {
-        uinput_emit(EV_REL, REL_X, x);
+        if (uinput_emit(EV_REL, REL_X, x)) {
+            return 1;
+        }
     }
     if (y) {
-        uinput_emit(EV_REL, REL_Y, y);
+        if (uinput_emit(EV_REL, REL_Y, y)) {
+            return 1;
+        }
     }
-    uinput_emit(EV_SYN, SYN_REPORT, 0);
+    if (uinput_emit(EV_SYN, SYN_REPORT, 0)) {
+        return 1;
+    }
+    return 0;
 }

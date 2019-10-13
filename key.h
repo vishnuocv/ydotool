@@ -14,7 +14,6 @@
 #ifndef __KEY_H__
 #define __KEY_H__
 
-void key_help();
 int key_run(int argc, char ** argv);
 
 #endif /* __KEY_H__ */

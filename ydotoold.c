@@ -47,7 +47,7 @@ int main() {
 
 	if (fd_listener == -1) {
 		fprintf(stderr, "ydotoold: failed to create socket: %s\n", strerror(errno));
-		abort();
+		return 1;
 	}
 
 	struct sockaddr_un addr;
@@ -57,12 +57,12 @@ int main() {
 
 	if (bind(fd_listener, (struct sockaddr *)&addr, sizeof(addr))) {
 		fprintf(stderr, "ydotoold: failed to bind to socket [%s]: %s\n", path_socket, strerror(errno));
-		abort();
+		return 1;
 	}
 
 	if (listen(fd_listener, 16)) {
 		fprintf(stderr, "ydotoold: failed to listen on socket [%s]: %s\n", path_socket, strerror(errno));
-		abort();
+		return 1;
 	}
 
 	chmod(path_socket, 0600);
@@ -75,15 +75,17 @@ int main() {
         pthread_t thd;
         if (pthread_create(&thd, NULL, client_handler, (void *)&fd_client)) {
             fprintf(stderr, "ydotoold: Error creating thread!\n");
-            abort();
+            return 1;
         }
 
         if (pthread_detach(thd)) {
             fprintf(stderr, "ydotoold: Error detaching thread!\n");
-            abort();
+            return 1;
         }
 	}
 
-    uinput_destroy();
+    if (uinput_destroy()) {
+        return 1;
+    }
     return 0;
 }

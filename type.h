@@ -14,7 +14,6 @@
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
-void type_help();
 int type_run(int argc, char ** argv);
 
 #endif /* __TYPE_H__ */
