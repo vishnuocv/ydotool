@@ -23,18 +23,7 @@ extern "C" {
 #include <evdevPlus/evdevPlus.hpp>
 
 void key_help() {
-	std::cerr << "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
-		<< "  --help                Show this help.\n"
-		<< "  --delay ms            Delay time before start pressing keys. Default 100ms.\n"
-		<< "  --key-delay ms        Delay time between keystrokes. Default 12ms.\n"
-		<< "  --repeat times        Times to repeat the key sequence.\n"
-		<< "  --repeat-delay ms     Delay time between repetitions. Default 0ms.\n"
-		<< "\n"
-		<< "Each key sequence can be any number of modifiers and keys, separated by plus (+)\n"
-		<< "For example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace \n"
-		<< "\n"
-		<< "Since we are emulating keyboard input, combination like Shift+# is invalid.\n"
-		<< "Because typing a `#' involves pressing Shift and 3." << std::endl;
+	fprintf(stderr, "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n\t--help\t\tShow this help.\n\t--delay ms\tDelay time before start pressing keys. Default 100ms.\n\t--key-delay ms\tDelay time between keystrokes. Default 12ms.\n\t--repeat times\t\tTimes to repeat the key sequence.\n\t--repeat-delay ms\tDelay time between repetitions. Default 0ms.\nEach key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\nSince we are emulating keyboard input, combination like Shift+# is invalid.\nBecause typing a `#' involves pressing Shift and 3.\n");
 }
 
 std::vector<std::string> explode_string(const std::string & str, char delim) {
@@ -112,16 +101,16 @@ int key_run(int argc, char ** argv) {
 	int repeats = 1;
     int opt = 0;
 
-    typedef enum {
+    enum optlist_t {
         opt_help,
         opt_delay,
         opt_repeat,
-    } optlist_t;
+    };
 
     static struct option long_options[] = {
-        { "help",         no_argument,       NULL, opt_help         },
-        { "delay",        required_argument, NULL, opt_delay        },
-        { "repeat",       required_argument, NULL, opt_repeat       },
+        {"help",   no_argument,       NULL, opt_help  },
+        {"delay",  required_argument, NULL, opt_delay },
+        {"repeat", required_argument, NULL, opt_repeat},
     };
 
     while((opt = getopt_long_only(argc, argv, "hd:r:", long_options, NULL)) != -1 )
@@ -145,7 +134,7 @@ int key_run(int argc, char ** argv) {
     }
 
     if (argc == optind) {
-        std::cerr << "Not enough args!" << std::endl;
+        fprintf(stderr, "Not enough args!\n");
         key_help();
         return -1;
     }
