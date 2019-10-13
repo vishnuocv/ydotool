@@ -28,6 +28,13 @@ ydotool: $(ydotool_DEP)
 ydotoold: $(ydotoold_DEP)
 	$(CC) $(CFLAGS) $^ -o $@
 
+# Install built binaries
+.PHONY: install
+install:
+	mkdir -p /usr/local/bin
+	mv ydotool /usr/local/bin
+	mv ydotoold /usr/local/bin
+
 # Remove build files
 .PHONY: clean
 clean:

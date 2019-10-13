@@ -19,7 +19,6 @@ Currently implemented command(s):
 - `key` - Press keys
 - `mouse` - Move mouse pointer to absolute position
 - `click` - Click on mouse buttons
-- `recorder` - Record/replay input events
 
 ## Examples
 Type some words:
@@ -60,12 +59,19 @@ In order to solve this problem, I made a persistent background service, ydotoold
 
 ## Build
 ### Dependencies
-NONE!
+* make
+* gcc
 
 ### Compile
 
 ```bash
 make -j $(nproc)
+```
+
+### Install
+
+```bash
+sudo make install
 ```
 
 <!-- Links -->
