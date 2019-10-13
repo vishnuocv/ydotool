@@ -13,7 +13,8 @@
 
 // Local includes
 #include "type.h"
-extern "C" {
+#include "uinput.h"
+// System includes
 #include <getopt.h>
 #include <stdio.h>
 #include <errno.h>
@@ -21,8 +22,6 @@ extern "C" {
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include "uinput.h"
-}
 
 int time_keydelay = 12;
 
@@ -32,7 +31,7 @@ void type_help(){
 
 void type_text(char * text) {
 	for (int i=0; text[i] != '\0'; ++i) {
-        uinput_enter_char(c);
+        uinput_enter_char(text[i]);
 	}
 }
 
@@ -86,16 +85,15 @@ int type_run(int argc, char ** argv) {
 
 	int fd = -1;
 
-	if (!file_path.empty()) {
-		if (file_path == "-") {
+	if (!strcmp(file_path, "")) {
+		if (!strcmp(file_path, "-")) {
 			fd = STDIN_FILENO;
 			fprintf(stderr, "ydotool: type: reading from stdin\n");
 		} else {
-			fd = open(file_path.c_str(), O_RDONLY);
+			fd = open(file_path, O_RDONLY);
 
 			if (fd == -1) {
-				fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path.c_str(),
-					strerror(errno));
+				fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path, strerror(errno));
 				return 2;
 			}
 		}
@@ -105,27 +103,25 @@ int type_run(int argc, char ** argv) {
 		usleep(time_delay * 1000);
 
 	if (fd >= 0) {
-		char[128] buf;
+		char buf[128];
 
 		ssize_t rc;
 		while ((rc = read(fd, &buf[0], 128))) {
 			if (rc > 0) {
-				buf.resize(rc);
 				type_text(buf);
-				buf.resize(128);
 			} else if (rc < 0) {
-				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path.c_str(), strerror(errno));
+				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path, strerror(errno));
 				return 2;
 			}
 		}
 
 		close(fd);
 	} else {
-        std::string txt = "";
+        char * buf = "";
         for (; optind != argc; ++optind) {
-            txt += argv[optind];
+            strcat(buf, argv[optind]);
         }
-        type_text(txt);
+        type_text(buf);
 	}
 
 	return argc;

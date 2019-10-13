@@ -14,7 +14,6 @@
 // Local includes
 #include "key.h"
 #include "recorder.h"
-#include "type.h"
 // C++ system includes
 #include <sstream>
 #include <iostream>
@@ -25,6 +24,7 @@ extern "C" {
 #include "click.h"
 #include "mouse.h"
 #include "uinput.h"
+#include "type.h"
 // System includes
 #include <sys/socket.h>
 #include <sys/un.h>
