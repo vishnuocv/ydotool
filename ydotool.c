@@ -43,18 +43,25 @@ int main(int argc, char ** argv) {
 	if (argc < 2 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--h", 3) == 0 || strcmp(argv[1], "help") == 0) {
 		fprintf(stderr, usage, argv[0]);
 		ret = 1;
-	} else if ( !strcmp(argv[1], "click") ) {
-		ret = click_run(argc-1, &argv[1]);
-	} else if ( !strcmp(argv[1], "key") ) {
-		ret = key_run(argc-1, &argv[1]);
-	} else if ( !strcmp(argv[1], "mouse") ) {
-		ret = mouse_run(argc-1, &argv[1]);
-	} else if ( !strcmp(argv[1], "type") ) {
-		ret = type_run(argc-1, &argv[1]);
 	} else {
-		fprintf(stderr, "ydotool: Unknown option: %s\nRun ydotool help for a list of arguments\n", argv[1]);
-		ret = 1;
-	}
+        /* First argument dealt with, increment arg pointer */
+        argv++;
+        argc--;
+
+        /* Check which command to run */
+        if ( !strcmp(argv[0], "click") ) {
+            ret = click_run(argc, argv);
+        } else if ( !strcmp(argv[0], "key") ) {
+            ret = key_run(argc, argv);
+        } else if ( !strcmp(argv[0], "mouse") ) {
+            ret = mouse_run(argc, argv);
+        } else if ( !strcmp(argv[0], "type") ) {
+            ret = type_run(argc, argv);
+        } else {
+            fprintf(stderr, "ydotool: Unknown option: %s\nRun ydotool help for a list of arguments\n", argv[0]);
+            ret = 1;
+        }
+    }
 
     ret += uinput_destroy();
 
