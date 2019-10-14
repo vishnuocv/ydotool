@@ -96,7 +96,7 @@ int type_run(int argc, char ** argv) {
 
 	int fd = -1;
 
-	if (!strcmp(file_path, "")) {
+	if (strcmp(file_path, "")) {
 		if (!strcmp(file_path, "-")) {
 			fd = STDIN_FILENO;
 			fprintf(stderr, "ydotool: type: reading from stdin\n");
@@ -130,11 +130,15 @@ int type_run(int argc, char ** argv) {
 
 		close(fd);
 	} else {
+        /* TODO: Type all args (just use a for loop?) */
+        /*
         char * buf = "";
         for (; optind != argc; ++optind) {
             strcat(buf, argv[optind]);
         }
         if (type_text(buf)) {
+        */
+        if (type_text(argv[optind])) {
             return 1;
         }
 	}

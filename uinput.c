@@ -126,7 +126,8 @@ const struct key FUNCTION_KEYS[] = {
 int uinput_init() {
     /* Check write access to uinput driver device */
     if (access("/dev/uinput", W_OK)) {
-        fprintf(stderr, "Do not have access to write to /dev/uinput!\nTry running as root\n");
+        fprintf(stderr, "Do not have access to write to /dev/uinput!\n"
+            "Try running as root\n");
         return 1;
     }
 
@@ -138,7 +139,9 @@ int uinput_init() {
     struct stat stats;
     stat(kernel_mod_dir, &stats);
     if (!S_ISDIR(stats.st_mode)) {
-        fprintf(stderr, "Dir (%s) doesn't exist!\nHave you recently updated your kernel version?\nRestart your system to use new kernel modules\n", kernel_mod_dir);
+        fprintf(stderr, "Dir (%s) doesn't exist!\n"
+            "Have you recently updated your kernel version?\n"
+            "Restart your system to use new kernel modules\n", kernel_mod_dir);
         return 1;
     }
 
@@ -167,6 +170,9 @@ int uinput_init() {
 
     CHECK( ioctl(FD, UI_DEV_SETUP, &usetup) );
     CHECK( ioctl(FD, UI_DEV_CREATE) );
+
+    /* Wait for device to come up */
+    usleep(1000000);
 
     return 0;
 }
