@@ -60,67 +60,200 @@ int EVCODES[] = {
     EV_SYN
 };
 
-/* All valid non-shifted characters */
-const char NORMAL_KEYS[] = {
-    '\t', '\n', ' ', '#', '\'', ',', '-', '.', '/', '0', '1', '2', '3', '4',
-    '5', '6', '7', '8', '9', ';', '=', '[', '\\', ']', '`', 'a',
-    'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+struct key_char {
+    char character;
+    int code;
 };
 
-/* All valid non-shifted keycodes */
-const int NORMAL_KEYCODES[] = {
-    KEY_TAB, KEY_ENTER, KEY_SPACE, KEY_BACKSLASH, KEY_APOSTROPHE, KEY_COMMA, KEY_MINUS,
-    KEY_DOT, KEY_SLASH, KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
-    KEY_6, KEY_7, KEY_8, KEY_9, KEY_SEMICOLON, KEY_EQUAL,
-    KEY_LEFTBRACE, KEY_102ND, KEY_RIGHTBRACE, KEY_GRAVE, KEY_A,
-    KEY_B, KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H, KEY_I, KEY_J,
-    KEY_K, KEY_L, KEY_M, KEY_N, KEY_O, KEY_P, KEY_Q, KEY_R, KEY_S,
-    KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z
-};
-
-/* All valid shifted characters */
-const char SHIFTED_KEYS[] = {
-    '!', '"', '$', '%', '&', '(', ')', '*', '+', ':', '<', '>',
-    '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-    'W', 'X', 'Y', 'Z', '^', '_', '{', '|', '}', '~'
-};
-
-/* All valid shifted keycodes */
-const int SHIFTED_KEYCODES[] = {
-    KEY_1, KEY_2, KEY_4, KEY_5, KEY_7, KEY_9, KEY_0, KEY_8, KEY_EQUAL,
-    KEY_SEMICOLON, KEY_COMMA, KEY_DOT, KEY_SLASH, KEY_APOSTROPHE,
-    KEY_A, KEY_B, KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H, KEY_I,
-    KEY_J, KEY_K, KEY_L, KEY_M, KEY_N, KEY_O, KEY_P, KEY_Q, KEY_R,
-    KEY_S, KEY_T, KEY_U, KEY_V, KEY_W, KEY_X, KEY_Y, KEY_Z, KEY_6,
-    KEY_MINUS, KEY_LEFTBRACE, KEY_102ND, KEY_RIGHTBRACE, KEY_BACKSLASH
-};
-
-struct key {
+struct key_string {
     char string[11];
     int code;
 };
 
-const struct key MODIFIER_KEYS[] = {
-	{"ALT", KEY_LEFTALT}, {"ALT_L", KEY_LEFTALT}, {"ALT_R", KEY_RIGHTALT},
-	{"SHIFT", KEY_LEFTSHIFT}, {"SHIFT_L", KEY_LEFTSHIFT}, {"SHIFT_R", KEY_RIGHTSHIFT},
-	{"CTRL", KEY_LEFTCTRL}, {"CTRL_L", KEY_LEFTCTRL}, {"CTRL_R", KEY_RIGHTCTRL},
-	{"SUPER", KEY_LEFTMETA}, {"SUPER_L", KEY_LEFTMETA}, {"SUPER_R", KEY_RIGHTMETA},
-	{"META", KEY_LEFTMETA}, {"META_L", KEY_LEFTMETA}, {"META_R", KEY_RIGHTMETA}
+/* All valid non-shifted characters */
+const struct key_char NORMAL_KEYS[] = {
+    {'\t', KEY_TAB},
+    {'\n', KEY_ENTER},
+    {' ', KEY_SPACE},
+    {'#', KEY_BACKSLASH},
+    {'\'', KEY_APOSTROPHE},
+    {',', KEY_COMMA},
+    {'-', KEY_MINUS},
+    {'.', KEY_DOT},
+    {'/', KEY_SLASH},
+    {'0', KEY_0},
+    {'1', KEY_1},
+    {'2', KEY_2},
+    {'3', KEY_3},
+    {'4', KEY_4},
+    {'5', KEY_5},
+    {'6', KEY_6},
+    {'7', KEY_7},
+    {'8', KEY_8},
+    {'9', KEY_9},
+    {';', KEY_SEMICOLON},
+    {'=', KEY_EQUAL},
+    {'[', KEY_LEFTBRACE},
+    {'\\', KEY_102ND},
+    {']', KEY_RIGHTBRACE},
+    {'`', KEY_GRAVE},
+    {'a', KEY_A},
+    {'b', KEY_B},
+    {'c', KEY_C},
+    {'d', KEY_D},
+    {'e', KEY_E},
+    {'f', KEY_F},
+    {'g', KEY_G},
+    {'h', KEY_H},
+    {'i', KEY_I},
+    {'j', KEY_J},
+    {'k', KEY_K},
+    {'l', KEY_L},
+    {'m', KEY_M},
+    {'n', KEY_N},
+    {'o', KEY_O},
+    {'p', KEY_P},
+    {'q', KEY_Q},
+    {'r', KEY_R},
+    {'s', KEY_S},
+    {'t', KEY_T},
+    {'u', KEY_U},
+    {'v', KEY_V},
+    {'w', KEY_W},
+    {'x', KEY_X},
+    {'y', KEY_Y},
+    {'z', KEY_Z}
 };
 
-const struct key FUNCTION_KEYS[] = {
-	{"UP", KEY_UP}, {"DOWN", KEY_DOWN}, {"LEFT", KEY_LEFT}, {"RIGHT", KEY_RIGHT},
-	{"TAB", KEY_TAB}, {"CAPSLOCK", KEY_CAPSLOCK}, {"NUMLOCK", KEY_NUMLOCK},
-    {"SCROLLLOCK", KEY_SCROLLLOCK}, {"ESC", KEY_ESC}, {"ENTER", KEY_ENTER},
-    {"BACKSPACE", KEY_BACKSPACE}, {"DELETE", KEY_DELETE}, {"INSERT", KEY_INSERT},
-    {"HOME", KEY_HOME}, {"END", KEY_END}, {"PAGEUP", KEY_PAGEUP},
-    {"PAGEDOWN", KEY_PAGEDOWN}, {"SYSRQ", KEY_SYSRQ}, {"PAUSE", KEY_PAUSE},
-	{"F1", KEY_F1}, {"F2", KEY_F2}, {"F3", KEY_F3}, {"F4", KEY_F4}, {"F5", KEY_F5},
-    {"F6", KEY_F6}, {"F7", KEY_F7}, {"F8", KEY_F8}, {"F9", KEY_F9}, {"F10", KEY_F10},
-    {"F11", KEY_F11}, {"F12", KEY_F12}
+/* All valid shifted characters */
+const struct key_char SHIFTED_KEYS[] = {
+    {'!', KEY_1},
+    {'"', KEY_2},
+    {'$', KEY_4},
+    {'%', KEY_5},
+    {'&', KEY_7},
+    {'(', KEY_9},
+    {')', KEY_0},
+    {'*', KEY_8},
+    {'+', KEY_EQUAL},
+    {':', KEY_SEMICOLON},
+    {'<', KEY_COMMA},
+    {'>', KEY_DOT},
+    {'?', KEY_SLASH},
+    {'@', KEY_APOSTROPHE},
+    {'A', KEY_A},
+    {'B', KEY_B},
+    {'C', KEY_C},
+    {'D', KEY_D},
+    {'E', KEY_E},
+    {'F', KEY_F},
+    {'G', KEY_G},
+    {'H', KEY_H},
+    {'I', KEY_I},
+    {'J', KEY_J},
+    {'K', KEY_K},
+    {'L', KEY_L},
+    {'M', KEY_M},
+    {'N', KEY_N},
+    {'O', KEY_O},
+    {'P', KEY_P},
+    {'Q', KEY_Q},
+    {'R', KEY_R},
+    {'S', KEY_S},
+    {'T', KEY_T},
+    {'U', KEY_U},
+    {'V', KEY_V},
+    {'W', KEY_W},
+    {'X', KEY_X},
+    {'Y', KEY_Y},
+    {'Z', KEY_Z},
+    {'^', KEY_6},
+    {'_', KEY_MINUS},
+    {'{', KEY_LEFTBRACE},
+    {'|', KEY_102ND},
+    {'}', KEY_RIGHTBRACE},
+    {'~', KEY_BACKSLASH}
 };
+
+const struct key_string MODIFIER_KEYS[] = {
+	{"ALT", KEY_LEFTALT},
+    {"ALT_L", KEY_LEFTALT},
+    {"ALT_R", KEY_RIGHTALT},
+	{"CTRL", KEY_LEFTCTRL},
+    {"CTRL_L", KEY_LEFTCTRL},
+    {"CTRL_R", KEY_RIGHTCTRL},
+	{"META", KEY_LEFTMETA},
+    {"META_L", KEY_LEFTMETA},
+    {"META_R", KEY_RIGHTMETA},
+	{"SHIFT", KEY_LEFTSHIFT},
+    {"SHIFT_L", KEY_LEFTSHIFT},
+    {"SHIFT_R", KEY_RIGHTSHIFT},
+	{"SUPER", KEY_LEFTMETA},
+    {"SUPER_L", KEY_LEFTMETA},
+    {"SUPER_R", KEY_RIGHTMETA}
+};
+
+const struct key_string FUNCTION_KEYS[] = {
+	{"BACKSPACE", KEY_BACKSPACE},
+    {"CAPSLOCK", KEY_CAPSLOCK},
+    {"DELETE", KEY_DELETE},
+    {"DOWN", KEY_DOWN},
+    {"END", KEY_END},
+    {"ENTER", KEY_ENTER},
+    {"ESC", KEY_ESC},
+	{"F1", KEY_F1},
+    {"F10", KEY_F10},
+    {"F11", KEY_F11},
+    {"F12", KEY_F12},
+    {"F2", KEY_F2},
+    {"F3", KEY_F3},
+    {"F4", KEY_F4},
+    {"F5", KEY_F5},
+    {"F6", KEY_F6},
+    {"F7", KEY_F7},
+    {"F8", KEY_F8},
+    {"F9", KEY_F9},
+    {"HOME", KEY_HOME},
+    {"INSERT", KEY_INSERT},
+    {"LEFT", KEY_LEFT},
+    {"NUMLOCK", KEY_NUMLOCK},
+    {"PAGEDOWN", KEY_PAGEDOWN},
+    {"PAGEUP", KEY_PAGEUP},
+    {"PAUSE", KEY_PAUSE},
+    {"RIGHT", KEY_RIGHT},
+    {"SCROLLLOCK", KEY_SCROLLLOCK},
+    {"SYSRQ", KEY_SYSRQ},
+	{"TAB", KEY_TAB},
+    {"UP", KEY_UP}
+};
+
+int uinput_test() {
+    for (size_t i = 1; i != sizeof(NORMAL_KEYS)/sizeof(struct key_char); ++i) {
+        if (NORMAL_KEYS[i].character < NORMAL_KEYS[i-1].character) {
+            printf("%c < %c\n", NORMAL_KEYS[i].character, NORMAL_KEYS[i-1].character);
+        }
+    }
+
+    for (size_t i = 1; i != sizeof(SHIFTED_KEYS)/sizeof(struct key_char); ++i) {
+        if (SHIFTED_KEYS[i].character < SHIFTED_KEYS[i-1].character) {
+            printf("%c < %c\n", SHIFTED_KEYS[i].character, SHIFTED_KEYS[i-1].character);
+        }
+    }
+
+    for (size_t i = 1; i != sizeof(MODIFIER_KEYS)/sizeof(struct key_string); ++i) {
+        if (strcmp(MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string) < 0) {
+            printf("%s < %s\n", MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string);
+        }
+    }
+
+    for (size_t i = 1; i != sizeof(FUNCTION_KEYS)/sizeof(struct key_string); ++i) {
+        if (strcmp(FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string) < 0) {
+            printf("%s < %s\n", FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string);
+        }
+    }
+
+    return 0;
+}
 
 /* Initialise the input device */
 int uinput_init() {
@@ -194,7 +327,8 @@ int cmp_chars(const void * a, const void * b) {
 
 /* TODO: Implement binary search */
 int uinput_enter_key(const char * key_string) {
-    for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key); ++i) {
+    /* Search modifier keys */
+    for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key_string); ++i) {
         if (!strcmp(key_string, MODIFIER_KEYS[i].string)) {
             if (uinput_send_keypress(MODIFIER_KEYS[i].code)) {
                 return 1;
@@ -202,7 +336,9 @@ int uinput_enter_key(const char * key_string) {
             return 0;
         }
     }
-    for (int i = 0; i != sizeof(FUNCTION_KEYS)/sizeof(struct key); ++i) {
+
+    /* Search function keys */
+    for (int i = 0; i != sizeof(FUNCTION_KEYS)/sizeof(struct key_string); ++i) {
         if (!strcmp(key_string, FUNCTION_KEYS[i].string)) {
             if (uinput_send_keypress(FUNCTION_KEYS[i].code)) {
                 return 1;
@@ -210,12 +346,35 @@ int uinput_enter_key(const char * key_string) {
             return 0;
         }
     }
-    /* TODO: Check upper/lower keys too */
+
+    /* If string is a single character */
+    if (strlen(key_string) == 1) {
+        /* Search normal keys */
+        for (int i = 0; i != sizeof(NORMAL_KEYS)/sizeof(struct key_char); ++i) {
+            if (key_string[0] == NORMAL_KEYS[i].character) {
+                if (uinput_send_keypress(NORMAL_KEYS[i].code)) {
+                    return 1;
+                }
+                return 0;
+            }
+        }
+
+        /* Search shifted keys */
+        for (int i = 0; i != sizeof(SHIFTED_KEYS)/sizeof(struct key_char); ++i) {
+            if (key_string[0] == SHIFTED_KEYS[i].character) {
+                if (uinput_send_shifted_keypress(SHIFTED_KEYS[i].code)) {
+                    return 1;
+                }
+                return 0;
+            }
+        }
+    }
     return 1;
 }
 
 /* Emulate typing the given character on the vitual device */
 int uinput_enter_char(char c) {
+/* This should be re-enabled once binary searching the key arrays has been implemented
     void * found;
     void * begin_norm = (void *)&NORMAL_KEYS;
     void * begin_shift = (void *)&SHIFTED_KEYS;
@@ -233,6 +392,7 @@ int uinput_enter_char(char c) {
         return 1;
     }
 
+*/
     return 0;
 }
 

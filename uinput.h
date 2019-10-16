@@ -32,6 +32,8 @@ struct uinput_raw_data {
     int32_t value; /**< @brief 1 for key press, 0 for key release or any integer value for absolute/relative mouse movement in pixels */
 } __attribute__((packed));
 
+int uinput_test();
+
 /**
  * @brief Close uinput device if open
  * @return 0 on success, 1 if error(s)
