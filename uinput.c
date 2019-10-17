@@ -227,6 +227,32 @@ const struct key_string FUNCTION_KEYS[] = {
     {"UP", KEY_UP}
 };
 
+int binary_search(const struct key_string * arr, int len, const char * str, int * code) {
+    int lo = 0;
+    int hi = len-1;
+    while (lo <= hi) {
+        /* Calculate middle element index */
+        int mid = (hi + lo)/2;
+
+        /* If middle element equals target string, found! */
+        if (!strcmp(arr[mid].string, str)) {
+            *code = arr[mid].code;
+            return 0;
+        }
+
+        /* If middle element less than target string, remove lower half */
+        if (strcmp(arr[mid].string, str) < 0) {
+            lo = mid + 1;
+        /* If middle element greater than target string, remove upper half */
+        } else {
+            hi = mid - 1;
+        }
+    }
+
+    /* If we reach here, string is not found */
+    return 1;
+}
+
 int uinput_test() {
     for (size_t i = 1; i != sizeof(NORMAL_KEYS)/sizeof(struct key_char); ++i) {
         if (NORMAL_KEYS[i].character < NORMAL_KEYS[i-1].character) {
@@ -240,15 +266,31 @@ int uinput_test() {
         }
     }
 
-    for (size_t i = 1; i != sizeof(MODIFIER_KEYS)/sizeof(struct key_string); ++i) {
+    int num_modifiers = sizeof(MODIFIER_KEYS)/sizeof(struct key_string);
+    for (size_t i = 1; i != num_modifiers; ++i) {
         if (strcmp(MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string) < 0) {
             printf("%s < %s\n", MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string);
         }
+
+        int code = 0;
+        if (binary_search(MODIFIER_KEYS, num_modifiers, MODIFIER_KEYS[i].string, &code)) {
+            printf("%s NOT FOUND!\n", MODIFIER_KEYS[i].string);
+        } else if ( code != MODIFIER_KEYS[i].code ) {
+            printf("Code does not match for %s. Got %d, expected %d\n", MODIFIER_KEYS[i].string, code, MODIFIER_KEYS[i].code);
+        }
     }
 
-    for (size_t i = 1; i != sizeof(FUNCTION_KEYS)/sizeof(struct key_string); ++i) {
+    int num_funcs = sizeof(FUNCTION_KEYS)/sizeof(struct key_string);
+    for (size_t i = 1; i != num_funcs; ++i) {
         if (strcmp(FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string) < 0) {
             printf("%s < %s\n", FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string);
+        }
+
+        int code = 0;
+        if (binary_search(FUNCTION_KEYS, num_modifiers, FUNCTION_KEYS[i].string, &code)) {
+            printf("%s NOT FOUND!\n", FUNCTION_KEYS[i].string);
+        } else if ( code != FUNCTION_KEYS[i].code ) {
+            printf("Code does not match for %s. Got %d, expected %d\n", FUNCTION_KEYS[i].string, code, FUNCTION_KEYS[i].code);
         }
     }
 
@@ -325,7 +367,6 @@ int cmp_chars(const void * a, const void * b) {
     return (*(char *)a - *(char *)b);
 }
 
-/* TODO: Implement binary search */
 int uinput_enter_key(const char * key_string) {
     /* Search modifier keys */
     for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key_string); ++i) {
