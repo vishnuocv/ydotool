@@ -227,12 +227,12 @@ const struct key_string FUNCTION_KEYS[] = {
     {"UP", KEY_UP}
 };
 
-int binary_search(const struct key_string * arr, int len, const char * str, int * code) {
-    int lo = 0;
-    int hi = len-1;
+int binary_search_string(const struct key_string * arr, size_t len, const char * str, int * code) {
+    size_t lo = 0;
+    size_t hi = len-1;
     while (lo <= hi) {
         /* Calculate middle element index */
-        int mid = (hi + lo)/2;
+        size_t mid = (hi + lo)/2;
 
         /* If middle element equals target string, found! */
         if (!strcmp(arr[mid].string, str)) {
@@ -253,41 +253,83 @@ int binary_search(const struct key_string * arr, int len, const char * str, int 
     return 1;
 }
 
+int binary_search_char(const struct key_char * arr, size_t len, char c, int * code) {
+    size_t lo = 0;
+    size_t hi = len-1;
+    while (lo <= hi) {
+        /* Calculate middle element index */
+        size_t mid = (hi + lo)/2;
+
+        /* If middle element equals target char, found! */
+        if (arr[mid].character == c) {
+            *code = arr[mid].code;
+            return 0;
+        }
+
+        /* If middle element less than target char, remove lower half */
+        if (arr[mid].character < c) {
+            lo = mid + 1;
+        /* If middle element greater than target char, remove upper half */
+        } else {
+            hi = mid - 1;
+        }
+    }
+
+    /* If we reach here, char is not found */
+    return 1;
+}
+
 int uinput_test() {
-    for (size_t i = 1; i != sizeof(NORMAL_KEYS)/sizeof(struct key_char); ++i) {
+    size_t num_norm = sizeof(NORMAL_KEYS)/sizeof(struct key_char);
+    for (size_t i = 1; i != num_norm; ++i) {
         if (NORMAL_KEYS[i].character < NORMAL_KEYS[i-1].character) {
             printf("%c < %c\n", NORMAL_KEYS[i].character, NORMAL_KEYS[i-1].character);
         }
-    }
 
-    for (size_t i = 1; i != sizeof(SHIFTED_KEYS)/sizeof(struct key_char); ++i) {
-        if (SHIFTED_KEYS[i].character < SHIFTED_KEYS[i-1].character) {
-            printf("%c < %c\n", SHIFTED_KEYS[i].character, SHIFTED_KEYS[i-1].character);
+        int code = 0;
+        if (binary_search_char(NORMAL_KEYS, num_norm, NORMAL_KEYS[i].character, &code)) {
+            printf("'%c' NOT FOUND!\n", NORMAL_KEYS[i].character);
+        } else if (code != NORMAL_KEYS[i].code) {
+            printf("Code does not match for '%c'. Got %d, expected %d\n", NORMAL_KEYS[i].character, code, NORMAL_KEYS[i].character);
         }
     }
 
-    int num_modifiers = sizeof(MODIFIER_KEYS)/sizeof(struct key_string);
+    size_t num_shift = sizeof(SHIFTED_KEYS)/sizeof(struct key_char);
+    for (size_t i = 1; i != num_shift; ++i) {
+        if (SHIFTED_KEYS[i].character < SHIFTED_KEYS[i-1].character) {
+            printf("%c < %c\n", SHIFTED_KEYS[i].character, SHIFTED_KEYS[i-1].character);
+        }
+
+        int code = 0;
+        if (binary_search_char(SHIFTED_KEYS, num_shift, SHIFTED_KEYS[i].character, &code)) {
+            printf("'%c' NOT FOUND!\n", SHIFTED_KEYS[i].character);
+        } else if (code != SHIFTED_KEYS[i].code) {
+            printf("Code does not match for '%c'. Got %d, expected %d\n", SHIFTED_KEYS[i].character, code, SHIFTED_KEYS[i].character);
+        }
+    }
+
+    size_t num_modifiers = sizeof(MODIFIER_KEYS)/sizeof(struct key_string);
     for (size_t i = 1; i != num_modifiers; ++i) {
         if (strcmp(MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string) < 0) {
             printf("%s < %s\n", MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string);
         }
 
         int code = 0;
-        if (binary_search(MODIFIER_KEYS, num_modifiers, MODIFIER_KEYS[i].string, &code)) {
+        if (binary_search_string(MODIFIER_KEYS, num_modifiers, MODIFIER_KEYS[i].string, &code)) {
             printf("%s NOT FOUND!\n", MODIFIER_KEYS[i].string);
         } else if ( code != MODIFIER_KEYS[i].code ) {
             printf("Code does not match for %s. Got %d, expected %d\n", MODIFIER_KEYS[i].string, code, MODIFIER_KEYS[i].code);
         }
     }
 
-    int num_funcs = sizeof(FUNCTION_KEYS)/sizeof(struct key_string);
+    size_t num_funcs = sizeof(FUNCTION_KEYS)/sizeof(struct key_string);
     for (size_t i = 1; i != num_funcs; ++i) {
         if (strcmp(FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string) < 0) {
             printf("%s < %s\n", FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string);
         }
 
         int code = 0;
-        if (binary_search(FUNCTION_KEYS, num_modifiers, FUNCTION_KEYS[i].string, &code)) {
+        if (binary_search_string(FUNCTION_KEYS, num_funcs, FUNCTION_KEYS[i].string, &code)) {
             printf("%s NOT FOUND!\n", FUNCTION_KEYS[i].string);
         } else if ( code != FUNCTION_KEYS[i].code ) {
             printf("Code does not match for %s. Got %d, expected %d\n", FUNCTION_KEYS[i].string, code, FUNCTION_KEYS[i].code);
@@ -415,17 +457,14 @@ int uinput_enter_key(const char * key_string) {
 
 /* Emulate typing the given character on the vitual device */
 int uinput_enter_char(char c) {
-/* This should be re-enabled once binary searching the key arrays has been implemented
-    void * found;
-    void * begin_norm = (void *)&NORMAL_KEYS;
-    void * begin_shift = (void *)&SHIFTED_KEYS;
+    int code = 0;
 
-    if ((found = bsearch(&c, begin_norm, sizeof(NORMAL_KEYS)/sizeof(char), sizeof(char), cmp_chars))) {
-        if (uinput_send_keypress(NORMAL_KEYCODES[((char *)found - (char *)begin_norm)/sizeof(char)])) {
+    if (!binary_search_char(NORMAL_KEYS, sizeof(NORMAL_KEYS)/sizeof(struct key_char), c, &code)) {
+        if (uinput_send_keypress(code)) {
             return 1;
         }
-    } else if ((found = bsearch(&c, begin_shift, sizeof(SHIFTED_KEYS)/sizeof(char), sizeof(char), cmp_chars))) {
-        if (uinput_send_shifted_keypress(SHIFTED_KEYCODES[((char *)found - (char *)begin_shift)/sizeof(char)])) {
+    } else if (!binary_search_char(SHIFTED_KEYS, sizeof(SHIFTED_KEYS)/sizeof(struct key_char), c, &code)) {
+        if (uinput_send_shifted_keypress(code)) {
             return 1;
         }
     } else {
@@ -433,7 +472,6 @@ int uinput_enter_char(char c) {
         return 1;
     }
 
-*/
     return 0;
 }
 
