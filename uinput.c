@@ -60,16 +60,6 @@ int EVCODES[] = {
     EV_SYN
 };
 
-struct key_char {
-    char character;
-    int code;
-};
-
-struct key_string {
-    char string[11];
-    int code;
-};
-
 /* All valid non-shifted characters */
 const struct key_char NORMAL_KEYS[] = {
     {'\t', KEY_TAB},
@@ -409,35 +399,14 @@ int cmp_chars(const void * a, const void * b) {
     return (*(char *)a - *(char *)b);
 }
 
-int uinput_enter_key(const char * key_string) {
-    /* Search modifier keys */
-    for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key_string); ++i) {
-        if (!strcmp(key_string, MODIFIER_KEYS[i].string)) {
-            if (uinput_send_keypress(MODIFIER_KEYS[i].code)) {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
-    /* Search function keys */
-    for (int i = 0; i != sizeof(FUNCTION_KEYS)/sizeof(struct key_string); ++i) {
-        if (!strcmp(key_string, FUNCTION_KEYS[i].string)) {
-            if (uinput_send_keypress(FUNCTION_KEYS[i].code)) {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
+int keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted) {
+    *shifted = 0;
     /* If string is a single character */
     if (strlen(key_string) == 1) {
         /* Search normal keys */
         for (int i = 0; i != sizeof(NORMAL_KEYS)/sizeof(struct key_char); ++i) {
             if (key_string[0] == NORMAL_KEYS[i].character) {
-                if (uinput_send_keypress(NORMAL_KEYS[i].code)) {
-                    return 1;
-                }
+                *keycode = NORMAL_KEYS[i].code;
                 return 0;
             }
         }
@@ -445,13 +414,72 @@ int uinput_enter_key(const char * key_string) {
         /* Search shifted keys */
         for (int i = 0; i != sizeof(SHIFTED_KEYS)/sizeof(struct key_char); ++i) {
             if (key_string[0] == SHIFTED_KEYS[i].character) {
-                if (uinput_send_shifted_keypress(SHIFTED_KEYS[i].code)) {
-                    return 1;
-                }
+                *shifted = 1;
+                *keycode = SHIFTED_KEYS[i].code;
+                return 0;
+            }
+        }
+    /* Else string is multiple characters */
+    } else {
+        /* Search modifier keys */
+        for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key_string); ++i) {
+            if (!strcmp(key_string, MODIFIER_KEYS[i].string)) {
+                *keycode = MODIFIER_KEYS[i].code;
+                return 0;
+            }
+        }
+
+        /* Search function keys */
+        for (int i = 0; i != sizeof(FUNCTION_KEYS)/sizeof(struct key_string); ++i) {
+            if (!strcmp(key_string, FUNCTION_KEYS[i].string)) {
+                *keycode = FUNCTION_KEYS[i].code;
                 return 0;
             }
         }
     }
+    return 1;
+}
+
+int uinput_enter_keypress(const char * key_string) {
+    uint8_t shifted = 0;
+    uint16_t keycode = 0;
+
+    if (!keystring_to_keycode(key_string, &keycode, &shifted)) {
+        if (shifted) {
+            if (uinput_send_shifted_keypress(keycode)) {
+                return 1;
+            }
+        } else {
+            if (uinput_send_keypress(keycode)) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    return 1;
+}
+
+int uinput_enter_key(const char * key_string, int32_t value) {
+    uint8_t shifted = 0;
+    uint16_t keycode = 0;
+
+    if (!keystring_to_keycode(key_string, &keycode, &shifted)) {
+        if (shifted) {
+            if (uinput_send_key(KEY_LEFTSHIFT, value)) {
+                return 1;
+            }
+            if (uinput_send_key(keycode, value)) {
+                return 1;
+            }
+        } else {
+            if (uinput_send_key(keycode, value)) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
     return 1;
 }
 

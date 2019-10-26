@@ -23,6 +23,11 @@
 #include <stdint.h>
 #include <linux/uinput.h>
 
+#define NUM_NORMAL_KEYS 51
+#define NUM_SHIFTED_KEYS 46
+#define NUM_MODIFIER_KEYS 15
+#define NUM_FUNCTION_KEYS 31
+
 /**
  * @brief uinput event information
  */
@@ -31,6 +36,21 @@ struct uinput_raw_data {
     uint16_t code; /**< @brief An integer representing the key to input or direction to move in */
     int32_t value; /**< @brief 1 for key press, 0 for key release or any integer value for absolute/relative mouse movement in pixels */
 } __attribute__((packed));
+
+struct key_char {
+    char character;
+    int code;
+};
+
+struct key_string {
+    char string[11];
+    int code;
+};
+
+extern const struct key_char NORMAL_KEYS[NUM_NORMAL_KEYS];
+extern const struct key_char SHIFTED_KEYS[NUM_SHIFTED_KEYS];
+extern const struct key_string MODIFIER_KEYS[NUM_MODIFIER_KEYS];
+extern const struct key_string FUNCTION_KEYS[NUM_FUNCTION_KEYS];
 
 int uinput_test();
 
@@ -61,7 +81,9 @@ int uinput_emit(uint16_t type, uint16_t code, int32_t value);
  * @param key_string Character array representing the key to be pressed
  * @return 0 on success, 1 if error(s)
  */
-int uinput_enter_key(const char * key_string);
+int uinput_enter_keypress(const char * key_string);
+
+int uinput_enter_key(const char * key_string, int32_t value);
 
 /**
  * @brief Send a particular key input event (press or release)

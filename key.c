@@ -37,11 +37,18 @@ static const char * usage =
     "    --repeat-delay ms  Delay time between repetitions (default = 0ms)\n"
     "Each key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\n";
 
-/* TODO: Press all keys then release all keys */
+/* Press all keys, then release all keys */
 int enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
     while (ptr != NULL) {
-        if (uinput_enter_key(ptr)) {
+        if (uinput_enter_key(ptr, 1)) {
+            return 1;
+        }
+        ptr = strtok(NULL, "+");
+    }
+    ptr = strtok(key_string, "+");
+    while (ptr != NULL) {
+        if (uinput_enter_key(ptr, 0)) {
             return 1;
         }
         ptr = strtok(NULL, "+");
