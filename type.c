@@ -47,22 +47,28 @@ int type_text(char * text) {
 
 int type_run(int argc, char ** argv) {
 	int time_delay = 100;
-    /* int time_keydelay = 12; */
+    /*
+    int time_keydelay = 12;
 	char file_path[100] = "";
+    */
     int opt = 0;
 
     enum optlist_t {
         opt_help,
         opt_delay,
+        /*
         opt_key_delay,
-        opt_file
+        opt_file,
+        */
     };
 
     static struct option long_options[] = {
         {"help",      no_argument,       NULL, opt_help     },
         {"delay",     required_argument, NULL, opt_delay    },
-        /* {"key-delay", required_argument, NULL, opt_key_delay}, */
-        {"file",      required_argument, NULL, opt_file     }
+        /*
+        {"key-delay", required_argument, NULL, opt_key_delay},
+        {"file",      required_argument, NULL, opt_file     },
+        */
     };
 
     while ((opt = getopt_long_only(argc, argv, "hd:k:f:", long_options, NULL)) != -1) {
@@ -71,14 +77,16 @@ int type_run(int argc, char ** argv) {
             case opt_delay:
                 time_delay = strtoul(optarg, NULL, 10);
                 break;
-            /* case 'k':
+            /*
+            case 'k':
             case opt_key_delay:
                 time_keydelay = strtoul(optarg, NULL, 10);
-                break; */
+                break;
             case 'f':
             case opt_file:
                 strcat(file_path, optarg);
                 break;
+            */
             case 'h':
             case opt_help:
             case '?':
@@ -87,61 +95,86 @@ int type_run(int argc, char ** argv) {
         }
     }
 
-    int extra_args = argc - optind;
-    if (!extra_args) {
-        fprintf(stderr, "Not enough args!\n");
-        fprintf(stderr, usage);
-        return 1;
-    }
-
-	int fd = -1;
+    /*
+	FILE * fd = NULL;
 
 	if (strcmp(file_path, "")) {
 		if (!strcmp(file_path, "-")) {
-			fd = STDIN_FILENO;
+            printf("Setting fd\n");
+			fd = stdin;
+            printf("Set\n");
 			fprintf(stderr, "ydotool: type: reading from stdin\n");
 		} else {
-			fd = open(file_path, O_RDONLY);
+			fd = fopen(file_path, O_RDONLY);
 
-			if (fd == -1) {
+			if (!fd) {
 				fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path, strerror(errno));
 				return 1;
 			}
 		}
 	}
+    */
 
 	if (time_delay)
 		usleep(time_delay * 1000);
 
-	if (fd >= 0) {
-		char buf[128];
+    /*
+	if (fd) {
+        printf("Seeking\n");
+        if (fseek(fd, 0L, SEEK_END)) {
+            printf("FAIL\n");
+        }
+        printf("Seeked\n");
+        size_t len = ftell(fd);
+        if (fseek(fd, 0L, SEEK_SET)) {
+            printf("FAIL2\n");
+        }
+        char * buf = malloc(sizeof(char) * (len + 1));
 
-		ssize_t rc;
-		while ((rc = read(fd, &buf[0], 128))) {
-			if (rc > 0) {
-				if (type_text(buf)) {
-                    return 1;
-                }
-			} else if (rc < 0) {
-				fprintf(stderr, "ydotool: type: error: read %s failed: %s\n", file_path, strerror(errno));
-				return 1;
-			}
+		while (fgets(buf, len, fd)) {
+            if (type_text(buf)) {
+                return 1;
+            }
 		}
 
-		close(fd);
+		if (fclose(fd)) {
+            printf("FAIL3\n");
+        }
 	} else {
-        /* TODO: Type all args (just use a for loop?) */
+    */
+        /* Check for input */
+        int extra_args = argc - optind;
+        if (!extra_args) {
+            fprintf(stderr, "Not enough args!\n");
+            fprintf(stderr, usage);
+            return 1;
+        }
+
+        /* Sum length of args */
+        size_t len = 0;
+        for (; optind != argc; ++optind) {
+            len += strlen(argv[optind]);
+        }
+
         /*
-        char * buf = "";
+         * Allocate character array buffer
+         * "+1" to allow space for null terminating byte
+         */
+        char * buf = malloc(sizeof(char) * (len + 1));
+        optind -= extra_args;
+
+        /* Concatenate args into buffer */
         for (; optind != argc; ++optind) {
             strcat(buf, argv[optind]);
         }
+
+        /* Emulate keyboard input of buffer characters */
         if (type_text(buf)) {
-        */
-        if (type_text(argv[optind])) {
             return 1;
         }
+    /*
 	}
+    */
 
 	return 0;
 }
