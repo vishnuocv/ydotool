@@ -37,22 +37,43 @@ struct uinput_raw_data {
     int32_t value; /**< @brief 1 for key press, 0 for key release or any integer value for absolute/relative mouse movement in pixels */
 } __attribute__((packed));
 
+/**
+ * @brief Represents a single keyboard character
+ * @details Used to convert between the char and the integer keycode
+ */
 struct key_char {
     char character;
     int code;
 };
 
+/**
+ * @brief Represents a single keyobard function/modifier key
+ * @details Used to convert between the string representation of the key and the integer keycode
+ */
 struct key_string {
     char string[11];
     int code;
 };
 
+/**
+ * @brief Array of all normal (non-shifted) character keys
+ */
 extern const struct key_char NORMAL_KEYS[NUM_NORMAL_KEYS];
-extern const struct key_char SHIFTED_KEYS[NUM_SHIFTED_KEYS];
-extern const struct key_string MODIFIER_KEYS[NUM_MODIFIER_KEYS];
-extern const struct key_string FUNCTION_KEYS[NUM_FUNCTION_KEYS];
 
-int uinput_test();
+/**
+ * @brief Array of all shifted character keys
+ */
+extern const struct key_char SHIFTED_KEYS[NUM_SHIFTED_KEYS];
+
+/**
+ * @brief Array of all modifier keys
+ */
+extern const struct key_string MODIFIER_KEYS[NUM_MODIFIER_KEYS];
+
+/**
+ * @brief Array of all function keys
+ */
+extern const struct key_string FUNCTION_KEYS[NUM_FUNCTION_KEYS];
 
 /**
  * @brief Close uinput device if open
@@ -83,8 +104,21 @@ int uinput_emit(uint16_t type, uint16_t code, int32_t value);
  */
 int uinput_enter_keypress(const char * key_string);
 
+/**
+ * @brief Emulate a single key event for the given string representation of a key
+ * @param key_string Character array representing the key to be pressed/released
+ * @param value 1 for press, 0 for release
+ * @return 0 on success, 1 if error(s)
+ */
 int uinput_enter_key(const char * key_string, int32_t value);
 
+/**
+ * @brief Convert string/char representation of a key to the associated integer keycode
+ * @param [in] key_string Character array representing the key
+ * @param [out] keycode The integer keycode for the given key
+ * @param [out] shifted 1 if keycode represents a shifted key, 0 if normal
+ * @return 0 on success, 1 if error(s)
+ */
 int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted);
 
 /**

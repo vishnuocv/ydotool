@@ -1,3 +1,21 @@
+/*
+    This file is part of ydotool.
+	Copyright (C) 2019 Harry Austen
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the MIT License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+/**
+ * @file test.c
+ * @author Harry Austen
+ * @brief Program for testing the ydotool code
+ */
+
 /* Local includes */
 #include "uinput.h"
 
@@ -110,6 +128,10 @@ int uinput_test() {
 
 int main() {
     int ret = 0;
+
+    /**
+     * @todo Add tests for different areas of the ydotool codebase
+     */
 
     ret += uinput_test();
 
