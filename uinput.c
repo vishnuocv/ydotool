@@ -269,66 +269,6 @@ int binary_search_char(const struct key_char * arr, size_t len, char c, int * co
     return 1;
 }
 
-int uinput_test() {
-    size_t num_norm = sizeof(NORMAL_KEYS)/sizeof(struct key_char);
-    for (size_t i = 1; i != num_norm; ++i) {
-        if (NORMAL_KEYS[i].character < NORMAL_KEYS[i-1].character) {
-            printf("%c < %c\n", NORMAL_KEYS[i].character, NORMAL_KEYS[i-1].character);
-        }
-
-        int code = 0;
-        if (binary_search_char(NORMAL_KEYS, num_norm, NORMAL_KEYS[i].character, &code)) {
-            printf("'%c' NOT FOUND!\n", NORMAL_KEYS[i].character);
-        } else if (code != NORMAL_KEYS[i].code) {
-            printf("Code does not match for '%c'. Got %d, expected %d\n", NORMAL_KEYS[i].character, code, NORMAL_KEYS[i].character);
-        }
-    }
-
-    size_t num_shift = sizeof(SHIFTED_KEYS)/sizeof(struct key_char);
-    for (size_t i = 1; i != num_shift; ++i) {
-        if (SHIFTED_KEYS[i].character < SHIFTED_KEYS[i-1].character) {
-            printf("%c < %c\n", SHIFTED_KEYS[i].character, SHIFTED_KEYS[i-1].character);
-        }
-
-        int code = 0;
-        if (binary_search_char(SHIFTED_KEYS, num_shift, SHIFTED_KEYS[i].character, &code)) {
-            printf("'%c' NOT FOUND!\n", SHIFTED_KEYS[i].character);
-        } else if (code != SHIFTED_KEYS[i].code) {
-            printf("Code does not match for '%c'. Got %d, expected %d\n", SHIFTED_KEYS[i].character, code, SHIFTED_KEYS[i].character);
-        }
-    }
-
-    size_t num_modifiers = sizeof(MODIFIER_KEYS)/sizeof(struct key_string);
-    for (size_t i = 1; i != num_modifiers; ++i) {
-        if (strcmp(MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string) < 0) {
-            printf("%s < %s\n", MODIFIER_KEYS[i].string, MODIFIER_KEYS[i-1].string);
-        }
-
-        int code = 0;
-        if (binary_search_string(MODIFIER_KEYS, num_modifiers, MODIFIER_KEYS[i].string, &code)) {
-            printf("%s NOT FOUND!\n", MODIFIER_KEYS[i].string);
-        } else if ( code != MODIFIER_KEYS[i].code ) {
-            printf("Code does not match for %s. Got %d, expected %d\n", MODIFIER_KEYS[i].string, code, MODIFIER_KEYS[i].code);
-        }
-    }
-
-    size_t num_funcs = sizeof(FUNCTION_KEYS)/sizeof(struct key_string);
-    for (size_t i = 1; i != num_funcs; ++i) {
-        if (strcmp(FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string) < 0) {
-            printf("%s < %s\n", FUNCTION_KEYS[i].string, FUNCTION_KEYS[i-1].string);
-        }
-
-        int code = 0;
-        if (binary_search_string(FUNCTION_KEYS, num_funcs, FUNCTION_KEYS[i].string, &code)) {
-            printf("%s NOT FOUND!\n", FUNCTION_KEYS[i].string);
-        } else if ( code != FUNCTION_KEYS[i].code ) {
-            printf("Code does not match for %s. Got %d, expected %d\n", FUNCTION_KEYS[i].string, code, FUNCTION_KEYS[i].code);
-        }
-    }
-
-    return 0;
-}
-
 /* Initialise the input device */
 int uinput_init() {
     /* Check write access to uinput driver device */
@@ -399,7 +339,7 @@ int cmp_chars(const void * a, const void * b) {
     return (*(char *)a - *(char *)b);
 }
 
-int keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted) {
+int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted) {
     *shifted = 0;
     /* If string is a single character */
     if (strlen(key_string) == 1) {
@@ -444,7 +384,7 @@ int uinput_enter_keypress(const char * key_string) {
     uint8_t shifted = 0;
     uint16_t keycode = 0;
 
-    if (!keystring_to_keycode(key_string, &keycode, &shifted)) {
+    if (!uinput_keystring_to_keycode(key_string, &keycode, &shifted)) {
         if (shifted) {
             if (uinput_send_shifted_keypress(keycode)) {
                 return 1;
@@ -464,7 +404,7 @@ int uinput_enter_key(const char * key_string, int32_t value) {
     uint8_t shifted = 0;
     uint16_t keycode = 0;
 
-    if (!keystring_to_keycode(key_string, &keycode, &shifted)) {
+    if (!uinput_keystring_to_keycode(key_string, &keycode, &shifted)) {
         if (shifted) {
             if (uinput_send_key(KEY_LEFTSHIFT, value)) {
                 return 1;

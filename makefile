@@ -4,7 +4,8 @@ OPT += -pthread
 CFLAGS := $(WARN) $(OPT)
 
 # Executables and dependencies
-EXE := ydotool ydotoold
+EXE := test ydotool ydotoold
+test_DEP := uinput.o test.o
 ydotool_DEP := ydotool.o click.o key.o mouse.o type.o uinput.o
 ydotoold_DEP := ydotoold.o uinput.o
 
@@ -19,6 +20,10 @@ default: $(EXE)
 # Compile a C++ source file
 %.o:%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Test application
+test: $(test_DEP)
+	$(CC) $(CFLAGS) $^ -o $@
 
 # Main application
 ydotool: $(ydotool_DEP)

@@ -85,6 +85,8 @@ int uinput_enter_keypress(const char * key_string);
 
 int uinput_enter_key(const char * key_string, int32_t value);
 
+int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted);
+
 /**
  * @brief Send a particular key input event (press or release)
  * @param code The integer representation of the associated key
