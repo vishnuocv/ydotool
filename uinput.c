@@ -335,11 +335,6 @@ int uinput_destroy() {
     return 0;
 }
 
-/* Character pointer comparer for use with bsearch */
-int cmp_chars(const void * a, const void * b) {
-    return (*(char *)a - *(char *)b);
-}
-
 int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted) {
     *shifted = 0;
     /* If string is a single character */

@@ -163,6 +163,8 @@ int type_run(int argc, char ** argv) {
          * "+1" to allow space for null terminating byte
          */
         char * buf = malloc(sizeof(char) * (len + 1));
+        /* Initialise to null bytes */
+        memset(buf, '\0', len+1);
         optind -= extra_args;
 
         /* Concatenate args into buffer */

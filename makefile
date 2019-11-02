@@ -44,3 +44,8 @@ install:
 .PHONY: clean
 clean:
 	$(RM) $(EXE) *.o
+
+# Perform a static analysis check
+.PHONY: cppcheck
+cppcheck:
+	@cppcheck --enable=all --force -q --suppress=missingIncludeSystem .
