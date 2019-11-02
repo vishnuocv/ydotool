@@ -1,5 +1,5 @@
 # Compiler flags
-WARN := -Wall -Wextra -Wpedantic
+WARN := -Wall -Wextra -Wpedantic -Wshadow -Wcast-align -Wconversion -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wdouble-promotion -Wformat=2
 OPT += -pthread
 CFLAGS := $(WARN) $(OPT)
 

@@ -16,12 +16,12 @@
  * @brief Program for testing the ydotool code
  */
 
-/* Local includes */
-#include "uinput.h"
-
 /* System includes */
 #include <string.h>
 #include <stdio.h>
+
+/* Local includes */
+#include "uinput.h"
 
 int uinput_test_array_order() {
     int ret = 0;

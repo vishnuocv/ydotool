@@ -17,8 +17,6 @@
  * @brief Implementation of functions for emulating input events
  */
 
-/* Local includes */
-#include "uinput.h"
 /* System includes */
 #include <errno.h>
 #include <stdlib.h>
@@ -28,6 +26,9 @@
 #include <fcntl.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
+
+/* Local includes */
+#include "uinput.h"
 
 /* Wrapper macro for errno error check */
 #define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); return 1; }
@@ -243,7 +244,7 @@ int binary_search_string(const struct key_string * arr, size_t len, const char *
     return 1;
 }
 
-int binary_search_char(const struct key_char * arr, size_t len, char c, int * code) {
+int binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;
     while (lo <= hi) {
@@ -425,7 +426,7 @@ int uinput_enter_key(const char * key_string, int32_t value) {
 
 /* Emulate typing the given character on the vitual device */
 int uinput_enter_char(char c) {
-    int code = 0;
+    uint16_t code = 0;
 
     if (!binary_search_char(NORMAL_KEYS, sizeof(NORMAL_KEYS)/sizeof(struct key_char), c, &code)) {
         if (uinput_send_keypress(code)) {

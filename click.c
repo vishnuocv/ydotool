@@ -17,24 +17,29 @@
  * @brief Emulate clicking the given mouse button
  */
 
-/* Local includes */
-#include "uinput.h"
 /* System includes */
 #include <getopt.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 
-int click_run(int argc, char ** argv) {
-    const char * usage =
+/* Local includes */
+#include "uinput.h"
+
+int print_usage() {
+    fprintf(stderr,
         "Usage: click [--delay <ms>] <button>\n"
         "    --help      Show this help\n"
         "    --delay ms  Delay time before start clicking (default = 100ms)\n"
         "    button      1: left\n"
         "                2: right\n"
-        "                3: middle\n";
+        "                3: middle\n");
+    return 1;
+}
 
-	int time_delay = 100;
+
+int click_run(int argc, char ** argv) {
+	uint32_t time_delay = 100;
     int opt = 0;
 
     enum optlist_t {
@@ -51,13 +56,12 @@ int click_run(int argc, char ** argv) {
         switch (opt) {
             case 'd':
             case opt_delay:
-                time_delay = strtoul(optarg, NULL, 10);
+                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
                 break;
             case 'h':
             case opt_help:
             case '?':
-                fprintf(stderr, usage);
-                return 1;
+                return print_usage();
         }
     }
 
@@ -68,12 +72,11 @@ int click_run(int argc, char ** argv) {
         } else {
             fprintf(stderr, "Not enough arguments!\n");
         }
-        fprintf(stderr, usage);
-        return 1;
+        return print_usage();
     }
 
-    int button = strtoul(argv[optind], NULL, 10);
-	int keycode = BTN_LEFT;
+    uint16_t button = (uint16_t)strtoul(argv[optind], NULL, 10);
+	uint16_t keycode = BTN_LEFT;
 
 	switch (button) {
         case 1:
@@ -86,8 +89,7 @@ int click_run(int argc, char ** argv) {
 			break;
 		default:
             fprintf(stderr, "Invalid button argument!\n");
-            fprintf(stderr, usage);
-            return 1;
+            return print_usage();
 	}
 
 	if (time_delay) {

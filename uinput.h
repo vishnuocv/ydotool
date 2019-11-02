@@ -20,12 +20,25 @@
 #ifndef __UINPUT_H__
 #define __UINPUT_H__
 
+/* System includes */
 #include <stdint.h>
 #include <linux/uinput.h>
 
+/**
+ * Number of normal keys
+ */
 #define NUM_NORMAL_KEYS 51
+/**
+ * Number of shifted keys
+ */
 #define NUM_SHIFTED_KEYS 46
+/**
+ * Number of modifier keys
+ */
 #define NUM_MODIFIER_KEYS 15
+/**
+ * Number of function keys
+ */
 #define NUM_FUNCTION_KEYS 31
 
 /**
@@ -43,7 +56,7 @@ struct uinput_raw_data {
  */
 struct key_char {
     char character;
-    int code;
+    uint16_t code;
 };
 
 /**
@@ -52,7 +65,7 @@ struct key_char {
  */
 struct key_string {
     char string[11];
-    int code;
+    uint16_t code;
 };
 
 /**

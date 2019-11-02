@@ -17,9 +17,6 @@
  * @brief Implementation of function for emulating typing text
  */
 
-// Local includes
-#include "type.h"
-#include "uinput.h"
 // System includes
 #include <getopt.h>
 #include <stdio.h>
@@ -28,6 +25,20 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+
+// Local includes
+#include "type.h"
+#include "uinput.h"
+
+int type_print_usage() {
+    fprintf(stderr,
+        "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
+        "    --help                    Show this help\n"
+        "    --delay milliseconds      Delay time before start typing\n"
+        "    --key-delay milliseconds  Delay time between keystrokes (default = 12ms)\n"
+        "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n");
+    return 1;
+}
 
 int type_text(char * text) {
 	for (int i=0; text[i] != '\0'; ++i) {
@@ -39,14 +50,7 @@ int type_text(char * text) {
 }
 
 int type_run(int argc, char ** argv) {
-    const char * usage =
-        "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
-        "    --help                    Show this help\n"
-        "    --delay milliseconds      Delay time before start typing\n"
-        "    --key-delay milliseconds  Delay time between keystrokes (default = 12ms)\n"
-        "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n";
-
-	int time_delay = 100;
+	uint32_t time_delay = 100;
     /*
     int time_keydelay = 12;
 	char file_path[100] = "";
@@ -75,7 +79,7 @@ int type_run(int argc, char ** argv) {
         switch (opt) {
             case 'd':
             case opt_delay:
-                time_delay = strtoul(optarg, NULL, 10);
+                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
                 break;
             /*
             case 'k':
@@ -90,8 +94,7 @@ int type_run(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                fprintf(stderr, usage);
-                return 1;
+                return type_print_usage();
         }
     }
 
@@ -146,8 +149,7 @@ int type_run(int argc, char ** argv) {
         int extra_args = argc - optind;
         if (!extra_args) {
             fprintf(stderr, "Not enough args!\n");
-            fprintf(stderr, usage);
-            return 1;
+            return type_print_usage();
         }
 
         /* Sum length of args */

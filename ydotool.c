@@ -17,17 +17,18 @@
  * @brief Main entry point to the ydotool program. Uses the first argument to run the relevant command
  */
 
+/* System includes */
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
 /* Local includes */
 #include "click.h"
 #include "key.h"
 #include "mouse.h"
 #include "type.h"
 #include "uinput.h"
-/* System includes */
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/un.h>
 
 int main(int argc, char ** argv) {
 	int ret = 0;
@@ -37,15 +38,14 @@ int main(int argc, char ** argv) {
             || !strncmp(argv[1], "--h", 3)
             || !strcmp(argv[1], "help")
        ) {
-        const char * usage =
-            "Usage: %s <cmd> <args>\n"
-            "Available commands:\n"
-            "    click\n"
-            "    key\n"
-            "    mouse\n"
-            "    type\n";
-
-		fprintf(stderr, usage, argv[0]);
+		fprintf(stderr,
+                "Usage: %s <cmd> <args>\n"
+                "Available commands:\n"
+                "    click\n"
+                "    key\n"
+                "    mouse\n"
+                "    type\n",
+                argv[0]);
 		return 1;
 	} else {
         /* First argument dealt with, increment arg pointer */

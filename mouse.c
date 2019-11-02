@@ -23,17 +23,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 /* Local includes */
 #include "mouse.h"
 #include "uinput.h"
 
-int mouse_run(int argc, char ** argv) {
-    const char * usage =
+int mouse_print_usage() {
+    fprintf(stderr,
         "Usage: mouse [--delay <ms>] <x> <y>\n"
         "    --help      Show this help\n"
-        "    --delay ms  Delay time before start moving (default = 100ms)\n";
+        "    --delay ms  Delay time before start moving (default = 100ms)\n");
+    return 1;
+}
 
-	int time_delay = 100;
+int mouse_run(int argc, char ** argv) {
+	uint32_t time_delay = 100;
     int opt = 0;
 
     enum optlist_t {
@@ -50,13 +54,12 @@ int mouse_run(int argc, char ** argv) {
         switch (opt) {
             case 'd':
             case opt_delay:
-                time_delay = strtoul(optarg, NULL, 10);
+                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
                 break;
             case 'h':
             case opt_help:
             case '?':
-                fprintf(stderr, usage);
-                return 1;
+                return mouse_print_usage();
         }
     }
 
@@ -67,8 +70,7 @@ int mouse_run(int argc, char ** argv) {
         } else {
             fprintf(stderr, "Too few args!\n");
         }
-        fprintf(stderr, usage);
-        return 1;
+        return mouse_print_usage();
     }
 
 	if (time_delay)
