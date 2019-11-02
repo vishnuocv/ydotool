@@ -25,15 +25,15 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-static const char * usage =
-    "Usage: click [--delay <ms>] <button>\n"
-    "    --help      Show this help\n"
-    "    --delay ms  Delay time before start clicking (default = 100ms)\n"
-    "    button      1: left\n"
-    "                2: right\n"
-    "                3: middle\n";
-
 int click_run(int argc, char ** argv) {
+    const char * usage =
+        "Usage: click [--delay <ms>] <button>\n"
+        "    --help      Show this help\n"
+        "    --delay ms  Delay time before start clicking (default = 100ms)\n"
+        "    button      1: left\n"
+        "                2: right\n"
+        "                3: middle\n";
+
 	int time_delay = 100;
     int opt = 0;
 

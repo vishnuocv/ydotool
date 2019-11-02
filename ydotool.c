@@ -29,20 +29,24 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-static const char * usage =
-    "Usage: %s <cmd> <args>\n"
-    "Available commands:\n"
-    "    click\n"
-    "    key\n"
-    "    mouse\n"
-    "    type\n";
-
 int main(int argc, char ** argv) {
 	int ret = 0;
 
-	if (argc < 2 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--h", 3) == 0 || strcmp(argv[1], "help") == 0) {
+	if (    argc < 2
+            || !strncmp(argv[1], "-h", 2)
+            || !strncmp(argv[1], "--h", 3)
+            || !strcmp(argv[1], "help")
+       ) {
+        const char * usage =
+            "Usage: %s <cmd> <args>\n"
+            "Available commands:\n"
+            "    click\n"
+            "    key\n"
+            "    mouse\n"
+            "    type\n";
+
 		fprintf(stderr, usage, argv[0]);
-		ret = 1;
+		return 1;
 	} else {
         /* First argument dealt with, increment arg pointer */
         argv++;

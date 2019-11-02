@@ -27,12 +27,12 @@
 #include "mouse.h"
 #include "uinput.h"
 
-static const char * usage =
-    "Usage: mouse [--delay <ms>] <x> <y>\n"
-    "    --help      Show this help\n"
-    "    --delay ms  Delay time before start moving (default = 100ms)\n";
-
 int mouse_run(int argc, char ** argv) {
+    const char * usage =
+        "Usage: mouse [--delay <ms>] <x> <y>\n"
+        "    --help      Show this help\n"
+        "    --delay ms  Delay time before start moving (default = 100ms)\n";
+
 	int time_delay = 100;
     int opt = 0;
 

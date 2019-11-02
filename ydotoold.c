@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <pthread.h>
+
 /* Local includes */
 #include "uinput.h"
 
@@ -47,7 +48,7 @@ void * client_handler(void * fdp) {
 }
 
 int main() {
-	const char path_socket[] = "/tmp/.ydotool_socket";
+	const char * path_socket = "/tmp/.ydotool_socket";
 	unlink(path_socket);
 	int fd_listener = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -71,7 +72,7 @@ int main() {
 		return 1;
 	}
 
-	chmod(path_socket, 0600);
+	chmod(path_socket, 600);
 	printf("ydotoold: listening on socket %s\n", path_socket);
 
     int fd_client = 0;

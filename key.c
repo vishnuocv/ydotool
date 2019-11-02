@@ -28,15 +28,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static const char * usage =
-    "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
-    "    --help             Show this help\n"
-    "    --delay ms         Delay time before start pressing keys (default = 100ms)\n"
-    "    --key-delay ms     Delay time between keystrokes (default = 12ms)\n"
-    "    --repeat times     Times to repeat the key sequence\n"
-    "    --repeat-delay ms  Delay time between repetitions (default = 0ms)\n"
-    "Each key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\n";
-
 /* Press all keys, then release all keys */
 int enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
@@ -57,6 +48,15 @@ int enter_keys(char * key_string) {
 }
 
 int key_run(int argc, char ** argv) {
+    const char * usage =
+        "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
+        "    --help             Show this help\n"
+        "    --delay ms         Delay time before start pressing keys (default = 100ms)\n"
+        "    --key-delay ms     Delay time between keystrokes (default = 12ms)\n"
+        "    --repeat times     Times to repeat the key sequence\n"
+        "    --repeat-delay ms  Delay time between repetitions (default = 0ms)\n"
+        "Each key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\n";
+
 	int time_delay = 100;
 	int repeats = 1;
     int opt = 0;

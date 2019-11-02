@@ -29,13 +29,6 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-static const char * usage =
-    "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
-    "    --help                    Show this help\n"
-    "    --delay milliseconds      Delay time before start typing\n"
-    "    --key-delay milliseconds  Delay time between keystrokes (default = 12ms)\n"
-    "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n";
-
 int type_text(char * text) {
 	for (int i=0; text[i] != '\0'; ++i) {
         if (uinput_enter_char(text[i])) {
@@ -46,6 +39,13 @@ int type_text(char * text) {
 }
 
 int type_run(int argc, char ** argv) {
+    const char * usage =
+        "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
+        "    --help                    Show this help\n"
+        "    --delay milliseconds      Delay time before start typing\n"
+        "    --key-delay milliseconds  Delay time between keystrokes (default = 12ms)\n"
+        "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n";
+
 	int time_delay = 100;
     /*
     int time_keydelay = 12;
