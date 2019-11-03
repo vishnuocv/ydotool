@@ -223,7 +223,7 @@ const struct key_string FUNCTION_KEYS[] = {
     {"UP", KEY_UP}
 };
 
-int binary_search_string(const struct key_string * arr, size_t len, const char * str, int * code) {
+int binary_search_string(const struct key_string * arr, size_t len, const char * str, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;
     while (lo <= hi) {
@@ -373,37 +373,23 @@ int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uin
     /* If string is a single character */
     if (strlen(key_string) == 1) {
         /* Search normal keys */
-        for (int i = 0; i != NUM_NORMAL_KEYS; ++i) {
-            if (key_string[0] == NORMAL_KEYS[i].character) {
-                *keycode = NORMAL_KEYS[i].code;
-                return 0;
-            }
+        if (!binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, key_string[0], keycode)) {
+            return 0;
         }
-
         /* Search shifted keys */
-        for (int i = 0; i != NUM_SHIFTED_KEYS; ++i) {
-            if (key_string[0] == SHIFTED_KEYS[i].character) {
-                *shifted = 1;
-                *keycode = SHIFTED_KEYS[i].code;
-                return 0;
-            }
+        if (!binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, key_string[0], keycode)) {
+            *shifted = 1;
+            return 0;
         }
     /* Else string is multiple characters */
     } else {
         /* Search modifier keys */
-        for (int i = 0; i != NUM_MODIFIER_KEYS; ++i) {
-            if (!strcmp(key_string, MODIFIER_KEYS[i].string)) {
-                *keycode = MODIFIER_KEYS[i].code;
-                return 0;
-            }
+        if (!binary_search_string(MODIFIER_KEYS, NUM_MODIFIER_KEYS, key_string, keycode)) {
+            return 0;
         }
-
         /* Search function keys */
-        for (int i = 0; i != NUM_FUNCTION_KEYS; ++i) {
-            if (!strcmp(key_string, FUNCTION_KEYS[i].string)) {
-                *keycode = FUNCTION_KEYS[i].code;
-                return 0;
-            }
+        if (!binary_search_string(FUNCTION_KEYS, NUM_FUNCTION_KEYS, key_string, keycode)) {
+            return 0;
         }
     }
     return 1;
