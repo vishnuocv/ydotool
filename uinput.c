@@ -26,6 +26,8 @@
 #include <fcntl.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 /* Local includes */
 #include "uinput.h"
@@ -37,10 +39,10 @@
 #define NUM_EVCODES 4
 
 /* uinput file descriptor */
-int FD = -1;
+static int FD = -1;
 
 /* All valid keycodes */
-const int KEYCODES[NUM_KEYCODES] = {
+static const int KEYCODES[NUM_KEYCODES] = {
     BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
     KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_Q, KEY_W,
     KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LEFTBRACE,
@@ -57,7 +59,7 @@ const int KEYCODES[NUM_KEYCODES] = {
 };
 
 /* All valid event codes */
-int EVCODES[NUM_EVCODES] = {
+static const int EVCODES[NUM_EVCODES] = {
     EV_KEY,
     EV_REL,
     EV_ABS,
@@ -273,8 +275,36 @@ int binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t
     return 1;
 }
 
+int connect_socket() {
+    const char * path_socket = "/tmp/.ydotool_socket";
+    FD = socket(AF_UNIX, SOCK_STREAM, 0);
+
+    if (FD == -1) {
+        fprintf(stderr, "Failed to create socket: %s\n", strerror(errno));
+        return 1;
+    }
+
+    struct sockaddr_un addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, path_socket, sizeof(addr.sun_path)-1);
+
+    if (connect(FD, (struct sockaddr *)&addr, sizeof(addr))) {
+        fprintf(stderr, "Failed to connect to socket: %s\n", strerror(errno));
+        return 1;
+    }
+
+    return 0;
+}
+
 /* Initialise the input device */
 int uinput_init() {
+    /* Attempt to connect to ydotoold backend if running */
+    if (!connect_socket()) {
+        printf("Using ydotoold backend\n");
+        return 0;
+    }
+
     /* Check write access to uinput driver device */
     if (access("/dev/uinput", W_OK)) {
         fprintf(stderr, "Do not have access to write to /dev/uinput!\n"
@@ -331,7 +361,7 @@ int uinput_init() {
 /* Delete the input device */
 int uinput_destroy() {
     if (FD != -1) {
-        CHECK( ioctl(FD, UI_DEV_DESTROY) );
+        ioctl(FD, UI_DEV_DESTROY);
         close(FD);
         FD = -1;
     }

@@ -89,6 +89,12 @@ extern const struct key_string MODIFIER_KEYS[NUM_MODIFIER_KEYS];
 extern const struct key_string FUNCTION_KEYS[NUM_FUNCTION_KEYS];
 
 /**
+ * @brief Initialise uinput device
+ * @return 0 on success, 1 if error(s)
+ */
+int uinput_init();
+
+/**
  * @brief Close uinput device if open
  * @return 0 on success, 1 if error(s)
  */

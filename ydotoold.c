@@ -26,9 +26,19 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <signal.h>
 
 /* Local includes */
 #include "uinput.h"
+
+static int FD_LIST = -1;
+
+void sig_handler(int sig) {
+    printf("Received %s. Terminating...\n", sys_siglist[sig]);
+    uinput_destroy();
+    close(FD_LIST);
+    exit(0);
+}
 
 void * client_handler(void * fdp) {
 	struct uinput_raw_data buf;
@@ -48,11 +58,22 @@ void * client_handler(void * fdp) {
 }
 
 int main() {
+    /* Setup SIGINT signal handling */
+    struct sigaction act;
+    act.sa_handler = &sig_handler;
+    sigaction(SIGINT, &act, NULL);
+
+    /* Initialise input device */
+    if (uinput_init()) {
+        return 1;
+    }
+
+    /* Create socket */
 	const char * path_socket = "/tmp/.ydotool_socket";
 	unlink(path_socket);
-	int fd_listener = socket(AF_UNIX, SOCK_STREAM, 0);
+	FD_LIST = socket(AF_UNIX, SOCK_STREAM, 0);
 
-	if (fd_listener == -1) {
+	if (FD_LIST == -1) {
 		fprintf(stderr, "ydotoold: failed to create socket: %s\n", strerror(errno));
 		return 1;
 	}
@@ -62,21 +83,23 @@ int main() {
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, path_socket, sizeof(addr.sun_path)-1);
 
-	if (bind(fd_listener, (struct sockaddr *)&addr, sizeof(addr))) {
+	if (bind(FD_LIST, (struct sockaddr *)&addr, sizeof(addr))) {
 		fprintf(stderr, "ydotoold: failed to bind to socket [%s]: %s\n", path_socket, strerror(errno));
 		return 1;
 	}
 
-	if (listen(fd_listener, 16)) {
+	if (listen(FD_LIST, 16)) {
 		fprintf(stderr, "ydotoold: failed to listen on socket [%s]: %s\n", path_socket, strerror(errno));
 		return 1;
 	}
 
-	chmod(path_socket, 600);
+    mode_t open_access = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+	chmod(path_socket, open_access);
 	printf("ydotoold: listening on socket %s\n", path_socket);
 
+    /* Wait for tasks */
     int fd_client = 0;
-	while ((fd_client = accept(fd_listener, NULL, NULL))) {
+	while ((fd_client = accept(FD_LIST, NULL, NULL))) {
 		printf("ydotoold: accepted client\n");
 
         pthread_t thd;
@@ -91,7 +114,8 @@ int main() {
         }
 	}
 
-    if (uinput_destroy()) {
+    /* If socket become invalidated, destroy input device and close socket */
+    if (uinput_destroy() || close(FD_LIST)) {
         return 1;
     }
     return 0;
