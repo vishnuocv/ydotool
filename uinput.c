@@ -33,11 +33,14 @@
 /* Wrapper macro for errno error check */
 #define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); return 1; }
 
+#define NUM_KEYCODES 91
+#define NUM_EVCODES 4
+
 /* uinput file descriptor */
 int FD = -1;
 
 /* All valid keycodes */
-const int KEYCODES[] = {
+const int KEYCODES[NUM_KEYCODES] = {
     BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
     KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_Q, KEY_W,
     KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_LEFTBRACE,
@@ -54,7 +57,7 @@ const int KEYCODES[] = {
 };
 
 /* All valid event codes */
-int EVCODES[] = {
+int EVCODES[NUM_EVCODES] = {
     EV_KEY,
     EV_REL,
     EV_ABS,
@@ -297,10 +300,10 @@ int uinput_init() {
     CHECK( (FD = open("/dev/uinput", O_WRONLY|O_NONBLOCK)) );
 
     /* Events/Keys setup */
-    for (int i = 0; i != sizeof(KEYCODES)/sizeof(KEYCODES[0]); ++i) {
+    for (int i = 0; i != NUM_KEYCODES; ++i) {
         CHECK( ioctl(FD, UI_SET_KEYBIT, KEYCODES[i]) );
     }
-    for (int i = 0; i != sizeof(EVCODES)/sizeof(EVCODES[0]); ++i) {
+    for (int i = 0; i != NUM_EVCODES; ++i) {
         CHECK( ioctl(FD, UI_SET_EVBIT, EVCODES[i]) );
     }
 
@@ -340,7 +343,7 @@ int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uin
     /* If string is a single character */
     if (strlen(key_string) == 1) {
         /* Search normal keys */
-        for (int i = 0; i != sizeof(NORMAL_KEYS)/sizeof(struct key_char); ++i) {
+        for (int i = 0; i != NUM_NORMAL_KEYS; ++i) {
             if (key_string[0] == NORMAL_KEYS[i].character) {
                 *keycode = NORMAL_KEYS[i].code;
                 return 0;
@@ -348,7 +351,7 @@ int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uin
         }
 
         /* Search shifted keys */
-        for (int i = 0; i != sizeof(SHIFTED_KEYS)/sizeof(struct key_char); ++i) {
+        for (int i = 0; i != NUM_SHIFTED_KEYS; ++i) {
             if (key_string[0] == SHIFTED_KEYS[i].character) {
                 *shifted = 1;
                 *keycode = SHIFTED_KEYS[i].code;
@@ -358,7 +361,7 @@ int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uin
     /* Else string is multiple characters */
     } else {
         /* Search modifier keys */
-        for (int i = 0; i != sizeof(MODIFIER_KEYS)/sizeof(struct key_string); ++i) {
+        for (int i = 0; i != NUM_MODIFIER_KEYS; ++i) {
             if (!strcmp(key_string, MODIFIER_KEYS[i].string)) {
                 *keycode = MODIFIER_KEYS[i].code;
                 return 0;
@@ -366,7 +369,7 @@ int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uin
         }
 
         /* Search function keys */
-        for (int i = 0; i != sizeof(FUNCTION_KEYS)/sizeof(struct key_string); ++i) {
+        for (int i = 0; i != NUM_FUNCTION_KEYS; ++i) {
             if (!strcmp(key_string, FUNCTION_KEYS[i].string)) {
                 *keycode = FUNCTION_KEYS[i].code;
                 return 0;
@@ -402,10 +405,7 @@ int uinput_enter_key(const char * key_string, int32_t value) {
 
     if (!uinput_keystring_to_keycode(key_string, &keycode, &shifted)) {
         if (shifted) {
-            if (uinput_send_key(KEY_LEFTSHIFT, value)) {
-                return 1;
-            }
-            if (uinput_send_key(keycode, value)) {
+            if (uinput_send_key(KEY_LEFTSHIFT, value) || uinput_send_key(keycode, value)) {
                 return 1;
             }
         } else {
@@ -423,11 +423,11 @@ int uinput_enter_key(const char * key_string, int32_t value) {
 int uinput_enter_char(char c) {
     uint16_t code = 0;
 
-    if (!binary_search_char(NORMAL_KEYS, sizeof(NORMAL_KEYS)/sizeof(struct key_char), c, &code)) {
+    if (!binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, c, &code)) {
         if (uinput_send_keypress(code)) {
             return 1;
         }
-    } else if (!binary_search_char(SHIFTED_KEYS, sizeof(SHIFTED_KEYS)/sizeof(struct key_char), c, &code)) {
+    } else if (!binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, c, &code)) {
         if (uinput_send_shifted_keypress(code)) {
             return 1;
         }
@@ -465,10 +465,7 @@ int uinput_emit(uint16_t type, uint16_t code, int32_t value) {
 
 /* Single key event and report */
 int uinput_send_key(uint16_t code, int32_t value) {
-    if (uinput_emit(EV_KEY, code, value)) {
-        return 1;
-    }
-    if (uinput_emit(EV_SYN, SYN_REPORT, 0)) {
+    if (uinput_emit(EV_KEY, code, value) || uinput_emit(EV_SYN, SYN_REPORT, 0)) {
         return 1;
     }
     return 0;
@@ -476,12 +473,8 @@ int uinput_send_key(uint16_t code, int32_t value) {
 
 /* Emulate a quick key press */
 int uinput_send_keypress(uint16_t code) {
-    /* send press */
-    if (uinput_send_key(code, 1)) {
-        return 1;
-    }
-    /* send release */
-    if (uinput_send_key(code, 0)) {
+    /* send press followed by release */
+    if (uinput_send_key(code, 1) || uinput_send_key(code, 0)) {
         return 1;
     }
     return 0;
@@ -489,16 +482,11 @@ int uinput_send_keypress(uint16_t code) {
 
 /* Emulate a shifted key press */
 int uinput_send_shifted_keypress(uint16_t code) {
-    /* Send shift press */
-    if (uinput_send_key(KEY_LEFTSHIFT, 1)) {
-        return 1;
-    }
-    /* Emulate keypress */
-    if (uinput_send_keypress(code)) {
-        return 1;
-    }
-    /* Send shift release */
-    if (uinput_send_key(KEY_LEFTSHIFT, 0)) {
+    /* Send shift press, keypress, shift release */
+    if (uinput_send_key(KEY_LEFTSHIFT, 1)
+            || uinput_send_keypress(code)
+            || uinput_send_key(KEY_LEFTSHIFT, 0)
+            ) {
         return 1;
     }
     return 0;
@@ -506,13 +494,10 @@ int uinput_send_shifted_keypress(uint16_t code) {
 
 /* Move the cursor to a given (x,y) position */
 int uinput_move_mouse(int32_t x, int32_t y) {
-    if (uinput_emit(EV_ABS, ABS_X, x)) {
-        return 1;
-    }
-    if (uinput_emit(EV_ABS, ABS_Y, y)) {
-        return 1;
-    }
-    if (uinput_emit(EV_SYN, SYN_REPORT, 0)) {
+    if (uinput_emit(EV_ABS, ABS_X, x)
+            || uinput_emit(EV_ABS, ABS_Y, y)
+            || uinput_emit(EV_SYN, SYN_REPORT, 0)
+            ) {
         return 1;
     }
     return 0;

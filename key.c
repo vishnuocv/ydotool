@@ -44,14 +44,14 @@ int key_print_usage() {
 /* Press all keys, then release all keys */
 int enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
-    while (ptr != NULL) {
+    while (ptr) {
         if (uinput_enter_key(ptr, 1)) {
             return 1;
         }
         ptr = strtok(NULL, "+");
     }
     ptr = strtok(key_string, "+");
-    while (ptr != NULL) {
+    while (ptr) {
         if (uinput_enter_key(ptr, 0)) {
             return 1;
         }

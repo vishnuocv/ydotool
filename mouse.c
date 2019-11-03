@@ -65,11 +65,7 @@ int mouse_run(int argc, char ** argv) {
 
     int extra_args = argc - optind;
     if (extra_args != 2) {
-        if (extra_args > 2) {
-            fprintf(stderr, "Too many args!\n");
-        } else {
-            fprintf(stderr, "Too few args!\n");
-        }
+        fprintf(stderr, (extra_args > 2) ? "Too may arguments!\n" : "Not enough arguments!\n");
         return mouse_print_usage();
     }
 

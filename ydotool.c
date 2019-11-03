@@ -33,7 +33,7 @@
 int main(int argc, char ** argv) {
 	int ret = 0;
 
-	if (    argc < 2
+	if (argc < 2
             || !strncmp(argv[1], "-h", 2)
             || !strncmp(argv[1], "--h", 3)
             || !strcmp(argv[1], "help")
@@ -62,7 +62,8 @@ int main(int argc, char ** argv) {
         } else if ( !strcmp(argv[0], "type") ) {
             ret = type_run(argc, argv);
         } else {
-            fprintf(stderr, "ydotool: Unknown option: %s\nRun ydotool help for a list of arguments\n", argv[0]);
+            fprintf(stderr, "ydotool: Unknown option: %s\n"
+                    "Run ydotool help for a list of arguments\n", argv[0]);
             ret = 1;
         }
     }

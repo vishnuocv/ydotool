@@ -41,7 +41,7 @@ int type_print_usage() {
 }
 
 int type_text(char * text) {
-	for (int i=0; text[i] != '\0'; ++i) {
+	for (size_t i = 0; text[i] != '\0'; ++i) {
         if (uinput_enter_char(text[i])) {
             return 1;
         }

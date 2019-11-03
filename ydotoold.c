@@ -37,11 +37,11 @@ void * client_handler(void * fdp) {
 	for (;;) {
 		ssize_t rc = recv(fd, &buf, sizeof(buf), MSG_WAITALL);
 
-		if (rc == sizeof(buf)) {
-			uinput_emit(buf.type, buf.code, buf.value);
-		} else {
+		if (rc != sizeof(buf)) {
 			break;
 		}
+
+		uinput_emit(buf.type, buf.code, buf.value);
 	}
 
     pthread_exit(NULL);

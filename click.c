@@ -37,7 +37,6 @@ int print_usage() {
     return 1;
 }
 
-
 int click_run(int argc, char ** argv) {
 	uint32_t time_delay = 100;
     int opt = 0;
@@ -67,11 +66,7 @@ int click_run(int argc, char ** argv) {
 
     int extra_args = argc - optind;
     if (extra_args != 1) {
-        if (extra_args > 1 ) {
-            fprintf(stderr, "Too many arguments!\n");
-        } else {
-            fprintf(stderr, "Not enough arguments!\n");
-        }
+        fprintf(stderr, (extra_args > 1) ? "Too many arguments!\n" : "Not enough arguments!\n");
         return print_usage();
     }
 
