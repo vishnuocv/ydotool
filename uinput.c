@@ -46,10 +46,14 @@
  */
 #define NUM_EVCODES 4
 
-/* uinput file descriptor */
+/**
+ * uinput file descriptor
+ */
 static int FD = -1;
 
-/* All valid keycodes */
+/**
+ * All valid keycodes
+ */
 static const int KEYCODES[NUM_KEYCODES] = {
     BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
     KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_Q, KEY_W,
@@ -66,7 +70,9 @@ static const int KEYCODES[NUM_KEYCODES] = {
     KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10,  KEY_F11, KEY_F12
 };
 
-/* All valid event codes */
+/**
+ * All valid event codes
+ */
 static const int EVCODES[NUM_EVCODES] = {
     EV_KEY,
     EV_REL,
@@ -74,7 +80,10 @@ static const int EVCODES[NUM_EVCODES] = {
     EV_SYN
 };
 
-/* All valid non-shifted characters */
+/**
+ * All valid non-shifted characters
+ * Used for mapping the char representation to the uinput keycode
+ */
 const struct key_char NORMAL_KEYS[] = {
     {'\t', KEY_TAB},
     {'\n', KEY_ENTER},
@@ -129,7 +138,10 @@ const struct key_char NORMAL_KEYS[] = {
     {'z', KEY_Z}
 };
 
-/* All valid shifted characters */
+/**
+ * All valid shifted characters
+ * Used for mapping the char representation to the uinput keycode
+ */
 const struct key_char SHIFTED_KEYS[] = {
     {'!', KEY_1},
     {'"', KEY_2},
@@ -179,6 +191,10 @@ const struct key_char SHIFTED_KEYS[] = {
     {'~', KEY_BACKSLASH}
 };
 
+/**
+ * All valid modifier keys
+ * Used for mapping the string representation to the uinput keycode
+ */
 const struct key_string MODIFIER_KEYS[] = {
 	{"ALT", KEY_LEFTALT},
     {"ALT_L", KEY_LEFTALT},
@@ -197,6 +213,10 @@ const struct key_string MODIFIER_KEYS[] = {
     {"SUPER_R", KEY_RIGHTMETA}
 };
 
+/**
+ * All valid function keys
+ * Used for mapping the string representation to the uinput keycode
+ */
 const struct key_string FUNCTION_KEYS[] = {
 	{"BACKSPACE", KEY_BACKSPACE},
     {"CAPSLOCK", KEY_CAPSLOCK},
@@ -299,6 +319,10 @@ int binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t
     return 1;
 }
 
+/**
+ * Create socket to talk to ydotool daemon
+ * @return 0 on succes, 1 if error(s)
+ */
 int connect_socket() {
     const char * path_socket = "/tmp/.ydotool_socket";
     FD = socket(AF_UNIX, SOCK_STREAM, 0);

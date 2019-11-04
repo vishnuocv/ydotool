@@ -57,7 +57,7 @@ struct uinput_raw_data {
      * 1 for key press, 0 for key release or any integer value for absolute/relative mouse movement in pixels
      */
     int32_t value;
-} __attribute__((packed));
+};
 
 /**
  * @brief Represents a single keyboard character

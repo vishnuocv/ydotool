@@ -30,6 +30,12 @@
 #include "type.h"
 #include "uinput.h"
 
+/**
+ * Entrypoint of the ydotool program
+ * @param argc Nuber of input arguments
+ * @param argv Array of input arguments
+ * @return 0 on success, 1 if error(s)
+ */
 int main(int argc, char ** argv) {
 	int ret = 0;
 

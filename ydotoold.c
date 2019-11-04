@@ -31,8 +31,15 @@
 /* Local includes */
 #include "uinput.h"
 
+/**
+ * File decriptor for the socket listener
+ */
 static int FD_LIST = -1;
 
+/**
+ * Function for handling user interruption (Ctrl-C)
+ * @param sig The signal received by the program
+ */
 void sig_handler(int sig) {
     printf("Received %s. Terminating...\n", sys_siglist[sig]);
     uinput_destroy();
@@ -40,6 +47,10 @@ void sig_handler(int sig) {
     exit(0);
 }
 
+/**
+ * Function for handling a uinput event sent from the main ydotool program via socket
+ * @param fdp File descriptor pointer for the open socket
+ */
 void * client_handler(void * fdp) {
 	struct uinput_raw_data buf;
     int fd = *(int *)fdp;
@@ -57,6 +68,10 @@ void * client_handler(void * fdp) {
     pthread_exit(NULL);
 }
 
+/**
+ * Main entrypoint to the ydotool daemon program
+ * @return 0 on success, 1 if error(s)
+ */
 int main() {
     /* Setup SIGINT signal handling */
     struct sigaction act;
