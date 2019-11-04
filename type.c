@@ -60,6 +60,11 @@ int type_text(char * text) {
 
 int type_run(int argc, char ** argv) {
 	uint32_t time_delay = 100;
+
+    /**
+     * @todo Implement key delay and filepath inputs
+     */
+
     /*
     int time_keydelay = 12;
 	char file_path[100] = "";

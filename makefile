@@ -37,8 +37,8 @@ ydotoold: $(ydotoold_DEP)
 .PHONY: install
 install:
 	mkdir -p /usr/local/bin
-	mv ydotool /usr/local/bin
-	mv ydotoold /usr/local/bin
+	cp ydotool /usr/local/bin
+	cp ydotoold /usr/local/bin
 
 # Remove build files
 .PHONY: clean

@@ -41,7 +41,7 @@ static int FD_LIST = -1;
  * @param sig The signal received by the program
  */
 void sig_handler(int sig) {
-    printf("Received %s. Terminating...\n", sys_siglist[sig]);
+    printf("\nReceived %s. Terminating...\n", sys_siglist[sig]);
     uinput_destroy();
     close(FD_LIST);
     exit(0);
