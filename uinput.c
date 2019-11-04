@@ -395,26 +395,6 @@ int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uin
     return 1;
 }
 
-int uinput_enter_keypress(const char * key_string) {
-    uint8_t shifted = 0;
-    uint16_t keycode = 0;
-
-    if (!uinput_keystring_to_keycode(key_string, &keycode, &shifted)) {
-        if (shifted) {
-            if (uinput_send_shifted_keypress(keycode)) {
-                return 1;
-            }
-        } else {
-            if (uinput_send_keypress(keycode)) {
-                return 1;
-            }
-        }
-        return 0;
-    }
-
-    return 1;
-}
-
 int uinput_enter_key(const char * key_string, int32_t value) {
     uint8_t shifted = 0;
     uint16_t keycode = 0;

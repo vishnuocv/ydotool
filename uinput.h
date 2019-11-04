@@ -117,13 +117,6 @@ int uinput_enter_char(char c);
 int uinput_emit(uint16_t type, uint16_t code, int32_t value);
 
 /**
- * @brief Emulate pressing a given key, represented as a string
- * @param key_string Character array representing the key to be pressed
- * @return 0 on success, 1 if error(s)
- */
-int uinput_enter_keypress(const char * key_string);
-
-/**
  * @brief Emulate a single key event for the given string representation of a key
  * @param key_string Character array representing the key to be pressed/released
  * @param value 1 for press, 0 for release
