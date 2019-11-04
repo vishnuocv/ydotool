@@ -260,7 +260,7 @@ const struct key_string FUNCTION_KEYS[] = {
  * @param [out] code The keycode associated with str, if found
  * @return 0 on success, 1 if error(s)
  */
-int binary_search_string(const struct key_string * arr, size_t len, const char * str, uint16_t * code) {
+int uinput_binary_search_string(const struct key_string * arr, size_t len, const char * str, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;
     while (lo <= hi) {
@@ -294,7 +294,7 @@ int binary_search_string(const struct key_string * arr, size_t len, const char *
  * @param [out] code The keycode associated with c, if found
  * @return 0 on success, 1 if error(s)
  */
-int binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t * code) {
+int uinput_binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;
     while (lo <= hi) {
@@ -324,7 +324,7 @@ int binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t
  * Create socket to talk to ydotool daemon
  * @return 0 on succes, 1 if error(s)
  */
-int connect_socket() {
+int uinput_connect_socket() {
     const char * path_socket = "/tmp/.ydotool_socket";
     FD = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -349,7 +349,7 @@ int connect_socket() {
 /* Initialise the input device */
 int uinput_init() {
     /* Attempt to connect to ydotoold backend if running */
-    if (!connect_socket()) {
+    if (!uinput_connect_socket()) {
         printf("Using ydotoold backend\n");
         return 0;
     }
@@ -422,22 +422,22 @@ int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uin
     /* If string is a single character */
     if (strlen(key_string) == 1) {
         /* Search normal keys */
-        if (!binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, key_string[0], keycode)) {
+        if (!uinput_binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, key_string[0], keycode)) {
             return 0;
         }
         /* Search shifted keys */
-        if (!binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, key_string[0], keycode)) {
+        if (!uinput_binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, key_string[0], keycode)) {
             *shifted = 1;
             return 0;
         }
     /* Else string is multiple characters */
     } else {
         /* Search modifier keys */
-        if (!binary_search_string(MODIFIER_KEYS, NUM_MODIFIER_KEYS, key_string, keycode)) {
+        if (!uinput_binary_search_string(MODIFIER_KEYS, NUM_MODIFIER_KEYS, key_string, keycode)) {
             return 0;
         }
         /* Search function keys */
-        if (!binary_search_string(FUNCTION_KEYS, NUM_FUNCTION_KEYS, key_string, keycode)) {
+        if (!uinput_binary_search_string(FUNCTION_KEYS, NUM_FUNCTION_KEYS, key_string, keycode)) {
             return 0;
         }
     }
@@ -468,11 +468,11 @@ int uinput_enter_key(const char * key_string, int32_t value) {
 int uinput_enter_char(char c) {
     uint16_t code = 0;
 
-    if (!binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, c, &code)) {
+    if (!uinput_binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, c, &code)) {
         if (uinput_send_keypress(code)) {
             return 1;
         }
-    } else if (!binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, c, &code)) {
+    } else if (!uinput_binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, c, &code)) {
         if (uinput_send_shifted_keypress(code)) {
             return 1;
         }

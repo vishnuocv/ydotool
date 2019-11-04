@@ -30,7 +30,7 @@
  * Print usage string to stderr
  * @return 1 (error)
  */
-int print_usage() {
+int click_print_usage() {
     fprintf(stderr,
         "Usage: click [--delay <ms>] <button>\n"
         "    --help      Show this help\n"
@@ -64,14 +64,14 @@ int click_run(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                return print_usage();
+                return click_print_usage();
         }
     }
 
     int extra_args = argc - optind;
     if (extra_args != 1) {
         fprintf(stderr, (extra_args > 1) ? "Too many arguments!\n" : "Not enough arguments!\n");
-        return print_usage();
+        return click_print_usage();
     }
 
     uint16_t button = (uint16_t)strtoul(argv[optind], NULL, 10);
@@ -88,7 +88,7 @@ int click_run(int argc, char ** argv) {
 			break;
 		default:
             fprintf(stderr, "Invalid button argument!\n");
-            return print_usage();
+            return click_print_usage();
 	}
 
 	if (time_delay) {

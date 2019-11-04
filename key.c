@@ -50,7 +50,7 @@ int key_print_usage() {
  * @param key_string Sequence of string representations of keys to be pressed together, separated by '+'
  * @return 0 on success, 1 if error(s)
  */
-int enter_keys(char * key_string) {
+int key_enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
     while (ptr) {
         if (uinput_enter_key(ptr, 1)) {
@@ -117,7 +117,7 @@ int key_run(int argc, char ** argv) {
 
     while (repeats--) {
         for (; argc != optind; optind++) {
-            if (enter_keys(argv[optind])) {
+            if (key_enter_keys(argv[optind])) {
                 return 1;
             }
         }

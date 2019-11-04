@@ -40,7 +40,7 @@ static int FD_LIST = -1;
  * Function for handling user interruption (Ctrl-C)
  * @param sig The signal received by the program
  */
-void sig_handler(int sig) {
+void ydotoold_sig_handler(int sig) {
     printf("\nReceived %s. Terminating...\n", sys_siglist[sig]);
     uinput_destroy();
     close(FD_LIST);
@@ -51,7 +51,7 @@ void sig_handler(int sig) {
  * Function for handling a uinput event sent from the main ydotool program via socket
  * @param fdp File descriptor pointer for the open socket
  */
-void * client_handler(void * fdp) {
+void * ydotoold_client_handler(void * fdp) {
 	struct uinput_raw_data buf;
     int fd = *(int *)fdp;
 
@@ -75,7 +75,7 @@ void * client_handler(void * fdp) {
 int main() {
     /* Setup SIGINT signal handling */
     struct sigaction act;
-    act.sa_handler = &sig_handler;
+    act.sa_handler = &ydotoold_sig_handler;
     sigaction(SIGINT, &act, NULL);
 
     /* Initialise input device */
@@ -118,7 +118,7 @@ int main() {
 		printf("ydotoold: accepted client\n");
 
         pthread_t thd;
-        if (pthread_create(&thd, NULL, client_handler, (void *)&fd_client)) {
+        if (pthread_create(&thd, NULL, ydotoold_client_handler, (void *)&fd_client)) {
             fprintf(stderr, "ydotoold: Error creating thread!\n");
             return 1;
         }
