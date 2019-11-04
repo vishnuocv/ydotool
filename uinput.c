@@ -32,10 +32,18 @@
 /* Local includes */
 #include "uinput.h"
 
-/* Wrapper macro for errno error check */
+/**
+ * Wrapper macro for errno error check
+ */
 #define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); return 1; }
 
+/**
+ * Total number of keycodes that can be entered
+ */
 #define NUM_KEYCODES 91
+/**
+ * Total number of event codes that can be sent
+ */
 #define NUM_EVCODES 4
 
 /* uinput file descriptor */
@@ -223,6 +231,14 @@ const struct key_string FUNCTION_KEYS[] = {
     {"UP", KEY_UP}
 };
 
+/**
+ * Search the given array for a given string and return its keycode
+ * @param arr Array of *keys* to be searched
+ * @param len Length of arr
+ * @param str The character array to be found
+ * @param [out] code The keycode associated with str, if found
+ * @return 0 on success, 1 if error(s)
+ */
 int binary_search_string(const struct key_string * arr, size_t len, const char * str, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;
@@ -249,6 +265,14 @@ int binary_search_string(const struct key_string * arr, size_t len, const char *
     return 1;
 }
 
+/**
+ * Search the given array for a given character and return its keycode
+ * @param arr Array of *keys* to be searched
+ * @param len Length of arr
+ * @param c The character to be found
+ * @param [out] code The keycode associated with c, if found
+ * @return 0 on success, 1 if error(s)
+ */
 int binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;

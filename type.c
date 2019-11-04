@@ -30,6 +30,10 @@
 #include "type.h"
 #include "uinput.h"
 
+/**
+ * Print usage string to stderr
+ * @return 1 (error)
+ */
 int type_print_usage() {
     fprintf(stderr,
         "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
@@ -40,6 +44,11 @@ int type_print_usage() {
     return 1;
 }
 
+/**
+ * Enter characters in input string one at a time
+ * @param text Array of characters to be entered
+ * @return 0 on success, >0 if errors
+ */
 int type_text(char * text) {
 	for (size_t i = 0; text[i] != '\0'; ++i) {
         if (uinput_enter_char(text[i])) {

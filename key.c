@@ -29,6 +29,10 @@
 #include "key.h"
 #include "uinput.h"
 
+/**
+ * Print usage string to stderr
+ * @return 1 (error)
+ */
 int key_print_usage() {
     fprintf(stderr,
         "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
@@ -41,7 +45,11 @@ int key_print_usage() {
     return 1;
 }
 
-/* Press all keys, then release all keys */
+/**
+ * Press all keys, then release all keys
+ * @param key_string Sequence of string representations of keys to be pressed together, separated by '+'
+ * @return 0 on success, 1 if error(s)
+ */
 int enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
     while (ptr) {

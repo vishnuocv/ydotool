@@ -45,9 +45,18 @@
  * @brief uinput event information
  */
 struct uinput_raw_data {
-    uint16_t type; /**< @brief The type of input event (e.g. key input or mouse movement) */
-    uint16_t code; /**< @brief An integer representing the key to input or direction to move in */
-    int32_t value; /**< @brief 1 for key press, 0 for key release or any integer value for absolute/relative mouse movement in pixels */
+    /**
+     * The type of input event (e.g. key input or mouse movement)
+     */
+    uint16_t type;
+    /**
+     * An integer representing the key to input or direction to move in
+     */
+    uint16_t code;
+    /**
+     * 1 for key press, 0 for key release or any integer value for absolute/relative mouse movement in pixels
+     */
+    int32_t value;
 } __attribute__((packed));
 
 /**
@@ -55,7 +64,13 @@ struct uinput_raw_data {
  * @details Used to convert between the char and the integer keycode
  */
 struct key_char {
+    /**
+     * The character representation of the key
+     */
     char character;
+    /**
+     * The Linux uinput keycode representing the associated key
+     */
     uint16_t code;
 };
 
@@ -64,7 +79,13 @@ struct key_char {
  * @details Used to convert between the string representation of the key and the integer keycode
  */
 struct key_string {
+    /**
+     * String representation of the key
+     */
     char string[11];
+    /**
+     * The Linux uinput keycode representing the associated key
+     */
     uint16_t code;
 };
 

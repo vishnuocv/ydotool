@@ -23,6 +23,12 @@
 /* Local includes */
 #include "uinput.h"
 
+/**
+ * Check that the char/string to keycode mapping arrays are in chronological order
+ * The strings/characters are compared when using the binary search algorithm and
+ * are assumed to be in order
+ * @return 0 on success, >0 if errors
+ */
 int uinput_test_array_order() {
     int ret = 0;
 
@@ -57,6 +63,10 @@ int uinput_test_array_order() {
     return ret;
 }
 
+/**
+ * Check that the string to code function returns the correct values
+ * @return 0 on success, >0 if errors
+ */
 int uinput_test_keystring_to_keycode() {
     int ret = 0;
     uint16_t code = 0;
@@ -117,6 +127,10 @@ int uinput_test_keystring_to_keycode() {
     return ret;
 }
 
+/**
+ * Tests for the uinput.c/h functions
+ * @return 0 on success, >0 if errors
+ */
 int uinput_test() {
     int ret = 0;
 
@@ -126,6 +140,10 @@ int uinput_test() {
     return ret;
 }
 
+/**
+ * Main entrypoint for the test executable
+ * @return 0 on success, >0 if errors
+ */
 int main() {
     int ret = 0;
 

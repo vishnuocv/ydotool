@@ -26,6 +26,10 @@
 /* Local includes */
 #include "uinput.h"
 
+/**
+ * Print usage string to stderr
+ * @return 1 (error)
+ */
 int print_usage() {
     fprintf(stderr,
         "Usage: click [--delay <ms>] <button>\n"

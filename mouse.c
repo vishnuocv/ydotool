@@ -28,6 +28,10 @@
 #include "mouse.h"
 #include "uinput.h"
 
+/**
+ * Print usage string to stderr
+ * @return 1 (error)
+ */
 int mouse_print_usage() {
     fprintf(stderr,
         "Usage: mouse [--delay <ms>] <x> <y>\n"
