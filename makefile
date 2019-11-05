@@ -1,10 +1,18 @@
 # Compiler flags
 WARN := -Wall -Wextra -Wpedantic -Wshadow -Wcast-align -Wconversion -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wdouble-promotion -Wformat=2
 OPT += -pthread
-CFLAGS := $(WARN) $(OPT)
+# Auto-dependency generation (Part 1)
+# See: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+DEPFLAGS = -MT $@ -MMD -MP -MF dep/$*.d
+CFLAGS = $(DEPFLAGS) $(WARN) $(OPT)
 
-# Executables and dependencies
+# Executables
 EXE := test ydotool ydotoold
+
+# Secondary expansion for expanding dependency variable lists in generic linking rule
+.SECONDEXPANSION:
+
+# Executable dependencies
 test_DEP := uinput.o test.o
 ydotool_DEP := ydotool.o click.o key.o mouse.o type.o uinput.o
 ydotoold_DEP := ydotoold.o uinput.o
@@ -13,25 +21,24 @@ ydotoold_DEP := ydotoold.o uinput.o
 .PHONY: default
 default: $(EXE)
 
-# Compile a C source file
-%.o:%.c
+# Generic compilation rule
+%.o : %.c dep/%.d | dep
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile a C++ source file
-%.o:%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Test application
-test: $(test_DEP)
+# Generic linking rule
+$(EXE): %: $$(%_DEP)
 	$(CC) $(CFLAGS) $^ -o $@
 
-# Main application
-ydotool: $(ydotool_DEP)
-	$(CC) $(CFLAGS) $^ -o $@
+# Make dependency directory if it doesn't exist
+dep:
+	@mkdir -p $@
 
-# Daemon application
-ydotoold: $(ydotoold_DEP)
-	$(CC) $(CFLAGS) $^ -o $@
+# Auto-dependency generation (Part 2)
+# See: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+SRCS := $(wildcard *.c)
+DEPFILES := $(SRCS:%.c=dep/%.d)
+$(DEPFILES):
+include $(wildcard $(DEPFILES))
 
 # Install built binaries
 .PHONY: install
@@ -43,9 +50,14 @@ install:
 # Remove build files
 .PHONY: clean
 clean:
-	$(RM) $(EXE) *.o
+	$(RM) -r $(EXE) *.o ./dep ./doc
 
 # Perform a static analysis check
 .PHONY: cppcheck
 cppcheck:
 	@cppcheck --enable=all --force -q --suppress=missingIncludeSystem .
+
+# Generate doxygen documentation
+.PHONY: doxygen
+doxygen:
+	@doxygen
