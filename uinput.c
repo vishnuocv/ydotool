@@ -42,6 +42,7 @@
  * Total number of keycodes that can be entered
  */
 #define NUM_KEYCODES 91
+
 /**
  * Total number of event codes that can be sent
  */

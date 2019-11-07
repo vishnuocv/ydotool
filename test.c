@@ -147,10 +147,6 @@ int uinput_test() {
 int main() {
     int ret = 0;
 
-    /**
-     * @todo Add tests for different areas of the ydotool codebase
-     */
-
     ret += uinput_test();
 
     if (ret) {
