@@ -3,3 +3,4 @@ ydotool
 ydotoold
 *.o
 doc/
+dep/
