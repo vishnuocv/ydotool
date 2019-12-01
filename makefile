@@ -14,7 +14,7 @@ EXE := test ydotool ydotoold
 
 # Executable dependencies
 test_DEP := uinput.o test.o
-ydotool_DEP := ydotool.o click.o key.o mouse.o type.o uinput.o
+ydotool_DEP := ydotool.o uinput.o
 ydotoold_DEP := ydotoold.o uinput.o
 
 # Default to building the executables
