@@ -184,105 +184,11 @@ int type_text(char * text) {
     return 0;
 }
 
-// @brief Emulate keyboard input to type the given text using a virtual keyboard device
-// @param argc The number of (remaining) program arguments
-// @param argv Pointer to the (remaining) program arguments
+// @brief Type the given text using a virtual keyboard device
+// @param argc The number of strings to type
+// @param argv Pointer to the strings
 // @return 0 on success, 1 on error(s)
-int type_run(char * file_path, int argc, char ** argv) {
-    // If filepath parameter was passed in
-	if (strcmp(file_path, "")) {
-        // Hyphen means read from stdin
-		if (!strcmp(file_path, "-")) {
-            // Allocate buffer for reading in chunks and text for holding full input
-            char * buf = malloc(sizeof(char) * 10);
-            char * text = malloc(sizeof(char));
-
-            // Read up to 10 chars at a time from stdin
-            while (fgets(buf, 10, stdin)) {
-                // Add extra byte allocation for new chars
-                size_t len = strlen(text) + strlen(buf) + 1;
-                char * tmp = realloc(text, sizeof(char) * len);
-                if (tmp) {
-                    text = tmp;
-                } else {
-                    free(text);
-                    free(buf);
-                    fprintf(stderr, "Failed to allocated %lu bytes for text buffer\n", len);
-                    return 1;
-                }
-
-                // Error handling
-                if (!text) {
-                    fprintf(stderr, "Failed to read text from stdin\n");
-                    return 1;
-                }
-
-                // Append current buffer to full text string
-                strcat(text, buf);
-            }
-
-            // Free up buffer memory
-            free(buf);
-
-            // Call uinput to type the text
-            if (type_text(text)) {
-                return 1;
-            }
-
-            // Free up text memory
-            free(text);
-		} else {
-            // Open file_path file in read only mode
-            FILE * fd = fopen(file_path, "r");
-
-			if (!fd) {
-				fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path, strerror(errno));
-				return 1;
-			}
-
-            // Seek to end of file
-            if (fseek(fd, 0L, SEEK_END)) {
-                fprintf(stderr, "Failed to seek to end of file %s\n", file_path);
-            }
-
-            // Grab length of file (current position)
-            int64_t len = ftell(fd);
-
-            // Seek back to beginning
-            if (fseek(fd, 0L, SEEK_SET)) {
-                fprintf(stderr, "Failed to seek to beginning of file %s\n", file_path);
-            }
-
-            // Allocate buffer to correct size to hold all characers in the file,
-            // plus a null terminating byte
-            size_t len_with_null = (size_t)len + 1;
-            char * buf = malloc(sizeof(char) * len_with_null);
-
-            // Extract text from file and pass to uinput to type
-            fgets(buf, (int)len_with_null, fd);
-            if (type_text(buf)) {
-                return 1;
-            }
-
-            // Free up buffer memory
-            free(buf);
-
-            if (fclose(fd)) {
-                fprintf(stderr, "Failed to close file %s\n", file_path);
-            }
-		}
-
-        // Free up filepath memory
-        free(file_path);
-        return 0;
-	}
-
-    // No file parameter passed in, so text to type is in remaining args
-    if (!argc) {
-        fprintf(stderr, "Not enough args!\n");
-        return type_print_usage();
-    }
-
+int type_args(int argc, char ** argv) {
     // Sum length of args
     size_t len = 0;
     for (int i = 0; i != argc; ++i) {
@@ -312,11 +218,125 @@ int type_run(char * file_path, int argc, char ** argv) {
 	return 0;
 }
 
+int type_stdin() {
+    // Allocate buffer for reading in chunks and text for holding full input
+    char * buf = malloc(sizeof(char) * 10);
+    char * text = malloc(sizeof(char));
+
+    // Read up to 10 chars at a time from stdin
+    while (fgets(buf, 10, stdin)) {
+        // Add extra byte allocation for new chars
+        size_t len = strlen(text) + strlen(buf) + 1;
+        char * tmp = realloc(text, sizeof(char) * len);
+        if (tmp) {
+            text = tmp;
+        } else {
+            free(text);
+            free(buf);
+            fprintf(stderr, "Failed to allocated %lu bytes for text buffer\n", len);
+            return 1;
+        }
+
+        // Error handling
+        if (!text) {
+            fprintf(stderr, "Failed to read text from stdin\n");
+            return 1;
+        }
+
+        // Append current buffer to full text string
+        strcat(text, buf);
+    }
+
+    // Free up buffer memory
+    free(buf);
+
+    // Call uinput to type the text
+    if (type_text(text)) {
+        return 1;
+    }
+
+    // Free up text memory
+    free(text);
+
+    return 0;
+}
+
+int type_file(char * file_path) {
+    // Open file_path file in read only mode
+    FILE * fd = fopen(file_path, "r");
+
+    if (!fd) {
+        fprintf(stderr, "ydotool: type: error: failed to open %s: %s\n", file_path, strerror(errno));
+        return 1;
+    }
+
+    // Seek to end of file
+    if (fseek(fd, 0L, SEEK_END)) {
+        fprintf(stderr, "Failed to seek to end of file %s\n", file_path);
+    }
+
+    // Grab length of file (current position)
+    int64_t len = ftell(fd);
+
+    // Seek back to beginning
+    if (fseek(fd, 0L, SEEK_SET)) {
+        fprintf(stderr, "Failed to seek to beginning of file %s\n", file_path);
+    }
+
+    // Allocate buffer to correct size to hold all characers in the file,
+    // plus a null terminating byte
+    size_t len_with_null = (size_t)len + 1;
+    char * buf = malloc(sizeof(char) * len_with_null);
+
+    // Extract text from file and pass to uinput to type
+    fgets(buf, (int)len_with_null, fd);
+    if (type_text(buf)) {
+        // Free up buffer memory
+        free(buf);
+
+        if (fclose(fd)) {
+            fprintf(stderr, "Failed to close file %s\n", file_path);
+        }
+
+        // Free up filepath memory
+        free(file_path);
+
+        return 1;
+    }
+
+    // Free up buffer memory
+    free(buf);
+
+    if (fclose(fd)) {
+        fprintf(stderr, "Failed to close file %s\n", file_path);
+    }
+
+    // Free up filepath memory
+    free(file_path);
+    return 0;
+}
+
+int usage(char * prog) {
+    fprintf(stderr,
+        "Usage: %s cmd [opt ...]\n"
+        "Available commands:\n"
+        "    click\n"
+        "    key\n"
+        "    mouse\n"
+        "    type\n",
+        prog
+    );
+    return 1;
+}
+
 /// @brief Entrypoint of the ydotool program
 /// @param[in] argc Nuber of input arguments
 /// @param[in] argv Array of input arguments
 /// @return 0 on success, 1 if error(s)
 int main(int argc, char ** argv) {
+    if (argc == 1) {
+        return usage(argv[0]);
+    }
 	int ret = 0;
 
     // Options
@@ -326,7 +346,7 @@ int main(int argc, char ** argv) {
     bool relative = false;
     uint64_t repeats = 1;
     uint32_t time_delay = 100;
-    uint32_t time_keydelay = 12;
+    //uint32_t time_keydelay = 12;
 
     enum optlist_t {
         opt_delay,
@@ -340,7 +360,7 @@ int main(int argc, char ** argv) {
     static struct option long_options[] = {
         {"help",      no_argument,       NULL, opt_help     },
         {"delay",     required_argument, NULL, opt_delay    },
-        {"key-delay", required_argument, NULL, opt_key_delay},
+        //{"key-delay", required_argument, NULL, opt_key_delay},
         {"file",      required_argument, NULL, opt_file     },
         {"relative",  no_argument,       NULL, opt_relative },
         {"repeats",   required_argument, NULL, opt_repeats  },
@@ -353,10 +373,12 @@ int main(int argc, char ** argv) {
             case opt_delay:
                 time_delay = (uint32_t)strtoul(optarg, NULL, 10);
                 break;
+            /*
             case 'k':
             case opt_key_delay:
                 time_keydelay = (uint32_t)strtoul(optarg, NULL, 10);
                 break;
+            */
             case 'f':
             case opt_file:
                 file_path = malloc(sizeof(char) * (strlen(optarg) + 1));
@@ -372,20 +394,12 @@ int main(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                fprintf(stderr,
-                        "Usage: %s cmd [opt ...]\n"
-                        "Available commands:\n"
-                        "    click\n"
-                        "    key\n"
-                        "    mouse\n"
-                        "    type\n",
-                        argv[0]);
-                return 1;
+                return usage(argv[0]);
         }
     }
 
     if (optind == argc) {
-        fprintf(stderr, "Not enough parameters!\n");
+        return usage(argv[0]);
     }
 
     // Check which command to run
@@ -399,7 +413,7 @@ int main(int argc, char ** argv) {
             ret += click_run(button, time_delay);
         }
     } else if (!strcmp(argv[optind], "key")) {
-        ret += key_run(time_delay, repeats, argc - optind + 1, argv + optind + 1);
+        ret += key_run(time_delay, repeats, argc - optind, argv + optind + 1);
     } else if (!strcmp(argv[optind], "mouse")) {
         optind++;
         if (argc - optind != 2) {
@@ -411,11 +425,22 @@ int main(int argc, char ** argv) {
             ret += mouse_run(x, y, time_delay, relative);
         }
     } else if (!strcmp(argv[optind], "type")) {
-        ret += type_run(file_path, argc - optind + 1, argv + optind + 1);
+        optind++;
+        if (argc > optind) {
+            ret += type_args(argc - optind, argv + optind - 1);
+        } else if (!strcmp(file_path, "")) {
+            // Hyphen means read from stdin
+            if (!strcmp(file_path, "-")) {
+                ret += type_stdin();
+            } else {
+                ret += type_file(file_path);
+            }
+        } else {
+            ret += type_print_usage();
+        }
     } else {
-        fprintf(stderr, "ydotool: Unknown option: %s\n"
-                "Run ydotool help for a list of arguments\n", argv[0]);
-        ret += 1;
+        fprintf(stderr, "ydotool: Unknown command: %s\n", argv[optind]);
+        ret += usage(argv[0]);
     }
 
     ret += uinput_destroy();
