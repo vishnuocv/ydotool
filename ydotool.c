@@ -27,16 +27,39 @@
 // Local includes
 #include "uinput.h"
 
+static const char * click_usage =
+    "Usage: click [--delay <ms>] <button>\n"
+    "    --help      Show this help\n"
+    "    --delay ms  Delay time before start clicking (default = 100ms)\n"
+    "    button      1: left\n"
+    "                2: right\n"
+    "                3: middle\n";
+
+static const char * key_usage =
+    "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
+    "    --help             Show this help\n"
+    "    --delay ms         Delay time before start pressing keys (default = 100ms)\n"
+    "    --key-delay ms     Delay time between keystrokes (default = 12ms)\n"
+    "    --repeats times    Times to repeat the key sequence\n"
+    "    --repeat-delay ms  Delay time between repetitions (default = 0ms)\n"
+    "Each key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\n";
+
+static const char * mouse_usage =
+    "Usage: mouse [--delay <ms>] <x> <y>\n"
+    "    --help      Show this help\n"
+    "    --delay ms  Delay time before start moving (default = 100ms)\n";
+
+static const char * type_usage =
+    "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
+    "    --help                    Show this help\n"
+    "    --delay milliseconds      Delay time before start typing\n"
+    "    --key-delay milliseconds  Delay time between keystrokes (default = 12ms)\n"
+    "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n";
+
 /// @brief Print usage string to stderr
 /// @return 1 (error)
-int click_print_usage() {
-    fprintf(stderr,
-        "Usage: click [--delay <ms>] <button>\n"
-        "    --help      Show this help\n"
-        "    --delay ms  Delay time before start clicking (default = 100ms)\n"
-        "    button      1: left\n"
-        "                2: right\n"
-        "                3: middle\n");
+static int usage(const char * msg) {
+    fprintf(stderr, msg);
     return 1;
 }
 
@@ -58,7 +81,7 @@ int click_run(uint16_t button, uint32_t time_delay) {
 			break;
 		default:
             fprintf(stderr, "Invalid button argument!\n");
-            return click_print_usage();
+            return usage(click_usage);
 	}
 
     usleep(time_delay * 1000);
@@ -68,20 +91,6 @@ int click_run(uint16_t button, uint32_t time_delay) {
     }
 
 	return 0;
-}
-
-/// @brief Print usage string to stderr
-/// @return 1 (error)
-int key_print_usage() {
-    fprintf(stderr,
-        "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
-        "    --help             Show this help\n"
-        "    --delay ms         Delay time before start pressing keys (default = 100ms)\n"
-        "    --key-delay ms     Delay time between keystrokes (default = 12ms)\n"
-        "    --repeat times     Times to repeat the key sequence\n"
-        "    --repeat-delay ms  Delay time between repetitions (default = 0ms)\n"
-        "Each key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\n");
-    return 1;
 }
 
 /// @brief Press all keys, then release all keys
@@ -111,11 +120,6 @@ int key_enter_keys(char * key_string) {
 /// @return 0 on success, 1 if error(s)
 int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
 
-    if (argc == 0) {
-        fprintf(stderr, "Not enough args!\n");
-        return key_print_usage();
-    }
-
     usleep(time_delay * 1000);
 
     while (repeats--) {
@@ -127,16 +131,6 @@ int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
     }
 
 	return 0;
-}
-
-/// @brief Print usage string to stderr
-/// @return 1 (error)
-int mouse_print_usage() {
-    fprintf(stderr,
-        "Usage: mouse [--delay <ms>] <x> <y>\n"
-        "    --help      Show this help\n"
-        "    --delay ms  Delay time before start moving (default = 100ms)\n");
-    return 1;
 }
 
 /// @brief Moves the move absolutely or relatively by the given x/y coordinates
@@ -158,18 +152,6 @@ int mouse_run(int32_t x, int32_t y, uint32_t time_delay, bool relative) {
     }
 
 	return 0;
-}
-
-/// @brief Print usage string to stderr
-/// @return 1 (error)
-int type_print_usage() {
-    fprintf(stderr,
-        "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
-        "    --help                    Show this help\n"
-        "    --delay milliseconds      Delay time before start typing\n"
-        "    --key-delay milliseconds  Delay time between keystrokes (default = 12ms)\n"
-        "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n");
-    return 1;
 }
 
 /// @brief Enter characters in input string one at a time
@@ -316,7 +298,7 @@ int type_file(char * file_path) {
     return 0;
 }
 
-int usage(char * prog) {
+int usage_main(char * prog) {
     fprintf(stderr,
         "Usage: %s cmd [opt ...]\n"
         "Available commands:\n"
@@ -335,7 +317,7 @@ int usage(char * prog) {
 /// @return 0 on success, 1 if error(s)
 int main(int argc, char ** argv) {
     if (argc == 1) {
-        return usage(argv[0]);
+        return usage_main(argv[0]);
     }
 	int ret = 0;
 
@@ -394,31 +376,34 @@ int main(int argc, char ** argv) {
             case 'h':
             case opt_help:
             case '?':
-                return usage(argv[0]);
+                return usage_main(argv[0]);
         }
     }
 
     if (optind == argc) {
-        return usage(argv[0]);
+        return usage_main(argv[0]);
     }
 
     // Check which command to run
     if (!strcmp(argv[optind], "click")) {
         optind++;
         if (argc - optind != 1) {
-            fprintf(stderr, "Wrong num args\n");
-            ret += 1;
+            ret += usage(click_usage);
         } else {
             uint16_t button = (uint16_t)strtoul(argv[optind], NULL, 10);
             ret += click_run(button, time_delay);
         }
     } else if (!strcmp(argv[optind], "key")) {
-        ret += key_run(time_delay, repeats, argc - optind, argv + optind + 1);
+        optind++;
+        if (argc == optind) {
+            ret += usage(key_usage);
+        } else {
+            ret += key_run(time_delay, repeats, argc - optind, argv + optind);
+        }
     } else if (!strcmp(argv[optind], "mouse")) {
         optind++;
         if (argc - optind != 2) {
-            fprintf(stderr, "Wrong num args\n");
-            ret += 1;
+            ret += usage(mouse_usage);
         } else {
             int32_t x = (int32_t)strtol(argv[optind], NULL, 10);
             int32_t y = (int32_t)strtol(argv[optind + 1], NULL, 10);
@@ -436,11 +421,11 @@ int main(int argc, char ** argv) {
                 ret += type_file(file_path);
             }
         } else {
-            ret += type_print_usage();
+            ret += usage(type_usage);
         }
     } else {
         fprintf(stderr, "ydotool: Unknown command: %s\n", argv[optind]);
-        ret += usage(argv[0]);
+        ret += usage_main(argv[0]);
     }
 
     ret += uinput_destroy();
