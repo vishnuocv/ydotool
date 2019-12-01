@@ -17,6 +17,7 @@
 // System includes
 #include <errno.h>
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -117,9 +118,11 @@ int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
 
     usleep(time_delay * 1000);
 
-    for (int i = 0; i != argc; ++i) {
-        if (key_enter_keys(argv[i])) {
-            return 1;
+    while (repeats--) {
+        for (int i = 0; i != argc; ++i) {
+            if (key_enter_keys(argv[i])) {
+                return 1;
+            }
         }
     }
 
@@ -185,7 +188,7 @@ int type_text(char * text) {
 // @param argc The number of (remaining) program arguments
 // @param argv Pointer to the (remaining) program arguments
 // @return 0 on success, 1 on error(s)
-int type_run(char * file_path = "") {
+int type_run(char * file_path, int argc, char ** argv) {
     /* If filepath parameter was passed in */
 	if (strcmp(file_path, "")) {
         /* Hyphen means read from stdin */
@@ -277,16 +280,15 @@ int type_run(char * file_path = "") {
 	}
 
     /* No file parameter passed in, so text to type is in remaining args */
-    int extra_args = argc - optind;
-    if (!extra_args) {
+    if (!argc) {
         fprintf(stderr, "Not enough args!\n");
         return type_print_usage();
     }
 
     /* Sum length of args */
     size_t len = 0;
-    for (; optind != argc; ++optind) {
-        len += strlen(argv[optind]);
+    for (int i = 0; i != argc; ++i) {
+        len += strlen(argv[i]);
     }
 
     /*
@@ -297,11 +299,10 @@ int type_run(char * file_path = "") {
 
     /* Initialise to null bytes */
     memset(buf, '\0', len+1);
-    optind -= extra_args;
 
     /* Concatenate args into buffer */
-    for (; optind != argc; ++optind) {
-        strcat(buf, argv[optind]);
+    for (int i = 0; i != argc; ++i) {
+        strcat(buf, argv[i]);
     }
 
     /* Emulate keyboard input of buffer characters */
@@ -329,7 +330,7 @@ int main(int argc, char ** argv) {
     bool relative = false;
     uint64_t repeats = 1;
     uint32_t time_delay = 100;
-    int time_keydelay = 12;
+    uint32_t time_keydelay = 12;
 
     enum optlist_t {
         opt_delay,
@@ -337,7 +338,7 @@ int main(int argc, char ** argv) {
         opt_help,
         opt_key_delay,
         opt_relative,
-        opt_repeat,
+        opt_repeats,
     };
 
     static struct option long_options[] = {
@@ -349,7 +350,8 @@ int main(int argc, char ** argv) {
         {"repeats",   required_argument, NULL, opt_repeats  },
     };
 
-    while ((char opt = getopt_long_only(argc, argv, "d:f:hk:r", long_options, NULL)) != -1) {
+    int opt;
+    while ((opt = getopt_long_only(argc, argv, "d:f:hk:r", long_options, NULL)) != -1) {
         switch (opt) {
             case 'd':
             case opt_delay:
@@ -357,7 +359,7 @@ int main(int argc, char ** argv) {
                 break;
             case 'k':
             case opt_key_delay:
-                time_keydelay = strtoul(optarg, NULL, 10);
+                time_keydelay = (uint32_t)strtoul(optarg, NULL, 10);
                 break;
             case 'f':
             case opt_file:
@@ -391,23 +393,33 @@ int main(int argc, char ** argv) {
     }
 
     // Check which command to run
-    switch (argv[optind]) {
-        case "click":
-            ret += click_run(button, time_delay);
-            break;
-        case "key":
-            ret += key_run(time_delay, repeats, argc - optind + 1, argv[optind + 1]);
-            break;
-        case "mouse":
-            ret += mouse_run(x, y, time_delay, relative);
-            break;
-        case "type":
-            ret += type_run(file_path);
-            break;
-        default:
-            fprintf(stderr, "ydotool: Unknown option: %s\n"
-                    "Run ydotool help for a list of arguments\n", argv[0]);
+    if (!strcmp(argv[optind], "click")) {
+        optind++;
+        if (argc - optind != 1) {
+            fprintf(stderr, "Wrong num args\n");
             ret += 1;
+        } else {
+            uint16_t button = (uint16_t)strtoul(argv[optind], NULL, 10);
+            ret += click_run(button, time_delay);
+        }
+    } else if (!strcmp(argv[optind], "key")) {
+        ret += key_run(time_delay, repeats, argc - optind + 1, argv + optind + 1);
+    } else if (!strcmp(argv[optind], "mouse")) {
+        optind++;
+        if (argc - optind != 2) {
+            fprintf(stderr, "Wrong num args\n");
+            ret += 1;
+        } else {
+            int32_t x = (int32_t)strtol(argv[optind], NULL, 10);
+            int32_t y = (int32_t)strtol(argv[optind + 1], NULL, 10);
+            ret += mouse_run(x, y, time_delay, relative);
+        }
+    } else if (!strcmp(argv[optind], "type")) {
+        ret += type_run(file_path, argc - optind + 1, argv + optind + 1);
+    } else {
+        fprintf(stderr, "ydotool: Unknown option: %s\n"
+                "Run ydotool help for a list of arguments\n", argv[0]);
+        ret += 1;
     }
 
     ret += uinput_destroy();
