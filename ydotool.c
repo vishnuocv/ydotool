@@ -27,6 +27,7 @@
 // Local includes
 #include "uinput.h"
 
+/// @brief Click command usage string
 static const char * click_usage =
     "Usage: click [--delay <ms>] <button>\n"
     "    --help      Show this help\n"
@@ -35,6 +36,7 @@ static const char * click_usage =
     "                2: right\n"
     "                3: middle\n";
 
+/// @brief Key command usage string
 static const char * key_usage =
     "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
     "    --help             Show this help\n"
@@ -44,11 +46,13 @@ static const char * key_usage =
     "    --repeat-delay ms  Delay time between repetitions (default = 0ms)\n"
     "Each key sequence can be any number of modifiers and keys, separated by plus (+)\nFor example: alt+r Alt+F4 CTRL+alt+f3 aLT+1+2+3 ctrl+Backspace\n";
 
+/// @brief Mouse command usage string
 static const char * mouse_usage =
     "Usage: mouse [--delay <ms>] <x> <y>\n"
     "    --help      Show this help\n"
     "    --delay ms  Delay time before start moving (default = 100ms)\n";
 
+/// @brief Type command usage string
 static const char * type_usage =
     "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
     "    --help                    Show this help\n"
@@ -57,6 +61,7 @@ static const char * type_usage =
     "    --file filepath           Specify a file, the contents of which will be be typed as if passed as an argument. The filepath may also be '-' to read from stdin\n";
 
 /// @brief Print usage string to stderr
+/// @param[in] msg The error message
 /// @return 1 (error)
 static int usage(const char * msg) {
     fprintf(stderr, msg);
@@ -64,8 +69,8 @@ static int usage(const char * msg) {
 }
 
 /// @brief Click a particular mouse button once
-/// @param argc The (remaining) number of program arguments
-/// @param argv Pointer to the (remaining) program arguments
+/// @param[in] button 1=left, 2=right, 3=middle click
+/// @param[in] time_delay Delay before entering key
 /// @return 0 on success, 1 if error(s)
 int click_run(uint16_t button, uint32_t time_delay) {
 	uint16_t keycode = BTN_LEFT;
@@ -94,7 +99,7 @@ int click_run(uint16_t button, uint32_t time_delay) {
 }
 
 /// @brief Press all keys, then release all keys
-/// @param key_string Sequence of string representations of keys to be pressed together, separated by '+'
+/// @param[in] key_string Sequence of string representations of keys to be pressed together, separated by '+'
 /// @return 0 on success, 1 if error(s)
 int key_enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
@@ -115,8 +120,10 @@ int key_enter_keys(char * key_string) {
 }
 
 /// @brief Emulate entering any number of given sequences of keys
-/// @param argc Number of (remaining) program arguments
-/// @param argv Pointer to the (remaining) program arguments
+/// @param[in] time_delay Number of milliseconds to wait before pressing keys
+/// @param[in] repeats Number of times to repeat the inputted key presses
+/// @param[in] argc Number of (remaining) program arguments
+/// @param[in] argv Pointer to the (remaining) program arguments
 /// @return 0 on success, 1 if error(s)
 int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
 
@@ -134,8 +141,10 @@ int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
 }
 
 /// @brief Moves the move absolutely or relatively by the given x/y coordinates
-/// @param argc The number of (remaining) program arguments
-/// @param argv Pointer to the (remaining) program arguments
+/// @param[in] x Horizontal pixel position
+/// @param[in] y Vertical pixel position
+/// @param[in] time_delay Milliseconds to wait before moving mouse
+/// @param[in] relative true if movement is to be relative to current mouse position
 /// @return 0 on success, 1 if error(s)
 int mouse_run(int32_t x, int32_t y, uint32_t time_delay, bool relative) {
     // Sleep time_delay milliseconds
@@ -155,7 +164,7 @@ int mouse_run(int32_t x, int32_t y, uint32_t time_delay, bool relative) {
 }
 
 /// @brief Enter characters in input string one at a time
-/// @param text Array of characters to be entered
+/// @param[in] text Array of characters to be entered
 /// @return 0 on success, >0 if errors
 int type_text(char * text) {
 	for (size_t i = 0; text[i] != '\0'; ++i) {
@@ -166,10 +175,10 @@ int type_text(char * text) {
     return 0;
 }
 
-// @brief Type the given text using a virtual keyboard device
-// @param argc The number of strings to type
-// @param argv Pointer to the strings
-// @return 0 on success, 1 on error(s)
+/// @brief Type the given text using a virtual keyboard device
+/// @param[in] argc The number of strings to type
+/// @param[in] argv Pointer to the strings
+/// @return 0 on success, 1 on error(s)
 int type_args(int argc, char ** argv) {
     // Sum length of args
     size_t len = 0;
@@ -200,6 +209,8 @@ int type_args(int argc, char ** argv) {
 	return 0;
 }
 
+/// @brief Type the given text using a virtual keyboard device
+/// @return 0 on success, 1 on error(s)
 int type_stdin() {
     // Allocate buffer for reading in chunks and text for holding full input
     char * buf = malloc(sizeof(char) * 10);
@@ -243,6 +254,9 @@ int type_stdin() {
     return 0;
 }
 
+/// @brief Type the given text using a virtual keyboard device
+/// @param[in] file_path The path to the file containing the text to write
+/// @return 0 on success, 1 on error(s)
 int type_file(char * file_path) {
     // Open file_path file in read only mode
     FILE * fd = fopen(file_path, "r");
@@ -298,6 +312,9 @@ int type_file(char * file_path) {
     return 0;
 }
 
+/// @brief Main usage print function
+/// @param[in] prog Name of the program (argv[0])
+/// @return 1 (error)
 int usage_main(char * prog) {
     fprintf(stderr,
         "Usage: %s cmd [opt ...]\n"

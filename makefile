@@ -1,5 +1,5 @@
 # Compiler flags
-WARN := -Wall -Wextra -Wpedantic -Wshadow -Wcast-align -Wconversion -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wdouble-promotion -Wformat=2
+WARN := -Wall -Wextra -Wpedantic -Wshadow -Wcast-align -Wconversion -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wdouble-promotion
 OPT += -pthread
 # Auto-dependency generation (Part 1)
 # See: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
