@@ -1,23 +1,20 @@
-/*
-    This file is part of ydotool.
-	Copyright (C) 2019 Harry Austen
-    Copyright (C) 2018-2019 ReimuNotMoe
+/// @copyright
+/// This file is part of ydotool.
+/// Copyright (C) 2019 Harry Austen
+/// Copyright (C) 2018-2019 ReimuNotMoe
+///
+/// This program is free software: you can redistribute it and/or modify
+/// it under the terms of the MIT License.
+///
+/// This program is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+/// @file ydotool.c
+/// @author Harry Austen
+/// @brief Main entry point to the ydotool program. Uses the first argument to run the relevant command
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-*/
-
-/**
- * @file ydotool.c
- * @author Harry Austen
- * @brief Main entry point to the ydotool program. Uses the first argument to run the relevant command
- */
-
-/* System includes */
+// System includes
 #include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -26,13 +23,11 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-/* Local includes */
+// Local includes
 #include "uinput.h"
 
-/**
- * Print usage string to stderr
- * @return 1 (error)
- */
+/// @brief Print usage string to stderr
+/// @return 1 (error)
 int click_print_usage() {
     fprintf(stderr,
         "Usage: click [--delay <ms>] <button>\n"
@@ -44,46 +39,11 @@ int click_print_usage() {
     return 1;
 }
 
-/**
- * @brief Click a particular mouse button once
- * @param argc The (remaining) number of program arguments
- * @param argv Pointer to the (remaining) program arguments
- * @return 0 on success, 1 if error(s)
- */
-int click_run(int argc, char ** argv) {
-	uint32_t time_delay = 100;
-    int opt = 0;
-
-    enum optlist_t {
-        opt_help,
-        opt_delay
-    };
-
-    static struct option long_options[] = {
-        {"help",  no_argument,       NULL, opt_help },
-        {"delay", required_argument, NULL, opt_delay}
-    };
-
-    while ((opt = getopt_long_only(argc, argv, "hd:", long_options, NULL)) != -1) {
-        switch (opt) {
-            case 'd':
-            case opt_delay:
-                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
-                break;
-            case 'h':
-            case opt_help:
-            case '?':
-                return click_print_usage();
-        }
-    }
-
-    int extra_args = argc - optind;
-    if (extra_args != 1) {
-        fprintf(stderr, (extra_args > 1) ? "Too many arguments!\n" : "Not enough arguments!\n");
-        return click_print_usage();
-    }
-
-    uint16_t button = (uint16_t)strtoul(argv[optind], NULL, 10);
+/// @brief Click a particular mouse button once
+/// @param argc The (remaining) number of program arguments
+/// @param argv Pointer to the (remaining) program arguments
+/// @return 0 on success, 1 if error(s)
+int click_run(uint16_t button, uint32_t time_delay) {
 	uint16_t keycode = BTN_LEFT;
 
 	switch (button) {
@@ -100,9 +60,7 @@ int click_run(int argc, char ** argv) {
             return click_print_usage();
 	}
 
-	if (time_delay) {
-		usleep(time_delay * 1000);
-    }
+    usleep(time_delay * 1000);
 
     if (uinput_send_keypress(keycode)) {
         return 1;
@@ -111,10 +69,8 @@ int click_run(int argc, char ** argv) {
 	return 0;
 }
 
-/**
- * Print usage string to stderr
- * @return 1 (error)
- */
+/// @brief Print usage string to stderr
+/// @return 1 (error)
 int key_print_usage() {
     fprintf(stderr,
         "Usage: key [--delay <ms>] [--key-delay <ms>] [--repeat <times>] [--repeat-delay <ms>] <key sequence> ...\n"
@@ -127,11 +83,9 @@ int key_print_usage() {
     return 1;
 }
 
-/**
- * Press all keys, then release all keys
- * @param key_string Sequence of string representations of keys to be pressed together, separated by '+'
- * @return 0 on success, 1 if error(s)
- */
+/// @brief Press all keys, then release all keys
+/// @param key_string Sequence of string representations of keys to be pressed together, separated by '+'
+/// @return 0 on success, 1 if error(s)
 int key_enter_keys(char * key_string) {
     char * ptr = strtok(key_string, "+");
     while (ptr) {
@@ -150,75 +104,30 @@ int key_enter_keys(char * key_string) {
     return 0;
 }
 
-/**
- * @brief Emulate entering any number of given sequences of keys
- * @param argc Number of (remaining) program arguments
- * @param argv Pointer to the (remaining) program arguments
- * @return 0 on success, 1 if error(s)
- */
-int key_run(int argc, char ** argv) {
-	uint32_t time_delay = 100;
-	uint64_t repeats = 1;
-    int opt = 0;
+/// @brief Emulate entering any number of given sequences of keys
+/// @param argc Number of (remaining) program arguments
+/// @param argv Pointer to the (remaining) program arguments
+/// @return 0 on success, 1 if error(s)
+int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
 
-    enum optlist_t {
-        opt_help,
-        opt_delay,
-        opt_repeat,
-    };
-
-    static struct option long_options[] = {
-        {"help",   no_argument,       NULL, opt_help  },
-        {"delay",  required_argument, NULL, opt_delay },
-        {"repeat", required_argument, NULL, opt_repeat},
-    };
-
-    while((opt = getopt_long_only(argc, argv, "hd:r:", long_options, NULL)) != -1 )
-    {
-        switch (opt)
-        {
-            case 'd':
-            case opt_delay:
-                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
-                break;
-            case 'r':
-            case opt_repeat:
-                repeats = strtoul(optarg, NULL, 10);
-                break;
-            case 'h':
-            case opt_help:
-            case '?':
-                return key_print_usage();
-        }
-    }
-
-    if (argc == optind) {
+    if (argc == 0) {
         fprintf(stderr, "Not enough args!\n");
         return key_print_usage();
     }
 
-	if (time_delay) {
-		usleep(time_delay * 1000);
-    }
+    usleep(time_delay * 1000);
 
-    const int first_arg = optind;
-
-    while (repeats--) {
-        for (; argc != optind; optind++) {
-            if (key_enter_keys(argv[optind])) {
-                return 1;
-            }
+    for (int i = 0; i != argc; ++i) {
+        if (key_enter_keys(argv[i])) {
+            return 1;
         }
-        optind = first_arg;
     }
 
 	return 0;
 }
 
-/**
- * Print usage string to stderr
- * @return 1 (error)
- */
+/// @brief Print usage string to stderr
+/// @return 1 (error)
 int mouse_print_usage() {
     fprintf(stderr,
         "Usage: mouse [--delay <ms>] <x> <y>\n"
@@ -227,57 +136,20 @@ int mouse_print_usage() {
     return 1;
 }
 
-/**
- * @brief Moves the move absolutely or relatively by the given x/y coordinates
- * @param argc The number of (remaining) program arguments
- * @param argv Pointer to the (remaining) program arguments
- * @return 0 on success, 1 if error(s)
- */
-int mouse_run(int argc, char ** argv) {
-	uint32_t time_delay = 100;
-    int opt = 0;
+/// @brief Moves the move absolutely or relatively by the given x/y coordinates
+/// @param argc The number of (remaining) program arguments
+/// @param argv Pointer to the (remaining) program arguments
+/// @return 0 on success, 1 if error(s)
+int mouse_run(int32_t x, int32_t y, uint32_t time_delay, bool relative) {
+    // Sleep time_delay milliseconds
+    usleep(time_delay * 1000);
 
-    enum optlist_t {
-        opt_help,
-        opt_delay
-    };
-
-    static struct option long_options[] = {
-        {"help",  no_argument,       NULL, opt_help  },
-        {"delay", required_argument, NULL, opt_delay }
-    };
-
-    while ((opt = getopt_long_only(argc, argv, "hd:", long_options, NULL)) != -1) {
-        switch (opt) {
-            case 'd':
-            case opt_delay:
-                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
-                break;
-            case 'h':
-            case opt_help:
-            case '?':
-                return mouse_print_usage();
-        }
-    }
-
-    int extra_args = argc - optind;
-    if (extra_args != 2) {
-        fprintf(stderr, (extra_args > 2) ? "Too may arguments!\n" : "Not enough arguments!\n");
-        return mouse_print_usage();
-    }
-
-	if (time_delay)
-		usleep(time_delay * 1000);
-
-	int32_t x = (int32_t)strtol(argv[optind++], NULL, 10);
-	int32_t y = (int32_t)strtol(argv[optind],   NULL, 10);
-
-	if (!strchr(argv[0], '_')) {
-		if (uinput_move_mouse(x, y)) {
+	if (relative) {
+        if (uinput_relative_move_mouse(x, y)) {
             return 1;
         }
 	} else {
-        if (uinput_relative_move_mouse(x, y)) {
+		if (uinput_move_mouse(x, y)) {
             return 1;
         }
     }
@@ -285,10 +157,8 @@ int mouse_run(int argc, char ** argv) {
 	return 0;
 }
 
-/**
- * Print usage string to stderr
- * @return 1 (error)
- */
+/// @brief Print usage string to stderr
+/// @return 1 (error)
 int type_print_usage() {
     fprintf(stderr,
         "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
@@ -299,11 +169,9 @@ int type_print_usage() {
     return 1;
 }
 
-/**
- * Enter characters in input string one at a time
- * @param text Array of characters to be entered
- * @return 0 on success, >0 if errors
- */
+/// @brief Enter characters in input string one at a time
+/// @param text Array of characters to be entered
+/// @return 0 on success, >0 if errors
 int type_text(char * text) {
 	for (size_t i = 0; text[i] != '\0'; ++i) {
         if (uinput_enter_char(text[i])) {
@@ -313,66 +181,11 @@ int type_text(char * text) {
     return 0;
 }
 
-/**
- * @brief Emulate keyboard input to type the given text using a virtual keyboard device
- * @param argc The number of (remaining) program arguments
- * @param argv Pointer to the (remaining) program arguments
- * @return 0 on success, 1 on error(s)
- */
-int type_run(int argc, char ** argv) {
-    /**
-     * @todo Implement key delay
-     */
-
-    /*
-	uint32_t time_delay = 100;
-    int time_keydelay = 12;
-    */
-	char * file_path;
-    int opt = 0;
-
-    enum optlist_t {
-        opt_help,
-        /*
-        opt_delay,
-        opt_key_delay,
-        */
-        opt_file,
-    };
-
-    static struct option long_options[] = {
-        {"help",      no_argument,       NULL, opt_help     },
-        /*
-        {"delay",     required_argument, NULL, opt_delay    },
-        {"key-delay", required_argument, NULL, opt_key_delay},
-        */
-        {"file",      required_argument, NULL, opt_file     },
-    };
-
-    while ((opt = getopt_long_only(argc, argv, "hd:k:f:", long_options, NULL)) != -1) {
-        switch (opt) {
-            /*
-            case 'd':
-            case opt_delay:
-                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
-                break;
-            case 'k':
-            case opt_key_delay:
-                time_keydelay = strtoul(optarg, NULL, 10);
-                break;
-            */
-            case 'f':
-            case opt_file:
-                file_path = malloc(sizeof(char) * (strlen(optarg) + 1));
-                strcat(file_path, optarg);
-                break;
-            case 'h':
-            case opt_help:
-            case '?':
-                return type_print_usage();
-        }
-    }
-
+// @brief Emulate keyboard input to type the given text using a virtual keyboard device
+// @param argc The number of (remaining) program arguments
+// @param argv Pointer to the (remaining) program arguments
+// @return 0 on success, 1 on error(s)
+int type_run(char * file_path = "") {
     /* If filepath parameter was passed in */
 	if (strcmp(file_path, "")) {
         /* Hyphen means read from stdin */
@@ -502,48 +315,99 @@ int type_run(int argc, char ** argv) {
 	return 0;
 }
 
-/**
- * Entrypoint of the ydotool program
- * @param argc Nuber of input arguments
- * @param argv Array of input arguments
- * @return 0 on success, 1 if error(s)
- */
+/// @brief Entrypoint of the ydotool program
+/// @param[in] argc Nuber of input arguments
+/// @param[in] argv Array of input arguments
+/// @return 0 on success, 1 if error(s)
 int main(int argc, char ** argv) {
 	int ret = 0;
 
-	if (argc < 2
-            || !strncmp(argv[1], "-h", 2)
-            || !strncmp(argv[1], "--h", 3)
-            || !strcmp(argv[1], "help")
-       ) {
-		fprintf(stderr,
-                "Usage: %s <cmd> <args>\n"
-                "Available commands:\n"
-                "    click\n"
-                "    key\n"
-                "    mouse\n"
-                "    type\n",
-                argv[0]);
-		return 1;
-	} else {
-        /* First argument dealt with, increment arg pointer */
-        argv++;
-        argc--;
+    // Options
+    /// @todo Implement delays
 
-        /* Check which command to run */
-        if ( !strcmp(argv[0], "click") ) {
-            ret = click_run(argc, argv);
-        } else if ( !strcmp(argv[0], "key") ) {
-            ret = key_run(argc, argv);
-        } else if ( !strcmp(argv[0], "mouse") ) {
-            ret = mouse_run(argc, argv);
-        } else if ( !strcmp(argv[0], "type") ) {
-            ret = type_run(argc, argv);
-        } else {
+    char * file_path;
+    bool relative = false;
+    uint64_t repeats = 1;
+    uint32_t time_delay = 100;
+    int time_keydelay = 12;
+
+    enum optlist_t {
+        opt_delay,
+        opt_file,
+        opt_help,
+        opt_key_delay,
+        opt_relative,
+        opt_repeat,
+    };
+
+    static struct option long_options[] = {
+        {"help",      no_argument,       NULL, opt_help     },
+        {"delay",     required_argument, NULL, opt_delay    },
+        {"key-delay", required_argument, NULL, opt_key_delay},
+        {"file",      required_argument, NULL, opt_file     },
+        {"relative",  no_argument,       NULL, opt_relative },
+        {"repeats",   required_argument, NULL, opt_repeats  },
+    };
+
+    while ((char opt = getopt_long_only(argc, argv, "d:f:hk:r", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'd':
+            case opt_delay:
+                time_delay = (uint32_t)strtoul(optarg, NULL, 10);
+                break;
+            case 'k':
+            case opt_key_delay:
+                time_keydelay = strtoul(optarg, NULL, 10);
+                break;
+            case 'f':
+            case opt_file:
+                file_path = malloc(sizeof(char) * (strlen(optarg) + 1));
+                strcat(file_path, optarg);
+                break;
+            case 'r':
+            case opt_relative:
+                relative = true;
+                break;
+            case opt_repeats:
+                repeats = strtoul(optarg, NULL, 10);
+                break;
+            case 'h':
+            case opt_help:
+            case '?':
+                fprintf(stderr,
+                        "Usage: %s cmd [opt ...]\n"
+                        "Available commands:\n"
+                        "    click\n"
+                        "    key\n"
+                        "    mouse\n"
+                        "    type\n",
+                        argv[0]);
+                return 1;
+        }
+    }
+
+    if (optind == argc) {
+        fprintf(stderr, "Not enough parameters!\n");
+    }
+
+    // Check which command to run
+    switch (argv[optind]) {
+        case "click":
+            ret += click_run(button, time_delay);
+            break;
+        case "key":
+            ret += key_run(time_delay, repeats, argc - optind + 1, argv[optind + 1]);
+            break;
+        case "mouse":
+            ret += mouse_run(x, y, time_delay, relative);
+            break;
+        case "type":
+            ret += type_run(file_path);
+            break;
+        default:
             fprintf(stderr, "ydotool: Unknown option: %s\n"
                     "Run ydotool help for a list of arguments\n", argv[0]);
-            ret = 1;
-        }
+            ret += 1;
     }
 
     ret += uinput_destroy();
