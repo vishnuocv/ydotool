@@ -189,17 +189,17 @@ int type_text(char * text) {
 // @param argv Pointer to the (remaining) program arguments
 // @return 0 on success, 1 on error(s)
 int type_run(char * file_path, int argc, char ** argv) {
-    /* If filepath parameter was passed in */
+    // If filepath parameter was passed in
 	if (strcmp(file_path, "")) {
-        /* Hyphen means read from stdin */
+        // Hyphen means read from stdin
 		if (!strcmp(file_path, "-")) {
-            /* Allocate buffer for reading in chunks and text for holding full input */
+            // Allocate buffer for reading in chunks and text for holding full input
             char * buf = malloc(sizeof(char) * 10);
             char * text = malloc(sizeof(char));
 
-            /* Read up to 10 chars at a time from stdin */
+            // Read up to 10 chars at a time from stdin
             while (fgets(buf, 10, stdin)) {
-                /* Add extra byte allocation for new chars */
+                // Add extra byte allocation for new chars
                 size_t len = strlen(text) + strlen(buf) + 1;
                 char * tmp = realloc(text, sizeof(char) * len);
                 if (tmp) {
@@ -211,28 +211,28 @@ int type_run(char * file_path, int argc, char ** argv) {
                     return 1;
                 }
 
-                /* Error handling */
+                // Error handling
                 if (!text) {
                     fprintf(stderr, "Failed to read text from stdin\n");
                     return 1;
                 }
 
-                /* Append current buffer to full text string */
+                // Append current buffer to full text string
                 strcat(text, buf);
             }
 
-            /* Free up buffer memory */
+            // Free up buffer memory
             free(buf);
 
-            /* Call uinput to type the text */
+            // Call uinput to type the text
             if (type_text(text)) {
                 return 1;
             }
 
-            /* Free up text memory */
+            // Free up text memory
             free(text);
 		} else {
-            /* Open file_path file in read only mode */
+            // Open file_path file in read only mode
             FILE * fd = fopen(file_path, "r");
 
 			if (!fd) {
@@ -240,33 +240,31 @@ int type_run(char * file_path, int argc, char ** argv) {
 				return 1;
 			}
 
-            /* Seek to end of file */
+            // Seek to end of file
             if (fseek(fd, 0L, SEEK_END)) {
                 fprintf(stderr, "Failed to seek to end of file %s\n", file_path);
             }
 
-            /* Grab length of file (current position) */
+            // Grab length of file (current position)
             int64_t len = ftell(fd);
 
-            /* Seek back to beginning */
+            // Seek back to beginning
             if (fseek(fd, 0L, SEEK_SET)) {
                 fprintf(stderr, "Failed to seek to beginning of file %s\n", file_path);
             }
 
-            /*
-             * Allocate buffer to correct size to hold all characers in the file,
-             * plus a null terminating byte
-             */
+            // Allocate buffer to correct size to hold all characers in the file,
+            // plus a null terminating byte
             size_t len_with_null = (size_t)len + 1;
             char * buf = malloc(sizeof(char) * len_with_null);
 
-            /* Extract text from file and pass to uinput to type */
+            // Extract text from file and pass to uinput to type
             fgets(buf, (int)len_with_null, fd);
             if (type_text(buf)) {
                 return 1;
             }
 
-            /* Free up buffer memory */
+            // Free up buffer memory
             free(buf);
 
             if (fclose(fd)) {
@@ -274,43 +272,41 @@ int type_run(char * file_path, int argc, char ** argv) {
             }
 		}
 
-        /* Free up filepath memory */
+        // Free up filepath memory
         free(file_path);
         return 0;
 	}
 
-    /* No file parameter passed in, so text to type is in remaining args */
+    // No file parameter passed in, so text to type is in remaining args
     if (!argc) {
         fprintf(stderr, "Not enough args!\n");
         return type_print_usage();
     }
 
-    /* Sum length of args */
+    // Sum length of args
     size_t len = 0;
     for (int i = 0; i != argc; ++i) {
         len += strlen(argv[i]);
     }
 
-    /*
-     * Allocate character array buffer
-     * "+1" to allow space for null terminating byte
-     */
+    // Allocate character array buffer
+    // "+1" to allow space for null terminating byte
     char * buf = malloc(sizeof(char) * (len + 1));
 
-    /* Initialise to null bytes */
+    // Initialise to null bytes
     memset(buf, '\0', len+1);
 
-    /* Concatenate args into buffer */
+    // Concatenate args into buffer
     for (int i = 0; i != argc; ++i) {
         strcat(buf, argv[i]);
     }
 
-    /* Emulate keyboard input of buffer characters */
+    // Emulate keyboard input of buffer characters
     if (type_text(buf)) {
         return 1;
     }
 
-    /* Free up buffer memory */
+    // Free up buffer memory
     free(buf);
 
 	return 0;
