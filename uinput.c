@@ -451,11 +451,11 @@ int uinput_enter_char(char c) {
 
     if (!uinput_keychar_to_keycode(c, &keycode, &shifted)) {
         if (shifted) {
-            if (uinput_send_keypress(keycode)) {
+            if (uinput_send_shifted_keypress(keycode)) {
                 return 1;
             }
         } else {
-            if (uinput_send_shifted_keypress(keycode)) {
+            if (uinput_send_keypress(keycode)) {
                 return 1;
             }
         }

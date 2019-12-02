@@ -429,7 +429,7 @@ int main(int argc, char ** argv) {
     } else if (!strcmp(argv[optind], "type")) {
         optind++;
         if (argc > optind) {
-            ret += type_args(argc - optind, argv + optind - 1);
+            ret += type_args(argc - optind, argv + optind);
         } else if (!strcmp(file_path, "")) {
             // Hyphen means read from stdin
             if (!strcmp(file_path, "-")) {
