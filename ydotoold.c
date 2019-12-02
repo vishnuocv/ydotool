@@ -1,23 +1,20 @@
-/*
-    This file is part of ydotool.
-	Copyright (C) 2019 Harry Austen
-    Copyright (C) 2018-2019 ReimuNotMoe
+/// @copyright
+/// This file is part of ydotool.
+/// Copyright (C) 2019 Harry Austen
+/// Copyright (C) 2018-2019 ReimuNotMoe
+///
+/// This program is free software: you can redistribute it and/or modify
+/// it under the terms of the MIT License.
+///
+/// This program is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+/// @file ydotoold.c
+/// @author Harry Austen
+/// @brief Main entry point to the ydotool daemon program. Run this in the background to speed up the ydotool program commands
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-*/
-
-/**
- * @file ydotoold.c
- * @author Harry Austen
- * @brief Main entry point to the ydotool daemon program. Run this in the background to speed up the ydotool program commands
- */
-
-/* System includes */
+// System includes
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -28,18 +25,14 @@
 #include <pthread.h>
 #include <signal.h>
 
-/* Local includes */
+// Local includes
 #include "uinput.h"
 
-/**
- * File decriptor for the socket listener
- */
+/// File decriptor for the socket listener
 static int FD_LIST = -1;
 
-/**
- * Function for handling user interruption (Ctrl-C)
- * @param sig The signal received by the program
- */
+/// Function for handling user interruption (Ctrl-C)
+/// @param sig The signal received by the program
 void ydotoold_sig_handler(int sig) {
     printf("\nReceived %s. Terminating...\n", sys_siglist[sig]);
     uinput_destroy();
@@ -47,10 +40,8 @@ void ydotoold_sig_handler(int sig) {
     exit(0);
 }
 
-/**
- * Function for handling a uinput event sent from the main ydotool program via socket
- * @param fdp File descriptor pointer for the open socket
- */
+/// Function for handling a uinput event sent from the main ydotool program via socket
+/// @param fdp File descriptor pointer for the open socket
 void * ydotoold_client_handler(void * fdp) {
 	struct uinput_raw_data buf;
     int fd = *(int *)fdp;
@@ -68,22 +59,20 @@ void * ydotoold_client_handler(void * fdp) {
     pthread_exit(NULL);
 }
 
-/**
- * Main entrypoint to the ydotool daemon program
- * @return 0 on success, 1 if error(s)
- */
+/// Main entrypoint to the ydotool daemon program
+/// @return 0 on success, 1 if error(s)
 int main() {
-    /* Setup SIGINT signal handling */
+    // Setup SIGINT signal handling
     struct sigaction act;
     act.sa_handler = &ydotoold_sig_handler;
     sigaction(SIGINT, &act, NULL);
 
-    /* Initialise input device */
+    // Initialise input device
     if (uinput_init()) {
         return 1;
     }
 
-    /* Create socket */
+    // Create socket
 	const char * path_socket = "/tmp/.ydotool_socket";
 	unlink(path_socket);
 	FD_LIST = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -112,7 +101,7 @@ int main() {
 	chmod(path_socket, open_access);
 	printf("ydotoold: listening on socket %s\n", path_socket);
 
-    /* Wait for tasks */
+    // Wait for tasks
     int fd_client = 0;
 	while ((fd_client = accept(FD_LIST, NULL, NULL))) {
 		printf("ydotoold: accepted client\n");
@@ -129,7 +118,7 @@ int main() {
         }
 	}
 
-    /* If socket become invalidated, destroy input device and close socket */
+    // If socket become invalidated, destroy input device and close socket
     if (uinput_destroy() || close(FD_LIST)) {
         return 1;
     }

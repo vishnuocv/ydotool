@@ -1,24 +1,21 @@
-/*
-    This file is part of ydotool.
-	Copyright (C) 2019 Harry Austen
-    Copyright (C) 2018-2019 ReimuNotMoe
+/// @copyright
+/// This file is part of ydotool.
+/// Copyright (C) 2019 Harry Austen
+/// Copyright (C) 2018-2019 ReimuNotMoe
+///
+/// This program is free software: you can redistribute it and/or modify
+/// it under the terms of the MIT License.
+///
+/// This program is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the MIT License.
+/// @file uinput.c
+/// @author Harry Austen
+/// @brief Implementation of functions for emulating input events
+/// @todo Implement time delay inputs
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-*/
-
-/**
- * @file uinput.c
- * @author Harry Austen
- * @brief Implementation of functions for emulating input events
- * @todo Implement time delay inputs
- */
-
-/* System includes */
+// System includes
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -30,32 +27,22 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-/* Local includes */
+// Local includes
 #include "uinput.h"
 
-/**
- * Wrapper macro for errno error check
- */
+/// Wrapper macro for errno error check
 #define CHECK(X) if (X == -1) { fprintf( stderr, "ERROR (%s:%d) -- %s\n", __FILE__, __LINE__, strerror(errno) ); return 1; }
 
-/**
- * Total number of keycodes that can be entered
- */
+/// Total number of keycodes that can be entered
 #define NUM_KEYCODES 91
 
-/**
- * Total number of event codes that can be sent
- */
+/// Total number of event codes that can be sent
 #define NUM_EVCODES 4
 
-/**
- * uinput file descriptor
- */
+/// uinput file descriptor
 static int FD = -1;
 
-/**
- * All valid keycodes
- */
+/// All valid keycodes
 static const int KEYCODES[NUM_KEYCODES] = {
     BTN_LEFT, BTN_RIGHT, BTN_MIDDLE, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5,
     KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS, KEY_EQUAL, KEY_Q, KEY_W,
@@ -72,9 +59,7 @@ static const int KEYCODES[NUM_KEYCODES] = {
     KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10,  KEY_F11, KEY_F12
 };
 
-/**
- * All valid event codes
- */
+/// All valid event codes
 static const int EVCODES[NUM_EVCODES] = {
     EV_KEY,
     EV_REL,
@@ -82,10 +67,8 @@ static const int EVCODES[NUM_EVCODES] = {
     EV_SYN
 };
 
-/**
- * All valid non-shifted characters
- * Used for mapping the char representation to the uinput keycode
- */
+/// All valid non-shifted characters
+/// Used for mapping the char representation to the uinput keycode
 const struct key_char NORMAL_KEYS[] = {
     {'\t', KEY_TAB},
     {'\n', KEY_ENTER},
@@ -140,10 +123,8 @@ const struct key_char NORMAL_KEYS[] = {
     {'z', KEY_Z}
 };
 
-/**
- * All valid shifted characters
- * Used for mapping the char representation to the uinput keycode
- */
+/// All valid shifted characters
+/// Used for mapping the char representation to the uinput keycode
 const struct key_char SHIFTED_KEYS[] = {
     {'!', KEY_1},
     {'"', KEY_2},
@@ -193,10 +174,8 @@ const struct key_char SHIFTED_KEYS[] = {
     {'~', KEY_BACKSLASH}
 };
 
-/**
- * All valid modifier keys
- * Used for mapping the string representation to the uinput keycode
- */
+/// All valid modifier keys
+/// Used for mapping the string representation to the uinput keycode
 const struct key_string MODIFIER_KEYS[] = {
 	{"ALT", KEY_LEFTALT},
     {"ALT_L", KEY_LEFTALT},
@@ -215,10 +194,8 @@ const struct key_string MODIFIER_KEYS[] = {
     {"SUPER_R", KEY_RIGHTMETA}
 };
 
-/**
- * All valid function keys
- * Used for mapping the string representation to the uinput keycode
- */
+/// All valid function keys
+/// Used for mapping the string representation to the uinput keycode
 const struct key_string FUNCTION_KEYS[] = {
 	{"BACKSPACE", KEY_BACKSPACE},
     {"CAPSLOCK", KEY_CAPSLOCK},
@@ -253,78 +230,72 @@ const struct key_string FUNCTION_KEYS[] = {
     {"UP", KEY_UP}
 };
 
-/**
- * Search the given array for a given string and return its keycode
- * @param arr Array of *keys* to be searched
- * @param len Length of arr
- * @param str The character array to be found
- * @param [out] code The keycode associated with str, if found
- * @return 0 on success, 1 if error(s)
- */
+/// Search the given array for a given string and return its keycode
+/// @param arr Array of *keys* to be searched
+/// @param len Length of arr
+/// @param str The character array to be found
+/// @param [out] code The keycode associated with str, if found
+/// @return 0 on success, 1 if error(s)
 int uinput_binary_search_string(const struct key_string * arr, size_t len, const char * str, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;
     while (lo <= hi) {
-        /* Calculate middle element index */
+        // Calculate middle element index
         size_t mid = (hi + lo)/2;
 
-        /* If middle element equals target string, found! */
+        // If middle element equals target string, found!
         if (!strcmp(arr[mid].string, str)) {
             *code = arr[mid].code;
             return 0;
         }
 
-        /* If middle element less than target string, remove lower half */
+        // If middle element less than target string, remove lower half
         if (strcmp(arr[mid].string, str) < 0) {
             lo = mid + 1;
-        /* If middle element greater than target string, remove upper half */
+        // If middle element greater than target string, remove upper half
         } else {
             hi = mid - 1;
         }
     }
 
-    /* If we reach here, string is not found */
+    // If we reach here, string is not found
     return 1;
 }
 
-/**
- * Search the given array for a given character and return its keycode
- * @param arr Array of *keys* to be searched
- * @param len Length of arr
- * @param c The character to be found
- * @param [out] code The keycode associated with c, if found
- * @return 0 on success, 1 if error(s)
- */
+/// Search the given array for a given character and return its keycode
+/// @param arr Array of *keys* to be searched
+/// @param len Length of arr
+/// @param c The character to be found
+/// @param [out] code The keycode associated with c, if found
+/// @return 0 on success, 1 if error(s)
 int uinput_binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t * code) {
     size_t lo = 0;
     size_t hi = len-1;
     while (lo <= hi) {
-        /* Calculate middle element index */
+        // Calculate middle element index
         size_t mid = (hi + lo)/2;
 
-        /* If middle element equals target char, found! */
+        // If middle element equals target char, found!
         if (arr[mid].character == c) {
             *code = arr[mid].code;
             return 0;
         }
 
-        /* If middle element less than target char, remove lower half */
+        // If middle element less than target char, remove lower half
         if (arr[mid].character < c) {
             lo = mid + 1;
-        /* If middle element greater than target char, remove upper half */
+        // If middle element greater than target char, remove upper half
         } else {
             hi = mid - 1;
         }
     }
 
-    /* If we reach here, char is not found */
+    // If we reach here, char is not found */
     return 1;
 }
 
-/**
- * Create socket to talk to ydotool daemon
- * @return 0 on succes, 1 if error(s)
- */
+/// Create socket to talk to ydotool daemon
+/// @return 0 on succes, 1 if error(s)
 int uinput_connect_socket() {
     const char * path_socket = "/tmp/.ydotool_socket";
     FD = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -347,22 +318,22 @@ int uinput_connect_socket() {
     return 0;
 }
 
-/* Initialise the input device */
+// Initialise the input device
 int uinput_init() {
-    /* Attempt to connect to ydotoold backend if running */
+    // Attempt to connect to ydotoold backend if running
     if (!uinput_connect_socket()) {
         printf("Using ydotoold backend\n");
         return 0;
     }
 
-    /* Check write access to uinput driver device */
+    // Check write access to uinput driver device
     if (access("/dev/uinput", W_OK)) {
         fprintf(stderr, "Do not have access to write to /dev/uinput!\n"
             "Try running as root\n");
         return 1;
     }
 
-    /* Confirm availability of uinput kernel module */
+    // Confirm availability of uinput kernel module
     struct utsname uname_buffer;
     CHECK( uname(&uname_buffer) );
     char kernel_mod_dir[50] = "/lib/modules/";
@@ -376,10 +347,10 @@ int uinput_init() {
         return 1;
     }
 
-    /* Open uinput driver device */
+    // Open uinput driver device
     CHECK( (FD = open("/dev/uinput", O_WRONLY|O_NONBLOCK)) );
 
-    /* Events/Keys setup */
+    // Events/Keys setup
     for (int i = 0; i != NUM_KEYCODES; ++i) {
         CHECK( ioctl(FD, UI_SET_KEYBIT, KEYCODES[i]) );
     }
@@ -387,7 +358,7 @@ int uinput_init() {
         CHECK( ioctl(FD, UI_SET_EVBIT, EVCODES[i]) );
     }
 
-    /* uinput device setup */
+    // uinput device setup
     struct uinput_setup usetup = {
         {
             BUS_USB,
@@ -402,13 +373,13 @@ int uinput_init() {
     CHECK( ioctl(FD, UI_DEV_SETUP, &usetup) );
     CHECK( ioctl(FD, UI_DEV_CREATE) );
 
-    /* Wait for device to come up */
+    // Wait for device to come up
     usleep(1000000);
 
     return 0;
 }
 
-/* Delete the input device */
+// Delete the input device
 int uinput_destroy() {
     if (FD != -1) {
         ioctl(FD, UI_DEV_DESTROY);
@@ -420,24 +391,24 @@ int uinput_destroy() {
 
 int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted) {
     *shifted = 0;
-    /* If string is a single character */
+    // If string is a single character
     if (strlen(key_string) == 1) {
-        /* Search normal keys */
+        // Search normal keys
         if (!uinput_binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, key_string[0], keycode)) {
             return 0;
         }
-        /* Search shifted keys */
+        // Search shifted keys
         if (!uinput_binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, key_string[0], keycode)) {
             *shifted = 1;
             return 0;
         }
-    /* Else string is multiple characters */
+    // Else string is multiple characters
     } else {
-        /* Search modifier keys */
+        // Search modifier keys
         if (!uinput_binary_search_string(MODIFIER_KEYS, NUM_MODIFIER_KEYS, key_string, keycode)) {
             return 0;
         }
-        /* Search function keys */
+        // Search function keys
         if (!uinput_binary_search_string(FUNCTION_KEYS, NUM_FUNCTION_KEYS, key_string, keycode)) {
             return 0;
         }
@@ -465,7 +436,7 @@ int uinput_enter_key(const char * key_string, int32_t value) {
     return 1;
 }
 
-/* Emulate typing the given character on the vitual device */
+// Emulate typing the given character on the vitual device
 int uinput_enter_char(char c) {
     uint16_t code = 0;
 
@@ -485,10 +456,10 @@ int uinput_enter_char(char c) {
     return 0;
 }
 
-/* Trigger an input event */
+// Trigger an input event
 int uinput_emit(uint16_t type, uint16_t code, int32_t value) {
     struct input_event ie = {
-        /* Ignore timestamp values */
+        // Ignore timestamp values
         {0,0},
         type,
         code,
@@ -503,13 +474,13 @@ int uinput_emit(uint16_t type, uint16_t code, int32_t value) {
 
     CHECK( write(FD, &ie, sizeof(ie)) );
 
-    /* Allow processing time for uinput before sending next event */
+    // Allow processing time for uinput before sending next event
     usleep( 50 );
 
     return 0;
 }
 
-/* Single key event and report */
+// Single key event and report
 int uinput_send_key(uint16_t code, int32_t value) {
     if (uinput_emit(EV_KEY, code, value) || uinput_emit(EV_SYN, SYN_REPORT, 0)) {
         return 1;
@@ -517,18 +488,18 @@ int uinput_send_key(uint16_t code, int32_t value) {
     return 0;
 }
 
-/* Emulate a quick key press */
+// Emulate a quick key press
 int uinput_send_keypress(uint16_t code) {
-    /* send press followed by release */
+    // send press followed by release
     if (uinput_send_key(code, 1) || uinput_send_key(code, 0)) {
         return 1;
     }
     return 0;
 }
 
-/* Emulate a shifted key press */
+// Emulate a shifted key press
 int uinput_send_shifted_keypress(uint16_t code) {
-    /* Send shift press, keypress, shift release */
+    // Send shift press, keypress, shift release
     if (uinput_send_key(KEY_LEFTSHIFT, 1)
             || uinput_send_keypress(code)
             || uinput_send_key(KEY_LEFTSHIFT, 0)
@@ -538,7 +509,7 @@ int uinput_send_shifted_keypress(uint16_t code) {
     return 0;
 }
 
-/* Move the cursor to a given (x,y) position */
+// Move the cursor to a given (x,y) position
 int uinput_move_mouse(int32_t x, int32_t y) {
     if (uinput_emit(EV_ABS, ABS_X, x)
             || uinput_emit(EV_ABS, ABS_Y, y)
@@ -549,7 +520,7 @@ int uinput_move_mouse(int32_t x, int32_t y) {
     return 0;
 }
 
-/* Move the cursor a given (x,y) relative to the current position */
+// Move the cursor a given (x,y) relative to the current position
 int uinput_relative_move_mouse(int32_t x, int32_t y) {
     if (x) {
         if (uinput_emit(EV_REL, REL_X, x)) {
