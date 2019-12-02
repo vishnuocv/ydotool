@@ -389,30 +389,38 @@ int uinput_destroy() {
     return 0;
 }
 
+int uinput_keychar_to_keycode(const char c, uint16_t * keycode, uint8_t * shifted) {
+    // Search normal keys
+    if (!uinput_binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, c, keycode)) {
+        return 0;
+    }
+    // Search shifted keys
+    if (!uinput_binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, c, keycode)) {
+        *shifted = 1;
+        return 0;
+    }
+
+    fprintf(stderr, "Failed to find key char %c!\n", c);
+    return 1;
+}
+
 int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted) {
     *shifted = 0;
-    // If string is a single character
+
     if (strlen(key_string) == 1) {
-        // Search normal keys
-        if (!uinput_binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, key_string[0], keycode)) {
-            return 0;
-        }
-        // Search shifted keys
-        if (!uinput_binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, key_string[0], keycode)) {
-            *shifted = 1;
-            return 0;
-        }
-    // Else string is multiple characters
-    } else {
-        // Search modifier keys
-        if (!uinput_binary_search_string(MODIFIER_KEYS, NUM_MODIFIER_KEYS, key_string, keycode)) {
-            return 0;
-        }
-        // Search function keys
-        if (!uinput_binary_search_string(FUNCTION_KEYS, NUM_FUNCTION_KEYS, key_string, keycode)) {
-            return 0;
-        }
+        return uinput_keychar_to_keycode(key_string[0], keycode, shifted);
     }
+
+    // Search modifier keys
+    if (!uinput_binary_search_string(MODIFIER_KEYS, NUM_MODIFIER_KEYS, key_string, keycode)) {
+        return 0;
+    }
+    // Search function keys
+    if (!uinput_binary_search_string(FUNCTION_KEYS, NUM_FUNCTION_KEYS, key_string, keycode)) {
+        return 0;
+    }
+
+    fprintf(stderr, "Failed to find key string %s!\n", key_string);
     return 1;
 }
 
@@ -438,22 +446,23 @@ int uinput_enter_key(const char * key_string, int32_t value) {
 
 // Emulate typing the given character on the vitual device
 int uinput_enter_char(char c) {
-    uint16_t code = 0;
+    uint8_t shifted = 0;
+    uint16_t keycode = 0;
 
-    if (!uinput_binary_search_char(NORMAL_KEYS, NUM_NORMAL_KEYS, c, &code)) {
-        if (uinput_send_keypress(code)) {
-            return 1;
+    if (!uinput_keychar_to_keycode(c, &keycode, &shifted)) {
+        if (shifted) {
+            if (uinput_send_keypress(keycode)) {
+                return 1;
+            }
+        } else {
+            if (uinput_send_shifted_keypress(keycode)) {
+                return 1;
+            }
         }
-    } else if (!uinput_binary_search_char(SHIFTED_KEYS, NUM_SHIFTED_KEYS, c, &code)) {
-        if (uinput_send_shifted_keypress(code)) {
-            return 1;
-        }
-    } else {
-        fprintf(stderr, "Unsupported character (%d:%c) cannot be entered!\n", c, c);
-        return 1;
+        return 0;
     }
 
-    return 0;
+    return 1;
 }
 
 // Trigger an input event
