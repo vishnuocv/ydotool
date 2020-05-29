@@ -7,13 +7,14 @@ DEPFLAGS = -MT $@ -MMD -MP -MF dep/$*.d
 CFLAGS = $(DEPFLAGS) $(WARN) $(OPT)
 
 # Executables
+#EXE := test ydotool ydotoold
 EXE := test ydotool ydotoold
 
 # Secondary expansion for expanding dependency variable lists in generic linking rule
 .SECONDEXPANSION:
 
 # Executable dependencies
-test_DEP := uinput.o test.o
+#test_DEP := uinput.o test.o
 ydotool_DEP := ydotool.o uinput.o
 ydotoold_DEP := ydotoold.o uinput.o
 
@@ -41,11 +42,11 @@ $(DEPFILES):
 include $(wildcard $(DEPFILES))
 
 # Install built binaries
-.PHONY: install
-install:
-	mkdir -p /usr/local/bin
-	cp ydotool /usr/local/bin
-	cp ydotoold /usr/local/bin
+#.PHONY: install
+#install:
+#	mkdir -p /usr/local/bin
+#	cp ydotool /usr/local/bin
+#	cp ydotoold /usr/local/bin
 
 # Remove build files
 .PHONY: clean
