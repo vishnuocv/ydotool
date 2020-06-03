@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#uinput_init.sh
+
+modprobe uinput
+
+mkdir -p /sdcard
+
+ydotoold &
+

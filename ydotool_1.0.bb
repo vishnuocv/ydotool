@@ -28,4 +28,8 @@ do_install () {
 	install -d ${D}${bindir}
 	install -m 0755 ydotool ${D}${bindir}
 	install -m 0755 ydotoold ${D}${bindir}
+	install -m 0755 input ${D}${bindir}
+	install -m 0755 screencap ${D}${bindir}
+	install -m 0755 adb_init ${D}${bindir}
+	install -m 0755 uinput_init ${D}${bindir}
 }
