@@ -4,7 +4,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 # Use the latest version at 26 Oct, 2013
 #SRCREV = "19ff218870311206c8fa47a3fcbe174d72373c8c"
-SRC_URI = "git://github.com/harryausten/ydotool"
+SRC_URI = "git://github.com/vishnuocv/ydotool"
 
 SRCREV = "${AUTOREV}"
 PV = "1.0+git${SRCPV}"
@@ -19,7 +19,6 @@ EXTRA_OEMAKE = "'CC=${CC}' 'RANLIB=${RANLIB}' 'AR=${AR}' 'CFLAGS=${CFLAGS} -I${S
 INSANE_SKIP_${PN} = "ldflags"
 
 do_compile () {
-	make clean
 	make
 }
 
@@ -28,8 +27,8 @@ do_install () {
 	install -d ${D}${bindir}
 	install -m 0755 ydotool ${D}${bindir}
 	install -m 0755 ydotoold ${D}${bindir}
-	install -m 0755 input ${D}${bindir}
-	install -m 0755 screencap ${D}${bindir}
-	install -m 0755 adb_init ${D}${bindir}
-	install -m 0755 uinput_init ${D}${bindir}
+	cp ${S}/input ${D}${bindir}
+	cp ${S}/screencap ${D}${bindir}
+	cp ${S}/adb_init ${D}${bindir}
+	cp ${S}/uinput_init ${D}${bindir}
 }
