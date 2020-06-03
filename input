@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#input
+
+ydotool mouse $3 $4
+sleep 1
+ydotool click 1
+sleep 1

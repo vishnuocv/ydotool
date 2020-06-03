@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#screencap
+
+ydotool key SUPER+s
+
+sleep 2
+
+if ls /wayland* 1> /dev/null 2>&1; then
+    	mv /wayland* /sdcard/screen.png
+	echo "files do exist"
+else
+    echo "files do not exist"
+fi
+
