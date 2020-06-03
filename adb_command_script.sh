@@ -3,6 +3,8 @@
 
 mkdir -p /sys/kernel/config/usb_gadget/g1
 
+sleep 1
+
 #Set default Vendor and Product IDs for now
 echo 0x18d1 > /sys/kernel/config/usb_gadget/g1/idVendor
 echo 0x4E26 > /sys/kernel/config/usb_gadget/g1/idProduct
@@ -25,9 +27,10 @@ echo 120 > /sys/kernel/config/usb_gadget/g1/configs/c.1/Maxpower
 #And link it to the gadget configuration
 #stop adbd
 mkdir -p /sys/kernel/config/usb_gadget/g1/functions/ffs.adb
-mkdir /dev/usb-ffs
-mkdir /dev/usb-ffs/adb
+mkdir -p /dev/usb-ffs
+mkdir -p /dev/usb-ffs/adb
 
+sleep 1
 killall adbd
 
 mount -o uid=2000,gid=2000 -t functionfs adb /dev/usb-ffs/adb
@@ -35,6 +38,7 @@ ln -s /sys/kernel/config/usb_gadget/g1/functions/ffs.adb configs/c.1/ffs.adb
 
 adbd &
 
+sleep 1
 # Find the available udc
 udc=$(ls -1 /sys/class/udc/)
 if [ -z $udc ]; then
