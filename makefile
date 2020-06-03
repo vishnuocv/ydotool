@@ -8,7 +8,7 @@ CFLAGS = $(DEPFLAGS) $(WARN) $(OPT)
 
 # Executables
 #EXE := test ydotool ydotoold
-EXE := test ydotool ydotoold
+EXE := ydotool ydotoold
 
 # Secondary expansion for expanding dependency variable lists in generic linking rule
 .SECONDEXPANSION:
