@@ -37,4 +37,11 @@ ln -s functions/ffs.adb configs/c.1/ffs.adb
 
 adbd &
 
-echo "38100000.dwc3" > UDC
+# Find the available udc
+udc=$(ls -1 /sys/class/udc/)
+if [ -z $udc ]; then
+    echo "No UDC driver registered"
+    exit 1
+fi
+echo "${udc}" > /sys/kernel/config/usb_gadget/g1/UDC
+
