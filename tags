@@ -1,0 +1,77 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CFLAGS	makefile	/^CFLAGS = $(DEPFLAGS) $(WARN) $(OPT)$/;"	m
+CHECK	uinput.c	34;"	d	file:
+DEPFILES	makefile	/^DEPFILES := $(SRCS:%.c=dep\/%.d)$/;"	m
+DEPFLAGS	makefile	/^DEPFLAGS = -MT $@ -MMD -MP -MF dep\/$*.d$/;"	m
+EVCODES	uinput.c	/^static const int EVCODES[NUM_EVCODES] = {$/;"	v	file:
+EXE	makefile	/^EXE := ydotool ydotoold$/;"	m
+FD	uinput.c	/^static int FD = -1;$/;"	v	file:
+FD_LIST	ydotoold.c	/^static int FD_LIST = -1;$/;"	v	file:
+FUNCTION_KEYS	uinput.c	/^const struct key_string FUNCTION_KEYS[] = {$/;"	v	typeref:struct:key_string
+KEYCODES	uinput.c	/^static const int KEYCODES[NUM_KEYCODES] = {$/;"	v	file:
+MODIFIER_KEYS	uinput.c	/^const struct key_string MODIFIER_KEYS[] = {$/;"	v	typeref:struct:key_string
+NORMAL_KEYS	uinput.c	/^const struct key_char NORMAL_KEYS[] = {$/;"	v	typeref:struct:key_char
+NUM_EVCODES	uinput.c	40;"	d	file:
+NUM_FUNCTION_KEYS	uinput.h	31;"	d
+NUM_KEYCODES	uinput.c	37;"	d	file:
+NUM_MODIFIER_KEYS	uinput.h	29;"	d
+NUM_NORMAL_KEYS	uinput.h	25;"	d
+NUM_SHIFTED_KEYS	uinput.h	27;"	d
+SHIFTED_KEYS	uinput.c	/^const struct key_char SHIFTED_KEYS[] = {$/;"	v	typeref:struct:key_char
+SRCS	makefile	/^SRCS := $(wildcard *.c)$/;"	m
+WARN	makefile	/^WARN := -Wall -Wextra -Wpedantic -Wshadow -Wcast-align -Wconversion -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wdouble-promotion$/;"	m
+__UINPUT_H__	uinput.h	18;"	d
+character	uinput.h	/^    char character;$/;"	m	struct:key_char
+click_run	ydotool.c	/^int click_run(uint16_t button, uint32_t time_delay) {$/;"	f
+click_usage	ydotool.c	/^static const char * click_usage =$/;"	v	file:
+code	uinput.h	/^    uint16_t code;$/;"	m	struct:key_char
+code	uinput.h	/^    uint16_t code;$/;"	m	struct:key_string
+code	uinput.h	/^    uint16_t code;$/;"	m	struct:uinput_raw_data
+key_char	uinput.h	/^struct key_char {$/;"	s
+key_enter_keys	ydotool.c	/^int key_enter_keys(char * key_string) {$/;"	f
+key_run	ydotool.c	/^int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {$/;"	f
+key_string	uinput.h	/^struct key_string {$/;"	s
+key_usage	ydotool.c	/^static const char * key_usage =$/;"	v	file:
+main	test.c	/^int main() {$/;"	f
+main	ydotool.c	/^int main(int argc, char ** argv) {$/;"	f
+main	ydotoold.c	/^int main() {$/;"	f
+mouse_run	ydotool.c	/^int mouse_run(int32_t x, int32_t y, uint32_t time_delay, bool relative) {$/;"	f
+mouse_usage	ydotool.c	/^static const char * mouse_usage =$/;"	v	file:
+string	uinput.h	/^    char string[11];$/;"	m	struct:key_string
+type	uinput.h	/^    uint16_t type;$/;"	m	struct:uinput_raw_data
+type_args	ydotool.c	/^int type_args(int argc, char ** argv) {$/;"	f
+type_file	ydotool.c	/^int type_file(char * file_path) {$/;"	f
+type_stdin	ydotool.c	/^int type_stdin() {$/;"	f
+type_text	ydotool.c	/^int type_text(char * text) {$/;"	f
+type_usage	ydotool.c	/^static const char * type_usage =$/;"	v	file:
+uinput_binary_search_char	uinput.c	/^int uinput_binary_search_char(const struct key_char * arr, size_t len, char c, uint16_t * code) {$/;"	f
+uinput_binary_search_string	uinput.c	/^int uinput_binary_search_string(const struct key_string * arr, size_t len, const char * str, uint16_t * code) {$/;"	f
+uinput_connect_socket	uinput.c	/^int uinput_connect_socket() {$/;"	f
+uinput_destroy	uinput.c	/^int uinput_destroy() {$/;"	f
+uinput_emit	uinput.c	/^int uinput_emit(uint16_t type, uint16_t code, int32_t value) {$/;"	f
+uinput_enter_char	uinput.c	/^int uinput_enter_char(char c) {$/;"	f
+uinput_enter_key	uinput.c	/^int uinput_enter_key(const char * key_string, int32_t value) {$/;"	f
+uinput_init	uinput.c	/^int uinput_init() {$/;"	f
+uinput_keychar_to_keycode	uinput.c	/^int uinput_keychar_to_keycode(const char c, uint16_t * keycode, uint8_t * shifted) {$/;"	f
+uinput_keystring_to_keycode	uinput.c	/^int uinput_keystring_to_keycode(const char * key_string, uint16_t * keycode, uint8_t * shifted) {$/;"	f
+uinput_move_mouse	uinput.c	/^int uinput_move_mouse(int32_t x, int32_t y) {$/;"	f
+uinput_raw_data	uinput.h	/^struct uinput_raw_data {$/;"	s
+uinput_relative_move_mouse	uinput.c	/^int uinput_relative_move_mouse(int32_t x, int32_t y) {$/;"	f
+uinput_send_key	uinput.c	/^int uinput_send_key(uint16_t code, int32_t value) {$/;"	f
+uinput_send_keypress	uinput.c	/^int uinput_send_keypress(uint16_t code) {$/;"	f
+uinput_send_shifted_keypress	uinput.c	/^int uinput_send_shifted_keypress(uint16_t code) {$/;"	f
+uinput_test	test.c	/^int uinput_test() {$/;"	f
+uinput_test_array_order	test.c	/^int uinput_test_array_order() {$/;"	f
+uinput_test_keystring_to_keycode	test.c	/^int uinput_test_keystring_to_keycode() {$/;"	f
+usage	ydotool.c	/^static int usage(const char * msg) {$/;"	f	file:
+usage_main	ydotool.c	/^int usage_main(char * prog) {$/;"	f
+value	uinput.h	/^    int32_t value;$/;"	m	struct:uinput_raw_data
+ydotool_DEP	makefile	/^ydotool_DEP := ydotool.o uinput.o$/;"	m
+ydotoold_DEP	makefile	/^ydotoold_DEP := ydotoold.o uinput.o$/;"	m
+ydotoold_client_handler	ydotoold.c	/^void * ydotoold_client_handler(void * fdp) {$/;"	f
+ydotoold_sig_handler	ydotoold.c	/^void ydotoold_sig_handler(int sig) {$/;"	f
