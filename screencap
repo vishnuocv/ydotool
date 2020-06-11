@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #screencap
 
+ydotool key s
 ydotool key SUPER+s
 
 sleep 2
