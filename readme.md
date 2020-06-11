@@ -78,7 +78,7 @@ sudo make install
 [uinputplus]: https://github.com/YukiWorkshop/libuInputPlus
 [libevdevplus]: https://github.com/YukiWorkshop/libevdevPlus
 
-###Yocto Support
+##Yocto Support
 
 ```recipe for yocto
 Copy the recipe to meta layers
