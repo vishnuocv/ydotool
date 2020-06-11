@@ -77,3 +77,22 @@ sudo make install
 <!-- Links -->
 [uinputplus]: https://github.com/YukiWorkshop/libuInputPlus
 [libevdevplus]: https://github.com/YukiWorkshop/libevdevPlus
+
+```recipe for yocto
+Copy the recipe to meta layers
+add the package to local.conf
+bitbake
+```
+
+```Scripts for screenshot
+Connect the USB to i.MX8 and PC
+run "adb_init"
+This will make adb up.
+
+Then Launch "uinput_init"
+This will make necessary setup for the Java application to work
+
+Make sure the uinput driver is added to the kernel
+
+Launch the java app
+``` 
