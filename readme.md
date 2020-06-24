@@ -19,6 +19,9 @@ Currently implemented command(s):
 - `key` - Press keys
 - `mouse` - Move mouse pointer to absolute position
 - `click` - Click on mouse buttons
+- `touch` - Touch
+-- `tap` - Touch tap
+-- `swipe` - Touch tap
 
 ## Examples
 Type some words:
