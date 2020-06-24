@@ -138,4 +138,6 @@ int uinput_move_mouse(int32_t x, int32_t y);
 /// @return 0 on success, 1 if error(s)
 int uinput_relative_move_mouse(int32_t x, int32_t y);
 
+int uinput_touchevent(int x, int y);
+
 #endif // __UINPUT_H__

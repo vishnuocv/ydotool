@@ -52,6 +52,13 @@ static const char * mouse_usage =
     "    --help      Show this help\n"
     "    --delay ms  Delay time before start moving (default = 100ms)\n";
 
+/// @brief Mouse command usage string
+static const char * touch_usage =
+    "Usage: touch [--delay <ms>] <x> <y>\n"
+    "    --help      Show this help\n"
+    "    --delay ms  Delay time before start moving (default = 100ms)\n";
+
+
 /// @brief Type command usage string
 static const char * type_usage =
     "Usage: type [--delay milliseconds] [--key-delay milliseconds] [--args N] [--file <filepath>] <things to type>\n"
@@ -138,6 +145,21 @@ int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
     }
 
 	return 0;
+}
+
+/// @brief  positioning absolutely by the given x/y coordinates
+/// @param[in] x Horizontal pixel position
+/// @param[in] y Vertical pixel position
+/// @param[in] time_delay Milliseconds to wait before moving mouse
+/// @return 0 on success, 1 if error(s)
+int touch_run(int32_t x, int32_t y, uint32_t time_delay) {
+    // Sleep time_delay milliseconds
+    usleep(time_delay * 1000);
+
+        if (uinput_touchevent(x, y)) {
+            return 1;
+        }
+        return 0;
 }
 
 /// @brief Moves the move absolutely or relatively by the given x/y coordinates
@@ -322,7 +344,8 @@ int usage_main(char * prog) {
         "    click\n"
         "    key\n"
         "    mouse\n"
-        "    type\n",
+        "    type\n"
+        "    touch\n",
         prog
     );
     return 1;
@@ -425,6 +448,15 @@ int main(int argc, char ** argv) {
             int32_t x = (int32_t)strtol(argv[optind], NULL, 10);
             int32_t y = (int32_t)strtol(argv[optind + 1], NULL, 10);
             ret += mouse_run(x, y, time_delay, relative);
+        }
+    } else if (!strcmp(argv[optind], "touch")) {
+        optind++;
+        if (argc - optind != 2) {
+            ret += usage(touch_usage);
+        } else {
+            int32_t x = (int32_t)strtol(argv[optind], NULL, 10);
+            int32_t y = (int32_t)strtol(argv[optind + 1], NULL, 10);
+            ret += touch_run(x, y, time_delay);
         }
     } else if (!strcmp(argv[optind], "type")) {
         optind++;

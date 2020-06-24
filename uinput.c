@@ -39,6 +39,8 @@
 /// Total number of event codes that can be sent
 #define NUM_EVCODES 4
 
+struct uinput_user_dev uidev;
+
 /// uinput file descriptor
 static int FD = -1;
 
@@ -318,6 +320,11 @@ int uinput_connect_socket() {
     return 0;
 }
 
+#define die(str, args...) do { \
+        perror(str); \
+        exit(EXIT_FAILURE); \
+    } while(0)
+
 // Initialise the input device
 int uinput_init() {
     // Attempt to connect to ydotoold backend if running
@@ -350,6 +357,7 @@ int uinput_init() {
     // Open uinput driver device
     CHECK( (FD = open("/dev/uinput", O_WRONLY|O_NONBLOCK)) );
 
+#if 0 
     // Events/Keys setup
     for (int i = 0; i != NUM_KEYCODES; ++i) {
         CHECK( ioctl(FD, UI_SET_KEYBIT, KEYCODES[i]) );
@@ -372,6 +380,53 @@ int uinput_init() {
 
     CHECK( ioctl(FD, UI_DEV_SETUP, &usetup) );
     CHECK( ioctl(FD, UI_DEV_CREATE) );
+#endif
+
+
+	//screenshot key commands
+    	if(ioctl(FD, UI_SET_EVBIT, EV_KEY) < 0)
+        	die("error: ioctl", __VA_ARGS__);
+    	if(ioctl(FD, UI_SET_KEYBIT, KEY_S) < 0)
+	        die("error: ioctl");
+    	if(ioctl(FD, UI_SET_KEYBIT, KEY_LEFTMETA) < 0)
+	        die("error: ioctl");
+//    	if(ioctl(fd, UI_SET_KEYBIT, BTN_LEFT) < 0)
+   	if(ioctl(FD, UI_SET_KEYBIT, BTN_TOUCH) < 0)
+ 	      die("error: ioctl");
+
+	// for mouse
+    	if(ioctl(FD, UI_SET_EVBIT, EV_REL) < 0)
+        	die("error: ioctl");
+    	if(ioctl(FD, UI_SET_RELBIT, REL_X) < 0)
+        	die("error: ioctl");
+    	if(ioctl(FD, UI_SET_RELBIT, REL_Y) < 0)
+        	die("error: ioctl");
+
+    	if(ioctl(FD, UI_SET_EVBIT, EV_ABS) < 0)
+        	die("error: ioctl");
+    	if(ioctl(FD, UI_SET_ABSBIT, ABS_X) < 0)
+        	die("error: ioctl");
+    	if(ioctl(FD, UI_SET_ABSBIT, ABS_Y) < 0)
+        	die("error: ioctl");
+
+    	memset(&uidev, 0, sizeof(uidev));
+    	snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "ydotool virtual device");
+    	uidev.id.bustype = BUS_USB;
+    	uidev.id.vendor  = 0x1;
+    	uidev.id.product = 0x1;
+    	uidev.id.version = 1;
+
+	uidev.absmin[ABS_X] = 0;
+    	uidev.absmax[ABS_X] = 1920;
+	uidev.absmin[ABS_Y] = 0;
+    	uidev.absmax[ABS_Y] = 1080;
+
+    	if(write(FD, &uidev, sizeof(uidev)) < 0)
+        	die("error: write");
+
+    	if(ioctl(FD, UI_DEV_CREATE) < 0)
+        	die("error: ioctl");
+
 
     // Wait for device to come up
     usleep(1000000);
@@ -545,4 +600,20 @@ int uinput_relative_move_mouse(int32_t x, int32_t y) {
         return 1;
     }
     return 0;
+}
+
+int uinput_touchevent(int x, int y)
+{
+	uinput_emit(EV_ABS, ABS_X, x);
+	uinput_emit(EV_ABS, ABS_Y, y);
+	uinput_emit(EV_SYN, SYN_REPORT, 0);
+
+//	stroke_emit(EV_KEY, BTN_LEFT, 1);
+	uinput_emit(EV_KEY, BTN_TOUCH, 1);
+	uinput_emit(EV_SYN, SYN_REPORT, 0);
+
+	// Report KEY - RELEASE event
+//	stroke_emit(EV_KEY, BTN_LEFT, 0);
+	uinput_emit(EV_KEY, BTN_TOUCH, 0);
+	uinput_emit(EV_SYN, SYN_REPORT, 0);
 }
