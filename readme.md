@@ -47,6 +47,7 @@ Mouse right click:
 Touch screen:
 
     ydotool touch tap 800 600
+    
     ydotool touch swipe 800 600 850 650 1000
 
 
