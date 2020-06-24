@@ -163,7 +163,7 @@ int touch_tap_run(int32_t x, int32_t y, uint32_t time_delay) {
     // Sleep time_delay milliseconds
     usleep(time_delay * 1000);
 
-        if (uinput_touchevent(x, y)) {
+        if (uinput_touch_tap_event(x, y)) {
             return 1;
         }
         return 0;
@@ -181,7 +181,7 @@ int touch_swipe_run(int32_t startx, int32_t starty, int32_t endx, int32_t endy, 
     // Sleep time_delay milliseconds
     usleep(time_delay * 1000);
 
-        if (uinput_touchevent(startx, starty)) {
+        if (uinput_touch_swipe_event(startx, starty, endx, endy, duration)) {
             return 1;
         }
         return 0;
@@ -492,7 +492,6 @@ int main(int argc, char ** argv) {
         if (argc - optind != 5) {
             ret += usage(touch_swipe_usage);
         } else {
-	    printf("SWIPE TBD\n");
             int32_t startx = (int32_t)strtol(argv[optind], NULL, 10);
             int32_t starty = (int32_t)strtol(argv[optind + 1], NULL, 10);
             int32_t endx = (int32_t)strtol(argv[optind + 2], NULL, 10);

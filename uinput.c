@@ -602,7 +602,7 @@ int uinput_relative_move_mouse(int32_t x, int32_t y) {
     return 0;
 }
 
-int uinput_touchevent(int x, int y)
+int uinput_touch_tap_event(int x, int y)
 {
 	uinput_emit(EV_ABS, ABS_X, x);
 	uinput_emit(EV_ABS, ABS_Y, y);
@@ -617,3 +617,26 @@ int uinput_touchevent(int x, int y)
 	uinput_emit(EV_KEY, BTN_TOUCH, 0);
 	uinput_emit(EV_SYN, SYN_REPORT, 0);
 }
+
+int uinput_touch_swipe_event(int startx, int starty, int endx, int endy, int duration)
+{
+        uinput_emit(EV_ABS, ABS_X, startx);
+        uinput_emit(EV_ABS, ABS_Y, starty);
+        uinput_emit(EV_SYN, SYN_REPORT, 0);
+
+//      stroke_emit(EV_KEY, BTN_LEFT, 1);
+        uinput_emit(EV_KEY, BTN_TOUCH, 1);
+        uinput_emit(EV_SYN, SYN_REPORT, 0);
+
+	usleep(duration);
+
+        uinput_emit(EV_ABS, ABS_X, endx);
+        uinput_emit(EV_ABS, ABS_Y, endy);
+        uinput_emit(EV_SYN, SYN_REPORT, 0);
+
+        // Report KEY - RELEASE event
+//      stroke_emit(EV_KEY, BTN_LEFT, 0);
+        uinput_emit(EV_KEY, BTN_TOUCH, 0);
+        uinput_emit(EV_SYN, SYN_REPORT, 0);
+}
+
