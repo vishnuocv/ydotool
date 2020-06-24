@@ -52,11 +52,18 @@ static const char * mouse_usage =
     "    --help      Show this help\n"
     "    --delay ms  Delay time before start moving (default = 100ms)\n";
 
-/// @brief Mouse command usage string
-static const char * touch_usage =
+/// @brief Touch tap command usage string
+static const char * touch_tap_usage =
     "Usage: touch [--delay <ms>] <x> <y>\n"
     "    --help      Show this help\n"
     "    --delay ms  Delay time before start moving (default = 100ms)\n";
+
+/// @brief Touch swipe command usage string
+static const char * touch_swipe_usage =
+    "Usage: touch [--delay <ms>] <startx> <starty> <endx> <endy> <time>\n"
+    "    --help      Show this help\n"
+    "    --delay ms  Delay time before start moving (default = 100ms)\n";
+
 
 
 /// @brief Type command usage string
@@ -150,9 +157,9 @@ int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
 /// @brief  positioning absolutely by the given x/y coordinates
 /// @param[in] x Horizontal pixel position
 /// @param[in] y Vertical pixel position
-/// @param[in] time_delay Milliseconds to wait before moving mouse
+/// @param[in] time_delay Milliseconds to wait before positioning
 /// @return 0 on success, 1 if error(s)
-int touch_run(int32_t x, int32_t y, uint32_t time_delay) {
+int touch_tap_run(int32_t x, int32_t y, uint32_t time_delay) {
     // Sleep time_delay milliseconds
     usleep(time_delay * 1000);
 
@@ -161,6 +168,25 @@ int touch_run(int32_t x, int32_t y, uint32_t time_delay) {
         }
         return 0;
 }
+
+/// @brief  swipe positioning absolutely by the given startx/starty  and endx and endy coordinates
+/// @param[in] startx Horizontal pixel position where swipe starts
+/// @param[in] starty Vertical pixel position where swipe starts
+/// @param[in] endx Horizontal pixel position where swipe ends
+/// @param[in] endy Vertical pixel position where swipe ends
+/// @param[in] duration in Milliseconds swipe lasts
+/// @param[in] time_delay Milliseconds to wait before positioning 
+/// @return 0 on success, 1 if error(s)
+int touch_swipe_run(int32_t startx, int32_t starty, int32_t endx, int32_t endy, int32_t duration, uint32_t time_delay) {
+    // Sleep time_delay milliseconds
+    usleep(time_delay * 1000);
+
+        if (uinput_touchevent(startx, starty)) {
+            return 1;
+        }
+        return 0;
+}
+
 
 /// @brief Moves the move absolutely or relatively by the given x/y coordinates
 /// @param[in] x Horizontal pixel position
@@ -451,12 +477,29 @@ int main(int argc, char ** argv) {
         }
     } else if (!strcmp(argv[optind], "touch")) {
         optind++;
+	if (!strcmp(argv[optind], "tap")){
+	optind++;
         if (argc - optind != 2) {
-            ret += usage(touch_usage);
+            ret += usage(touch_tap_usage);
         } else {
             int32_t x = (int32_t)strtol(argv[optind], NULL, 10);
             int32_t y = (int32_t)strtol(argv[optind + 1], NULL, 10);
-            ret += touch_run(x, y, time_delay);
+            ret += touch_tap_run(x, y, time_delay);
+        }
+	}
+	else if (!strcmp(argv[optind], "swipe")){
+        optind++;
+        if (argc - optind != 5) {
+            ret += usage(touch_swipe_usage);
+        } else {
+	    printf("SWIPE TBD\n");
+            int32_t startx = (int32_t)strtol(argv[optind], NULL, 10);
+            int32_t starty = (int32_t)strtol(argv[optind + 1], NULL, 10);
+            int32_t endx = (int32_t)strtol(argv[optind + 2], NULL, 10);
+            int32_t endy = (int32_t)strtol(argv[optind + 3], NULL, 10);
+            int32_t duration = (int32_t)strtol(argv[optind + 4], NULL, 10);
+            ret += touch_swipe_run(startx, starty, endx, endy, duration, time_delay);
+        }
         }
     } else if (!strcmp(argv[optind], "type")) {
         optind++;
