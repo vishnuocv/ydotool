@@ -19,6 +19,9 @@ Currently implemented command(s):
 - `key` - Press keys
 - `mouse` - Move mouse pointer to absolute position
 - `click` - Click on mouse buttons
+- `touch` - Touch
+    - `tap` - Tap for Touch
+    - `swipe` - Swipe for Touch 
 
 ## Examples
 Type some words:
@@ -40,6 +43,12 @@ Move mouse pointer to 100,100:
 Mouse right click:
 
     ydotool click 2
+    
+Touch screen:
+
+    ydotool touch tap 800 600
+    
+    ydotool touch swipe 800 600 850 650 1000
 
 
 ## Notes
