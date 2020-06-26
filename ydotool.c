@@ -154,6 +154,22 @@ int key_run(uint32_t time_delay, uint64_t repeats, int argc, char ** argv) {
 	return 0;
 }
 
+int screenshot(void) {
+        if (uinput_enter_key("SUPER", 1)) {
+            return 1;
+        }
+        if (uinput_enter_key("s", 1)) {
+            return 1;
+        }
+    	usleep(10000);
+        if (uinput_enter_key("s", 0)) {
+            return 1;
+        }
+        if (uinput_enter_key("SUPER", 0)) {
+            return 1;
+        }
+	return 0;
+}
 /// @brief  positioning absolutely by the given x/y coordinates
 /// @param[in] x Horizontal pixel position
 /// @param[in] y Vertical pixel position
@@ -371,6 +387,7 @@ int usage_main(char * prog) {
         "    key\n"
         "    mouse\n"
         "    type\n"
+        "    screenshot\n"
         "    touch\n",
         prog
     );
@@ -466,6 +483,14 @@ int main(int argc, char ** argv) {
         } else {
             ret += key_run(time_delay, repeats, argc - optind, argv + optind);
         }
+    } else if (!strcmp(argv[optind], "screenshot")) {
+//        optind++;
+//        if (argc == optind) {
+//            ret += usage(key_usage);
+//        } else {
+//            ret += key_run(time_delay, repeats, argc - optind, argv + optind);
+//        }
+	ret += screenshot();
     } else if (!strcmp(argv[optind], "mouse")) {
         optind++;
         if (argc - optind != 2) {
