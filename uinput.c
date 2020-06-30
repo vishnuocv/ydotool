@@ -617,8 +617,8 @@ int uinput_touch_tap_event(int x, int y)
 
 	// Report KEY - RELEASE event
 //	stroke_emit(EV_KEY, BTN_LEFT, 0);
-//	uinput_emit(EV_KEY, BTN_TOUCH, 0);
-//	uinput_emit(EV_SYN, SYN_REPORT, 0);
+	uinput_emit(EV_KEY, BTN_TOUCH, 0);
+	uinput_emit(EV_SYN, SYN_REPORT, 0);
 }
 
 int uinput_touch_swipe_event(int startx, int starty, int endx, int endy, int duration)
