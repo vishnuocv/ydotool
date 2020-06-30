@@ -417,9 +417,11 @@ int uinput_init() {
     	uidev.id.version = 1;
 
 	uidev.absmin[ABS_X] = 0;
-    	uidev.absmax[ABS_X] = 1920;
+    	uidev.absmax[ABS_X] = 800;
+//    	uidev.absmax[ABS_X] = 1920;
 	uidev.absmin[ABS_Y] = 0;
-    	uidev.absmax[ABS_Y] = 1080;
+    	uidev.absmax[ABS_Y] = 480;
+//    	uidev.absmax[ABS_Y] = 1080;
 
     	if(write(FD, &uidev, sizeof(uidev)) < 0)
         	die("error: write");
