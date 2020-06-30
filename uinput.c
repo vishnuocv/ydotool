@@ -625,14 +625,14 @@ int uinput_touch_swipe_event(int startx, int starty, int endx, int endy, int dur
 {
 //	uinput_touch_tap_event (startx, starty);
 
-	uinput_emit(EV_KEY, BTN_TOUCH, 1);
+//	uinput_emit(EV_KEY, BTN_TOUCH, 1);
         uinput_emit(EV_ABS, ABS_X, startx);
         uinput_emit(EV_ABS, ABS_Y, starty);
         uinput_emit(EV_SYN, SYN_REPORT, 0);
 
 //      stroke_emit(EV_KEY, BTN_LEFT, 1);
-//        uinput_emit(EV_KEY, BTN_TOUCH, 1);
-//        uinput_emit(EV_SYN, SYN_REPORT, 0);
+        uinput_emit(EV_KEY, BTN_TOUCH, 1);
+        uinput_emit(EV_SYN, SYN_REPORT, 0);
 
 	usleep(duration);
 
