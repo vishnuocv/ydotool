@@ -541,7 +541,7 @@ int uinput_emit(uint16_t type, uint16_t code, int32_t value) {
     CHECK( write(FD, &ie, sizeof(ie)) );
 
     // Allow processing time for uinput before sending next event
-    usleep( 50 );
+    usleep( 500 );
 
     return 0;
 }
