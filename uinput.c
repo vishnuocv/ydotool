@@ -417,10 +417,10 @@ int uinput_init() {
     	uidev.id.version = 1;
 
 	uidev.absmin[ABS_X] = 0;
-    	uidev.absmax[ABS_X] = 799;
+    	uidev.absmax[ABS_X] = 800;
 //    	uidev.absmax[ABS_X] = 1920  ;
 	uidev.absmin[ABS_Y] = 0;
-    	uidev.absmax[ABS_Y] = 479;
+    	uidev.absmax[ABS_Y] = 480;
 //    	uidev.absmax[ABS_Y] = 1080;
 
     	if(write(FD, &uidev, sizeof(uidev)) < 0)
@@ -541,7 +541,7 @@ int uinput_emit(uint16_t type, uint16_t code, int32_t value) {
     CHECK( write(FD, &ie, sizeof(ie)) );
 
     // Allow processing time for uinput before sending next event
-    usleep( 500 );
+    usleep( 50 );
 
     return 0;
 }
@@ -611,8 +611,6 @@ int uinput_touch_tap_event(int x, int y)
 	uinput_emit(EV_ABS, ABS_Y, y);
 	uinput_emit(EV_SYN, SYN_REPORT, 0);
 
-	usleep (500);
-
 	uinput_emit(EV_KEY, BTN_TOUCH, 1);
 	uinput_emit(EV_SYN, SYN_REPORT, 0);
 	usleep (500);
@@ -620,12 +618,12 @@ int uinput_touch_tap_event(int x, int y)
 	// Report KEY - RELEASE event
 	uinput_emit(EV_KEY, BTN_TOUCH, 0);
 	uinput_emit(EV_SYN, SYN_REPORT, 0);
-	usleep (500);
 }
 
 int uinput_touch_swipe_event(int startx, int starty, int endx, int endy, int duration)
 {
-//	uinput_touch_tap_event (startx, starty);
+	uinput_touch_tap_event (startx, starty);
+	usleep (500);
 
 //	uinput_emit(EV_KEY, BTN_TOUCH, 1);
         uinput_emit(EV_ABS, ABS_X, startx);
@@ -646,8 +644,8 @@ int uinput_touch_swipe_event(int startx, int starty, int endx, int endy, int dur
         uinput_emit(EV_ABS, ABS_X, endx);
         uinput_emit(EV_ABS, ABS_Y, endy);
         uinput_emit(EV_SYN, SYN_REPORT, 0);
-        uinput_emit(EV_KEY, BTN_TOUCH, 0);
+
+	uinput_emit(EV_KEY, BTN_TOUCH, 0);
         uinput_emit(EV_SYN, SYN_REPORT, 0);
-	usleep (500);
 }
 
