@@ -646,10 +646,10 @@ int uinput_touch_swipe_event(int startx, int starty, int endx, int endy, int dur
 
 	usleep(duration);
 
-        uinput_emit(EV_KEY, BTN_TOUCH, 0);
+//        uinput_emit(EV_KEY, BTN_TOUCH, 0);
         uinput_emit(EV_ABS, ABS_X, endx);
         uinput_emit(EV_ABS, ABS_Y, endy);
-//        uinput_emit(EV_KEY, BTN_TOUCH, 0);
+        uinput_emit(EV_KEY, BTN_TOUCH, 0);
         uinput_emit(EV_SYN, SYN_REPORT, 0);
 	usleep (500);
 }
